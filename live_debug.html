@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="AkEUTRpveW3LlH796SD0Uxmgz6Ib5zmkEaNXZyWr">
+    <title>Buy a Number · Laravel</title>
+    <link rel="icon" type="image/svg+xml" href="https://flying-garmin-dispatch-constitute.trycloudflare.com/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preload" as="style" href="https://flying-garmin-dispatch-constitute.trycloudflare.com/build/assets/app--ABlVBDJ.css" /><link rel="modulepreload" href="https://flying-garmin-dispatch-constitute.trycloudflare.com/build/assets/app-urFEADgw.js" /><link rel="stylesheet" href="https://flying-garmin-dispatch-constitute.trycloudflare.com/build/assets/app--ABlVBDJ.css" /><script type="module" src="https://flying-garmin-dispatch-constitute.trycloudflare.com/build/assets/app-urFEADgw.js"></script></head>
+<body class="font-sans antialiased bg-ink-50 text-ink-900">
+
+<div x-data="{ mobileMenu: false }" class="min-h-screen lg:flex">
+
+    
+    <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-ink-200/70 z-40">
+        <div class="h-16 flex items-center px-5 border-b border-ink-200/70">
+            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/dashboard"><span class="inline-flex items-center gap-2.5 select-none">
+    <span class="inline-flex shrink-0 w-9 h-9">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" role="img" aria-label="KamVerify">
+        <defs>
+            <linearGradient id="kv-tile" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#0d9488"/>
+                <stop offset="1" stop-color="#0e7490"/>
+            </linearGradient>
+        </defs>
+        <rect width="48" height="48" rx="12" fill="url(#kv-tile)"/>
+        
+        <path d="M13 12.5 V35.5" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        
+        <path d="M24.5 12.5 L13.8 24.6" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        
+        <path d="M13.8 24.6 L20.5 34.5 L34 14.5" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+</span>
+    <span class="text-xl font-extrabold tracking-tight leading-none text-ink-900">
+        Kam<span class="text-brand-500">Verify</span>
+    </span>
+</span>
+</a>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/dashboard"
+                       class="kv-sidebar-link ">
+                        <i class="fas fa-gauge-high w-5 text-center"></i>
+                        <span class="flex-1">Dashboard</span>
+                                            </a>
+                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create"
+                       class="kv-sidebar-link kv-sidebar-link-active">
+                        <i class="fas fa-cart-shopping w-5 text-center"></i>
+                        <span class="flex-1">Buy Number</span>
+                                            </a>
+                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders"
+                       class="kv-sidebar-link ">
+                        <i class="fas fa-rectangle-list w-5 text-center"></i>
+                        <span class="flex-1">Orders</span>
+                                            </a>
+                                                                                            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/wallet"
+                       class="kv-sidebar-link ">
+                        <i class="fas fa-wallet w-5 text-center"></i>
+                        <span class="flex-1">Wallet</span>
+                                            </a>
+                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/referral"
+                       class="kv-sidebar-link ">
+                        <i class="fas fa-user-plus w-5 text-center"></i>
+                        <span class="flex-1">Referrals</span>
+                                            </a>
+                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/notifications"
+                       class="kv-sidebar-link ">
+                        <i class="fas fa-bell w-5 text-center"></i>
+                        <span class="flex-1">Notifications</span>
+                                            </a>
+                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/support"
+                       class="kv-sidebar-link ">
+                        <i class="fas fa-headset w-5 text-center"></i>
+                        <span class="flex-1">Support</span>
+                                            </a>
+                                    </nav>
+
+        <div class="p-3 border-t border-ink-200/70">
+            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/wallet" class="block rounded-xl bg-ink-900 text-white p-4 hover:bg-ink-800 transition-colors">
+                <p class="text-xs text-ink-300 font-medium">Wallet balance</p>
+                <p class="text-lg font-bold mt-0.5">1,253 XAF</p>
+                <span class="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-300">
+                    <i class="fas fa-plus-circle"></i> Deposit funds
+                </span>
+            </a>
+            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create" class="kv-btn-primary w-full mt-3">
+                <i class="fas fa-bolt"></i> Buy a number
+            </a>
+        </div>
+    </aside>
+
+    
+    <div x-show="mobileMenu" class="fixed inset-0 z-50 lg:hidden" style="display:none">
+        <div class="absolute inset-0 bg-ink-900/50" @click="mobileMenu = false"
+             x-transition:enter="transition-opacity duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"></div>
+        <div class="absolute inset-y-0 left-0 w-72 max-w-[85%] bg-white shadow-pop flex flex-col"
+             x-transition:enter="transition-transform duration-200" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0">
+            <div class="h-16 flex items-center justify-between px-5 border-b border-ink-200/70">
+                <span class="inline-flex items-center gap-2.5 select-none">
+    <span class="inline-flex shrink-0 w-8 h-8">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" role="img" aria-label="KamVerify">
+        <defs>
+            <linearGradient id="kv-tile" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#0d9488"/>
+                <stop offset="1" stop-color="#0e7490"/>
+            </linearGradient>
+        </defs>
+        <rect width="48" height="48" rx="12" fill="url(#kv-tile)"/>
+        
+        <path d="M13 12.5 V35.5" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        
+        <path d="M24.5 12.5 L13.8 24.6" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        
+        <path d="M13.8 24.6 L20.5 34.5 L34 14.5" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+</span>
+    <span class="text-xl font-extrabold tracking-tight leading-none text-ink-900">
+        Kam<span class="text-brand-500">Verify</span>
+    </span>
+</span>
+                <button @click="mobileMenu = false" class="text-ink-400 hover:text-ink-600 p-2"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+                                                            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/dashboard"
+                           class="kv-sidebar-link ">
+                            <i class="fas fa-gauge-high w-5 text-center"></i>
+                            <span class="flex-1">Dashboard</span>
+                                                    </a>
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create"
+                           class="kv-sidebar-link kv-sidebar-link-active">
+                            <i class="fas fa-cart-shopping w-5 text-center"></i>
+                            <span class="flex-1">Buy Number</span>
+                                                    </a>
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders"
+                           class="kv-sidebar-link ">
+                            <i class="fas fa-rectangle-list w-5 text-center"></i>
+                            <span class="flex-1">Orders</span>
+                                                    </a>
+                                                                                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/wallet"
+                           class="kv-sidebar-link ">
+                            <i class="fas fa-wallet w-5 text-center"></i>
+                            <span class="flex-1">Wallet</span>
+                                                    </a>
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/referral"
+                           class="kv-sidebar-link ">
+                            <i class="fas fa-user-plus w-5 text-center"></i>
+                            <span class="flex-1">Referrals</span>
+                                                    </a>
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/notifications"
+                           class="kv-sidebar-link ">
+                            <i class="fas fa-bell w-5 text-center"></i>
+                            <span class="flex-1">Notifications</span>
+                                                    </a>
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/support"
+                           class="kv-sidebar-link ">
+                            <i class="fas fa-headset w-5 text-center"></i>
+                            <span class="flex-1">Support</span>
+                                                    </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/profile" class="kv-sidebar-link ">
+                    <i class="fas fa-user-gear w-5 text-center"></i><span class="flex-1">Profile</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-ink-200/70">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">
+                        T
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-ink-900 truncate">Test Customer</p>
+                        <p class="text-xs text-ink-500 truncate"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="791a0c0a0d16141c0b391218140f1c0b101f00571a1614">[email&#160;protected]</a></p>
+                    </div>
+                </div>
+                <form method="POST" action="https://flying-garmin-dispatch-constitute.trycloudflare.com/logout">
+                    <input type="hidden" name="_token" value="AkEUTRpveW3LlH796SD0Uxmgz6Ib5zmkEaNXZyWr" autocomplete="off">                    <button type="submit" class="kv-btn-secondary w-full"><i class="fas fa-sign-out-alt"></i> Log out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="flex-1 min-w-0 lg:ml-64 flex flex-col min-h-screen">
+
+        
+        
+        <header class="sticky top-0 z-30 h-16 bg-white/90 backdrop-blur border-b border-ink-200/70">
+            <div class="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-3">
+                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/dashboard" class="lg:hidden"><span class="inline-flex shrink-0 w-8 h-8">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" role="img" aria-label="KamVerify">
+        <defs>
+            <linearGradient id="kv-tile" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#0d9488"/>
+                <stop offset="1" stop-color="#0e7490"/>
+            </linearGradient>
+        </defs>
+        <rect width="48" height="48" rx="12" fill="url(#kv-tile)"/>
+        
+        <path d="M13 12.5 V35.5" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        
+        <path d="M24.5 12.5 L13.8 24.6" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+        
+        <path d="M13.8 24.6 L20.5 34.5 L34 14.5" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+</span>
+</a>
+
+                <div class="flex-1 min-w-0 [&_h1,&_h2,&_h3]:!text-lg [&_h1,&_h2,&_h3]:!font-bold [&_h1,&_h2,&_h3]:!text-ink-900 [&_h1,&_h2,&_h3]:truncate">
+                                    </div>
+
+                
+                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/wallet" class="hidden sm:inline-flex items-center gap-2 rounded-full bg-ink-900 text-white pl-3 pr-4 py-1.5 text-sm font-semibold hover:bg-ink-800 transition-colors">
+                    <i class="fas fa-wallet text-brand-300 text-xs"></i>
+                    1,253 XAF
+                </a>
+
+                
+                <div class="relative" x-data="notifBell(0)" @click.outside="open = false">
+                    <button type="button" @click="toggle()" class="relative p-2 text-ink-500 hover:text-ink-800 transition-colors" aria-label="Notifications">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span x-show="unread > 0" x-cloak
+                              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center"
+                              x-text="unread > 9 ? '9+' : unread"></span>
+                    </button>
+
+                    <div x-show="open" x-cloak x-transition.opacity.scale.95
+                         class="absolute right-0 mt-2 w-[calc(100vw-1.5rem)] max-w-[22rem] sm:w-96 rounded-2xl bg-white border border-ink-200/70 shadow-xl z-50 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-ink-100 flex items-center justify-between">
+                            <p class="font-bold text-sm text-ink-900">Notifications</p>
+                            <button type="button" x-show="unread > 0" @click="markAll()"
+                                    class="text-xs font-semibold text-brand-600 hover:text-brand-700">
+                                Mark all read
+                            </button>
+                        </div>
+
+                        <div x-show="pushPrompt" x-cloak class="px-4 py-2.5 bg-brand-50 border-b border-brand-100 flex items-center gap-2.5">
+                            <i class="fas fa-bell text-brand-600 text-xs"></i>
+                            <p class="flex-1 text-xs text-brand-800">Enable browser notifications for instant updates.</p>
+                            <button type="button" @click="enablePush()" class="text-xs font-bold text-brand-700 hover:text-brand-800 shrink-0">Enable</button>
+                        </div>
+
+                        <div class="max-h-[22rem] overflow-y-auto divide-y divide-ink-100">
+                            <template x-for="n in items" :key="n.id">
+                                <a :href="n.action_url || 'https://flying-garmin-dispatch-constitute.trycloudflare.com/notifications'"
+                                   @click.prevent="openItem(n)"
+                                   class="flex gap-3 px-4 py-3 transition-colors"
+                                   :class="n.read ? 'bg-white hover:bg-ink-50' : 'bg-brand-50/50 hover:bg-brand-50'">
+                                    <span class="w-8 h-8 rounded-lg grid place-items-center shrink-0 mt-0.5"
+                                          :class="n.read ? 'bg-ink-100 text-ink-500' : 'bg-brand-100 text-brand-600'">
+                                        <i class="fas text-xs" :class="n.icon"></i>
+                                    </span>
+                                    <span class="flex-1 min-w-0">
+                                        <span class="flex items-center gap-2">
+                                            <span class="text-sm font-semibold text-ink-900 truncate" x-text="n.title"></span>
+                                            <span x-show="!n.read" class="w-1.5 h-1.5 rounded-full bg-brand-500 shrink-0"></span>
+                                        </span>
+                                        <span class="block text-xs text-ink-500 mt-0.5 line-clamp-2" x-text="n.message"></span>
+                                        <span class="block text-[11px] text-ink-400 mt-1" x-text="n.time"></span>
+                                    </span>
+                                </a>
+                            </template>
+                            <div x-show="items.length === 0" class="px-4 py-8 text-center">
+                                <i class="fas fa-bell-slash text-ink-200 text-2xl"></i>
+                                <p class="mt-2 text-xs text-ink-400">No notifications yet.</p>
+                            </div>
+                        </div>
+
+                        <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/notifications"
+                           class="block px-4 py-2.5 text-center text-xs font-bold text-brand-600 hover:bg-ink-50 border-t border-ink-100">
+                            View all notifications
+                        </a>
+                    </div>
+                </div>
+
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
+    <div @click="open = ! open">
+        <button class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-ink-100 transition-colors">
+                            <span class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">
+                                T
+                            </span>
+                            <i class="fas fa-chevron-down text-xs text-ink-400 hidden sm:block"></i>
+                        </button>
+    </div>
+
+    <div x-show="open"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="absolute z-50 mt-2 w-48 rounded-md shadow-lg ltr:origin-top-right rtl:origin-top-left end-0"
+            style="display: none;"
+            @click="open = false">
+        <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white">
+            <div class="px-4 py-3 border-b border-ink-100">
+                            <p class="text-sm font-semibold text-ink-900 truncate">Test Customer</p>
+                            <p class="text-xs text-ink-500 truncate"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="24475157504b494156644f45495241564d425d0a474b49">[email&#160;protected]</a></p>
+                        </div>
+                        <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out" href="https://flying-garmin-dispatch-constitute.trycloudflare.com/profile"><i class="fas fa-user-gear mr-2 w-4 text-center"></i> Profile</a>
+                        <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out" href="https://flying-garmin-dispatch-constitute.trycloudflare.com/wallet/deposit"><i class="fas fa-plus-circle mr-2 w-4 text-center"></i> Deposit</a>
+                        <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out" href="https://flying-garmin-dispatch-constitute.trycloudflare.com/support"><i class="fas fa-headset mr-2 w-4 text-center"></i> Support</a>
+                        <form method="POST" action="https://flying-garmin-dispatch-constitute.trycloudflare.com/logout">
+                            <input type="hidden" name="_token" value="AkEUTRpveW3LlH796SD0Uxmgz6Ib5zmkEaNXZyWr" autocomplete="off">                            <a class="block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out" href="https://flying-garmin-dispatch-constitute.trycloudflare.com/logout" onclick="event.preventDefault(); this.closest('form').submit();"><i class="fas fa-sign-out-alt mr-2 w-4 text-center"></i> Log out</a>
+                        </form>
+        </div>
+    </div>
+</div>
+
+                <button @click="mobileMenu = true" class="lg:hidden p-2 text-ink-500 hover:text-ink-800" aria-label="Menu">
+                    <i class="fas fa-bars text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-24 lg:pb-10">
+            <div class="max-w-7xl mx-auto">
+                <div class="max-w-5xl mx-auto"
+         x-data="buyFlow({
+            quoteUrl: 'https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/quote',
+            balance: 1252,
+            initialService: 0,
+            initialCountry: 0,
+            slugs: {"2":"facebook","3":"telegram","4":"tiktok","1":"whatsapp"}         })">
+
+        
+        <div class="mb-6">
+            <h1 class="text-2xl font-extrabold text-ink-900 tracking-tight">Buy a virtual number</h1>
+            <p class="mt-1 text-sm text-ink-500">Choose a service and country — your wallet is charged only after a number is assigned.</p>
+        </div>
+
+        
+        <div class="flex items-center gap-2 sm:gap-3 mb-7">
+            <template x-for="(label, i) in ['Service', 'Country', 'Confirm']" :key="i">
+                <div class="flex items-center gap-2 sm:gap-3" :class="i > 0 ? 'flex-1' : ''">
+                    <div x-show="i > 0" class="flex-1 h-px" :class="step > i ? 'bg-brand-400' : 'bg-ink-200'"></div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full grid place-items-center text-xs font-bold transition-colors"
+                             :class="step > i + 1 ? 'bg-brand-600 text-white' : (step === i + 1 ? 'bg-brand-600 text-white ring-4 ring-brand-100' : 'bg-ink-100 text-ink-400')">
+                            <i x-show="step > i + 1" class="fas fa-check text-[10px]"></i>
+                            <span x-show="step <= i + 1" x-text="i + 1"></span>
+                        </div>
+                        <span class="text-xs sm:text-sm font-semibold" :class="step >= i + 1 ? 'text-ink-900' : 'text-ink-400'" x-text="label"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        
+        <div x-data="{}" x-init="$el.remove()" class="kv-card mb-6">
+            <div class="px-5 sm:px-6 py-4 border-b border-ink-100">
+                <h2 class="font-bold text-ink-900">Buy a number</h2>
+                <p class="text-xs text-ink-500 mt-0.5">Choose a service and country, then confirm.</p>
+            </div>
+            <form method="POST" action="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders" class="p-5 sm:p-6 space-y-4">
+                <input type="hidden" name="_token" value="AkEUTRpveW3LlH796SD0Uxmgz6Ib5zmkEaNXZyWr" autocomplete="off">                <div>
+                    <label class="block text-xs font-semibold text-ink-600 mb-1.5">Service</label>
+                    <select name="service_id" class="kv-input w-full" required>
+                        <option value="">Choose a service…</option>
+                                                    <option value="2" >Facebook</option>
+                                                    <option value="3" >Telegram</option>
+                                                    <option value="4" >TikTok</option>
+                                                    <option value="1" >WhatsApp</option>
+                                            </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-ink-600 mb-1.5">Country</label>
+                    <select name="country_id" class="kv-input w-full" required>
+                        <option value="">Choose a country…</option>
+                                                    <option value="47" >Argentina (+54)</option>
+                                                    <option value="37" >Australia (+61)</option>
+                                                    <option value="11" >Austria (+43)</option>
+                                                    <option value="9" >Belgium (+32)</option>
+                                                    <option value="46" >Brazil (+55)</option>
+                                                    <option value="43" >Cameroon (+237)</option>
+                                                    <option value="3" >Canada (+1)</option>
+                                                    <option value="50" >Chile (+56)</option>
+                                                    <option value="49" >Colombia (+57)</option>
+                                                    <option value="19" >Czech Republic (+420)</option>
+                                                    <option value="14" >Denmark (+45)</option>
+                                                    <option value="44" >Egypt (+20)</option>
+                                                    <option value="15" >Finland (+358)</option>
+                                                    <option value="5" >France (+33)</option>
+                                                    <option value="4" >Germany (+49)</option>
+                                                    <option value="42" >Ghana (+233)</option>
+                                                    <option value="21" >Greece (+30)</option>
+                                                    <option value="27" >India (+91)</option>
+                                                    <option value="29" >Indonesia (+62)</option>
+                                                    <option value="16" >Ireland (+353)</option>
+                                                    <option value="26" >Israel (+972)</option>
+                                                    <option value="7" >Italy (+39)</option>
+                                                    <option value="35" >Japan (+81)</option>
+                                                    <option value="41" >Kenya (+254)</option>
+                                                    <option value="30" >Malaysia (+60)</option>
+                                                    <option value="48" >Mexico (+52)</option>
+                                                    <option value="45" >Morocco (+212)</option>
+                                                    <option value="8" >Netherlands (+31)</option>
+                                                    <option value="38" >New Zealand (+64)</option>
+                                                    <option value="40" >Nigeria (+234)</option>
+                                                    <option value="13" >Norway (+47)</option>
+                                                    <option value="28" >Pakistan (+92)</option>
+                                                    <option value="32" >Philippines (+63)</option>
+                                                    <option value="18" >Poland (+48)</option>
+                                                    <option value="17" >Portugal (+351)</option>
+                                                    <option value="20" >Romania (+40)</option>
+                                                    <option value="25" >Saudi Arabia (+966)</option>
+                                                    <option value="31" >Singapore (+65)</option>
+                                                    <option value="39" >South Africa (+27)</option>
+                                                    <option value="36" >South Korea (+82)</option>
+                                                    <option value="6" >Spain (+34)</option>
+                                                    <option value="12" >Sweden (+46)</option>
+                                                    <option value="10" >Switzerland (+41)</option>
+                                                    <option value="33" >Thailand (+66)</option>
+                                                    <option value="23" >Turkey (+90)</option>
+                                                    <option value="22" >Ukraine (+380)</option>
+                                                    <option value="24" >United Arab Emirates (+971)</option>
+                                                    <option value="2" >United Kingdom (+44)</option>
+                                                    <option value="1" >United States (+1)</option>
+                                                    <option value="34" >Vietnam (+84)</option>
+                                            </select>
+                </div>
+                                <button type="submit" class="kv-btn-primary w-full"><i class="fas fa-bolt"></i> Purchase number</button>
+            </form>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6 items-start">
+            
+            <div class="lg:col-span-2 space-y-5">
+
+                
+                <div class="kv-card" x-show="step === 1">
+                    <div class="px-5 sm:px-6 py-4 border-b border-ink-100 flex flex-wrap items-center justify-between gap-3">
+                        <h2 class="font-bold text-ink-900">Which service do you want to verify?</h2>
+                        <div class="relative w-full sm:w-56">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i>
+                            <input type="text" x-model="serviceQuery" placeholder="Search services…"
+                                   class="kv-input !pl-8 !py-2 !text-xs">
+                        </div>
+                    </div>
+                    <div class="p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[26rem] overflow-y-auto">
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?service=2"
+                                    x-show="serviceMatch(2)"
+                                    @click.prevent="selectService(2, 'Facebook')"
+                                    class="flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition"
+                                    :class="serviceId === 2 ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500' : 'border-ink-200/70 hover:border-brand-300 hover:bg-ink-50'">
+                                <i class="fab fa-facebook text-blue-600 text-lg w-5 text-center shrink-0"></i>
+                                <span class="text-sm font-semibold text-ink-800 truncate min-w-0">Facebook</span>
+                            </a>
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?service=3"
+                                    x-show="serviceMatch(3)"
+                                    @click.prevent="selectService(3, 'Telegram')"
+                                    class="flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition"
+                                    :class="serviceId === 3 ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500' : 'border-ink-200/70 hover:border-brand-300 hover:bg-ink-50'">
+                                <i class="fab fa-telegram text-sky-500 text-lg w-5 text-center shrink-0"></i>
+                                <span class="text-sm font-semibold text-ink-800 truncate min-w-0">Telegram</span>
+                            </a>
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?service=4"
+                                    x-show="serviceMatch(4)"
+                                    @click.prevent="selectService(4, 'TikTok')"
+                                    class="flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition"
+                                    :class="serviceId === 4 ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500' : 'border-ink-200/70 hover:border-brand-300 hover:bg-ink-50'">
+                                <i class="fab fa-tiktok text-ink-900 text-lg w-5 text-center shrink-0"></i>
+                                <span class="text-sm font-semibold text-ink-800 truncate min-w-0">TikTok</span>
+                            </a>
+                                                                                <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?service=1"
+                                    x-show="serviceMatch(1)"
+                                    @click.prevent="selectService(1, 'WhatsApp')"
+                                    class="flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition"
+                                    :class="serviceId === 1 ? 'border-brand-500 bg-brand-50 ring-1 ring-brand-500' : 'border-ink-200/70 hover:border-brand-300 hover:bg-ink-50'">
+                                <i class="fab fa-whatsapp text-emerald-500 text-lg w-5 text-center shrink-0"></i>
+                                <span class="text-sm font-semibold text-ink-800 truncate min-w-0">WhatsApp</span>
+                            </a>
+                                            </div>
+                    <div x-show="!anyServiceVisible()" x-cloak class="px-6 py-10 text-center text-sm text-ink-400">
+                        No services match your search.
+                    </div>
+                </div>
+
+                
+                <div class="kv-card" x-show="step === 2" x-cloak>
+                    <div class="px-5 sm:px-6 py-4 border-b border-ink-100 flex flex-wrap items-center justify-between gap-3">
+                        <h2 class="font-bold text-ink-900">Choose a country</h2>
+                        <div class="relative w-full sm:w-56">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i>
+                            <input type="text" x-model="countryQuery" placeholder="Search countries…"
+                                   class="kv-input !pl-8 !py-2 !text-xs">
+                        </div>
+                    </div>
+                    <div class="divide-y divide-ink-100 max-h-[26rem] overflow-y-auto">
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=47"
+                                    x-show="countryMatch(47)"
+                                    @click.prevent="selectCountry(47, 'Argentina')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 47 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇦🇷</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Argentina</span>
+                                    <span class="block text-xs text-ink-400">+54</span>
+                                </span>
+                                <span x-show="countryId === 47" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=37"
+                                    x-show="countryMatch(37)"
+                                    @click.prevent="selectCountry(37, 'Australia')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 37 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇦🇺</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Australia</span>
+                                    <span class="block text-xs text-ink-400">+61</span>
+                                </span>
+                                <span x-show="countryId === 37" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=11"
+                                    x-show="countryMatch(11)"
+                                    @click.prevent="selectCountry(11, 'Austria')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 11 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇦🇹</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Austria</span>
+                                    <span class="block text-xs text-ink-400">+43</span>
+                                </span>
+                                <span x-show="countryId === 11" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=9"
+                                    x-show="countryMatch(9)"
+                                    @click.prevent="selectCountry(9, 'Belgium')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 9 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇧🇪</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Belgium</span>
+                                    <span class="block text-xs text-ink-400">+32</span>
+                                </span>
+                                <span x-show="countryId === 9" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=46"
+                                    x-show="countryMatch(46)"
+                                    @click.prevent="selectCountry(46, 'Brazil')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 46 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇧🇷</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Brazil</span>
+                                    <span class="block text-xs text-ink-400">+55</span>
+                                </span>
+                                <span x-show="countryId === 46" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=43"
+                                    x-show="countryMatch(43)"
+                                    @click.prevent="selectCountry(43, 'Cameroon')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 43 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇨🇲</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Cameroon</span>
+                                    <span class="block text-xs text-ink-400">+237</span>
+                                </span>
+                                <span x-show="countryId === 43" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=3"
+                                    x-show="countryMatch(3)"
+                                    @click.prevent="selectCountry(3, 'Canada')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 3 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇨🇦</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Canada</span>
+                                    <span class="block text-xs text-ink-400">+1</span>
+                                </span>
+                                <span x-show="countryId === 3" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=50"
+                                    x-show="countryMatch(50)"
+                                    @click.prevent="selectCountry(50, 'Chile')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 50 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇨🇱</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Chile</span>
+                                    <span class="block text-xs text-ink-400">+56</span>
+                                </span>
+                                <span x-show="countryId === 50" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=49"
+                                    x-show="countryMatch(49)"
+                                    @click.prevent="selectCountry(49, 'Colombia')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 49 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇨🇴</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Colombia</span>
+                                    <span class="block text-xs text-ink-400">+57</span>
+                                </span>
+                                <span x-show="countryId === 49" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=19"
+                                    x-show="countryMatch(19)"
+                                    @click.prevent="selectCountry(19, 'Czech Republic')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 19 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇨🇿</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Czech Republic</span>
+                                    <span class="block text-xs text-ink-400">+420</span>
+                                </span>
+                                <span x-show="countryId === 19" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=14"
+                                    x-show="countryMatch(14)"
+                                    @click.prevent="selectCountry(14, 'Denmark')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 14 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇩🇰</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Denmark</span>
+                                    <span class="block text-xs text-ink-400">+45</span>
+                                </span>
+                                <span x-show="countryId === 14" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=44"
+                                    x-show="countryMatch(44)"
+                                    @click.prevent="selectCountry(44, 'Egypt')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 44 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇪🇬</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Egypt</span>
+                                    <span class="block text-xs text-ink-400">+20</span>
+                                </span>
+                                <span x-show="countryId === 44" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=15"
+                                    x-show="countryMatch(15)"
+                                    @click.prevent="selectCountry(15, 'Finland')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 15 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇫🇮</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Finland</span>
+                                    <span class="block text-xs text-ink-400">+358</span>
+                                </span>
+                                <span x-show="countryId === 15" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=5"
+                                    x-show="countryMatch(5)"
+                                    @click.prevent="selectCountry(5, 'France')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 5 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇫🇷</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">France</span>
+                                    <span class="block text-xs text-ink-400">+33</span>
+                                </span>
+                                <span x-show="countryId === 5" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=4"
+                                    x-show="countryMatch(4)"
+                                    @click.prevent="selectCountry(4, 'Germany')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 4 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇩🇪</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Germany</span>
+                                    <span class="block text-xs text-ink-400">+49</span>
+                                </span>
+                                <span x-show="countryId === 4" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=42"
+                                    x-show="countryMatch(42)"
+                                    @click.prevent="selectCountry(42, 'Ghana')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 42 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇬🇭</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Ghana</span>
+                                    <span class="block text-xs text-ink-400">+233</span>
+                                </span>
+                                <span x-show="countryId === 42" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=21"
+                                    x-show="countryMatch(21)"
+                                    @click.prevent="selectCountry(21, 'Greece')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 21 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇬🇷</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Greece</span>
+                                    <span class="block text-xs text-ink-400">+30</span>
+                                </span>
+                                <span x-show="countryId === 21" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=27"
+                                    x-show="countryMatch(27)"
+                                    @click.prevent="selectCountry(27, 'India')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 27 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇮🇳</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">India</span>
+                                    <span class="block text-xs text-ink-400">+91</span>
+                                </span>
+                                <span x-show="countryId === 27" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=29"
+                                    x-show="countryMatch(29)"
+                                    @click.prevent="selectCountry(29, 'Indonesia')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 29 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇮🇩</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Indonesia</span>
+                                    <span class="block text-xs text-ink-400">+62</span>
+                                </span>
+                                <span x-show="countryId === 29" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=16"
+                                    x-show="countryMatch(16)"
+                                    @click.prevent="selectCountry(16, 'Ireland')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 16 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇮🇪</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Ireland</span>
+                                    <span class="block text-xs text-ink-400">+353</span>
+                                </span>
+                                <span x-show="countryId === 16" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=26"
+                                    x-show="countryMatch(26)"
+                                    @click.prevent="selectCountry(26, 'Israel')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 26 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇮🇱</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Israel</span>
+                                    <span class="block text-xs text-ink-400">+972</span>
+                                </span>
+                                <span x-show="countryId === 26" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=7"
+                                    x-show="countryMatch(7)"
+                                    @click.prevent="selectCountry(7, 'Italy')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 7 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇮🇹</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Italy</span>
+                                    <span class="block text-xs text-ink-400">+39</span>
+                                </span>
+                                <span x-show="countryId === 7" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=35"
+                                    x-show="countryMatch(35)"
+                                    @click.prevent="selectCountry(35, 'Japan')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 35 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇯🇵</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Japan</span>
+                                    <span class="block text-xs text-ink-400">+81</span>
+                                </span>
+                                <span x-show="countryId === 35" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=41"
+                                    x-show="countryMatch(41)"
+                                    @click.prevent="selectCountry(41, 'Kenya')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 41 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇰🇪</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Kenya</span>
+                                    <span class="block text-xs text-ink-400">+254</span>
+                                </span>
+                                <span x-show="countryId === 41" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=30"
+                                    x-show="countryMatch(30)"
+                                    @click.prevent="selectCountry(30, 'Malaysia')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 30 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇲🇾</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Malaysia</span>
+                                    <span class="block text-xs text-ink-400">+60</span>
+                                </span>
+                                <span x-show="countryId === 30" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=48"
+                                    x-show="countryMatch(48)"
+                                    @click.prevent="selectCountry(48, 'Mexico')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 48 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇲🇽</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Mexico</span>
+                                    <span class="block text-xs text-ink-400">+52</span>
+                                </span>
+                                <span x-show="countryId === 48" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=45"
+                                    x-show="countryMatch(45)"
+                                    @click.prevent="selectCountry(45, 'Morocco')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 45 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇲🇦</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Morocco</span>
+                                    <span class="block text-xs text-ink-400">+212</span>
+                                </span>
+                                <span x-show="countryId === 45" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=8"
+                                    x-show="countryMatch(8)"
+                                    @click.prevent="selectCountry(8, 'Netherlands')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 8 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇳🇱</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Netherlands</span>
+                                    <span class="block text-xs text-ink-400">+31</span>
+                                </span>
+                                <span x-show="countryId === 8" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=38"
+                                    x-show="countryMatch(38)"
+                                    @click.prevent="selectCountry(38, 'New Zealand')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 38 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇳🇿</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">New Zealand</span>
+                                    <span class="block text-xs text-ink-400">+64</span>
+                                </span>
+                                <span x-show="countryId === 38" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=40"
+                                    x-show="countryMatch(40)"
+                                    @click.prevent="selectCountry(40, 'Nigeria')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 40 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇳🇬</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Nigeria</span>
+                                    <span class="block text-xs text-ink-400">+234</span>
+                                </span>
+                                <span x-show="countryId === 40" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=13"
+                                    x-show="countryMatch(13)"
+                                    @click.prevent="selectCountry(13, 'Norway')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 13 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇳🇴</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Norway</span>
+                                    <span class="block text-xs text-ink-400">+47</span>
+                                </span>
+                                <span x-show="countryId === 13" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=28"
+                                    x-show="countryMatch(28)"
+                                    @click.prevent="selectCountry(28, 'Pakistan')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 28 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇵🇰</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Pakistan</span>
+                                    <span class="block text-xs text-ink-400">+92</span>
+                                </span>
+                                <span x-show="countryId === 28" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=32"
+                                    x-show="countryMatch(32)"
+                                    @click.prevent="selectCountry(32, 'Philippines')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 32 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇵🇭</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Philippines</span>
+                                    <span class="block text-xs text-ink-400">+63</span>
+                                </span>
+                                <span x-show="countryId === 32" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=18"
+                                    x-show="countryMatch(18)"
+                                    @click.prevent="selectCountry(18, 'Poland')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 18 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇵🇱</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Poland</span>
+                                    <span class="block text-xs text-ink-400">+48</span>
+                                </span>
+                                <span x-show="countryId === 18" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=17"
+                                    x-show="countryMatch(17)"
+                                    @click.prevent="selectCountry(17, 'Portugal')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 17 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇵🇹</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Portugal</span>
+                                    <span class="block text-xs text-ink-400">+351</span>
+                                </span>
+                                <span x-show="countryId === 17" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=20"
+                                    x-show="countryMatch(20)"
+                                    @click.prevent="selectCountry(20, 'Romania')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 20 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇷🇴</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Romania</span>
+                                    <span class="block text-xs text-ink-400">+40</span>
+                                </span>
+                                <span x-show="countryId === 20" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=25"
+                                    x-show="countryMatch(25)"
+                                    @click.prevent="selectCountry(25, 'Saudi Arabia')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 25 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇸🇦</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Saudi Arabia</span>
+                                    <span class="block text-xs text-ink-400">+966</span>
+                                </span>
+                                <span x-show="countryId === 25" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=31"
+                                    x-show="countryMatch(31)"
+                                    @click.prevent="selectCountry(31, 'Singapore')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 31 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇸🇬</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Singapore</span>
+                                    <span class="block text-xs text-ink-400">+65</span>
+                                </span>
+                                <span x-show="countryId === 31" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=39"
+                                    x-show="countryMatch(39)"
+                                    @click.prevent="selectCountry(39, 'South Africa')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 39 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇿🇦</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">South Africa</span>
+                                    <span class="block text-xs text-ink-400">+27</span>
+                                </span>
+                                <span x-show="countryId === 39" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=36"
+                                    x-show="countryMatch(36)"
+                                    @click.prevent="selectCountry(36, 'South Korea')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 36 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇰🇷</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">South Korea</span>
+                                    <span class="block text-xs text-ink-400">+82</span>
+                                </span>
+                                <span x-show="countryId === 36" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=6"
+                                    x-show="countryMatch(6)"
+                                    @click.prevent="selectCountry(6, 'Spain')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 6 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇪🇸</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Spain</span>
+                                    <span class="block text-xs text-ink-400">+34</span>
+                                </span>
+                                <span x-show="countryId === 6" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=12"
+                                    x-show="countryMatch(12)"
+                                    @click.prevent="selectCountry(12, 'Sweden')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 12 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇸🇪</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Sweden</span>
+                                    <span class="block text-xs text-ink-400">+46</span>
+                                </span>
+                                <span x-show="countryId === 12" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=10"
+                                    x-show="countryMatch(10)"
+                                    @click.prevent="selectCountry(10, 'Switzerland')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 10 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇨🇭</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Switzerland</span>
+                                    <span class="block text-xs text-ink-400">+41</span>
+                                </span>
+                                <span x-show="countryId === 10" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=33"
+                                    x-show="countryMatch(33)"
+                                    @click.prevent="selectCountry(33, 'Thailand')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 33 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇹🇭</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Thailand</span>
+                                    <span class="block text-xs text-ink-400">+66</span>
+                                </span>
+                                <span x-show="countryId === 33" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=23"
+                                    x-show="countryMatch(23)"
+                                    @click.prevent="selectCountry(23, 'Turkey')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 23 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇹🇷</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Turkey</span>
+                                    <span class="block text-xs text-ink-400">+90</span>
+                                </span>
+                                <span x-show="countryId === 23" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=22"
+                                    x-show="countryMatch(22)"
+                                    @click.prevent="selectCountry(22, 'Ukraine')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 22 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇺🇦</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Ukraine</span>
+                                    <span class="block text-xs text-ink-400">+380</span>
+                                </span>
+                                <span x-show="countryId === 22" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=24"
+                                    x-show="countryMatch(24)"
+                                    @click.prevent="selectCountry(24, 'United Arab Emirates')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 24 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇦🇪</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">United Arab Emirates</span>
+                                    <span class="block text-xs text-ink-400">+971</span>
+                                </span>
+                                <span x-show="countryId === 24" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=2"
+                                    x-show="countryMatch(2)"
+                                    @click.prevent="selectCountry(2, 'United Kingdom')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 2 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇬🇧</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">United Kingdom</span>
+                                    <span class="block text-xs text-ink-400">+44</span>
+                                </span>
+                                <span x-show="countryId === 2" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=1"
+                                    x-show="countryMatch(1)"
+                                    @click.prevent="selectCountry(1, 'United States')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 1 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇺🇸</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">United States</span>
+                                    <span class="block text-xs text-ink-400">+1</span>
+                                </span>
+                                <span x-show="countryId === 1" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create?country=34"
+                                    x-show="countryMatch(34)"
+                                    @click.prevent="selectCountry(34, 'Vietnam')"
+                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
+                                    :class="countryId === 34 ? 'bg-brand-50' : 'hover:bg-ink-50'">
+                                <span class="text-2xl">🇻🇳</span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block text-sm font-semibold text-ink-800 truncate">Vietnam</span>
+                                    <span class="block text-xs text-ink-400">+84</span>
+                                </span>
+                                <span x-show="countryId === 34" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center">
+                                    <i class="fas fa-check text-[9px]"></i>
+                                </span>
+                            </a>
+                                            </div>
+                    <div x-show="!anyCountryVisible()" x-cloak class="px-6 py-10 text-center text-sm text-ink-400">
+                        No countries match your search.
+                    </div>
+                </div>
+
+                
+                <div class="kv-card" x-show="step === 3" x-cloak>
+                    <div class="px-5 sm:px-6 py-4 border-b border-ink-100">
+                        <h2 class="font-bold text-ink-900">Confirm your purchase</h2>
+                    </div>
+                    <div class="p-5 sm:p-6">
+
+                        
+                        <div x-show="serviceSlug() === 'whatsapp'" class="mb-4 rounded-xl bg-emerald-50 border border-emerald-200/70 px-4 py-3 flex items-start gap-3">
+                            <i class="fab fa-whatsapp text-emerald-600 mt-0.5"></i>
+                            <p class="text-sm text-emerald-900">Enter the assigned number into WhatsApp's normal verification flow, then return here and wait for the SMS code to appear. KamVerify delivers the SMS — WhatsApp decides whether to accept the number.</p>
+                        </div>
+                        <div x-show="serviceSlug() === 'telegram'" class="mb-4 rounded-xl bg-sky-50 border border-sky-200/70 px-4 py-3 flex items-start gap-3">
+                            <i class="fab fa-telegram text-sky-600 mt-0.5"></i>
+                            <p class="text-sm text-sky-900">Use the assigned number in Telegram's normal sign-up or login verification, then wait for the SMS code here. KamVerify delivers the SMS — Telegram decides whether to accept the number.</p>
+                        </div>
+                        <div x-show="serviceSlug() === 'tiktok'" class="mb-4 rounded-xl bg-ink-50 border border-ink-200/70 px-4 py-3 flex items-start gap-3">
+                            <i class="fab fa-tiktok text-ink-800 mt-0.5"></i>
+                            <p class="text-sm text-ink-800">Use the assigned number in TikTok's normal verification process, then wait for the SMS code here. KamVerify delivers the SMS — TikTok decides whether to accept the number.</p>
+                        </div>
+
+                        
+                        <div x-show="serviceSlug() === 'facebook' && !vpnAck" x-cloak
+                             class="mb-4 rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-4 sm:px-5">
+                            <div class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-amber-400/30 grid place-items-center shrink-0">
+                                    <i class="fas fa-triangle-exclamation text-amber-600"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-extrabold text-amber-900 text-sm uppercase tracking-wide">Important — Facebook Verification</p>
+                                    <p class="mt-1.5 text-sm text-amber-900 leading-relaxed">
+                                        When using KamVerify for Facebook verification, you must have a <strong>VPN connected to a USA location</strong> on the same phone you are using to request the Facebook verification code.
+                                    </p>
+                                    <p class="mt-1.5 text-sm text-amber-900 leading-relaxed">
+                                        Make sure the VPN is already connected before you start the Facebook verification process and keep it connected while requesting the code. If you request the Facebook code without the required VPN connection, you may not receive the verification code.
+                                    </p>
+                                    <label class="mt-3 flex items-start gap-2.5 cursor-pointer">
+                                        <input type="checkbox" x-model="vpnAgreed" @change="vpnError = false"
+                                               class="mt-0.5 w-4 h-4 rounded border-amber-400 text-brand-600 focus:ring-brand-500">
+                                        <span class="text-sm font-semibold text-amber-900">I understand that I need to use a USA VPN on the same phone I am using to request my Facebook verification code.</span>
+                                    </label>
+                                    <p x-show="vpnError" x-cloak class="mt-2 text-xs font-semibold text-red-600">
+                                        Please confirm that you understand the Facebook VPN requirement before continuing.
+                                    </p>
+                                    <button type="button" @click="acknowledgeVpn()"
+                                            class="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold px-4 py-2.5 transition-colors">
+                                        <i class="fas fa-check"></i> I Understand — Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div x-show="quoteLoading" class="space-y-3">
+                            <div class="h-4 w-40 rounded bg-ink-100 animate-pulse"></div>
+                            <div class="h-9 w-56 rounded bg-ink-100 animate-pulse"></div>
+                            <div class="h-4 w-64 rounded bg-ink-100 animate-pulse"></div>
+                        </div>
+
+                        
+                        <div x-show="!quoteLoading && quote && quote.available" x-cloak>
+                            <div class="flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-200/70 px-4 py-3">
+                                <div class="flex items-center gap-2.5">
+                                    <i class="fas fa-circle-check text-emerald-600"></i>
+                                    <span class="text-sm font-semibold text-emerald-800">Numbers available</span>
+                                </div>
+                                <span class="text-2xl font-extrabold text-ink-900" x-text="quote.price_formatted"></span>
+                            </div>
+                            <ul class="mt-4 space-y-2 text-sm text-ink-600">
+                                <li class="flex justify-between"><span>Service</span><strong class="text-ink-900" x-text="serviceName"></strong></li>
+                                <li class="flex justify-between"><span>Country</span><strong class="text-ink-900" x-text="countryName"></strong></li>
+                                <li class="flex justify-between"><span>Activation window</span><strong class="text-ink-900">15 minutes</strong></li>
+                                <li class="flex justify-between"><span>Your balance</span>
+                                    <strong :class="quote.sufficient ? 'text-emerald-600' : 'text-red-600'" x-text="quote.balance_formatted"></strong>
+                                </li>
+                            </ul>
+                            <div x-show="!quote.sufficient" x-cloak class="mt-4 rounded-xl bg-amber-50 border border-amber-200/70 px-4 py-3 flex items-start gap-2.5">
+                                <i class="fas fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                                <p class="text-sm text-amber-800">
+                                    Insufficient balance.
+                                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/wallet/deposit" class="font-semibold underline">Deposit funds</a> to continue.
+                                </p>
+                            </div>
+                            <p class="mt-4 text-xs text-ink-400 flex items-start gap-2">
+                                <i class="fas fa-shield-halved mt-0.5 text-brand-500"></i>
+                                Your wallet is charged only after a number is assigned. If no SMS arrives, the order can be cancelled or expires for a full refund.
+                            </p>
+                        </div>
+
+                        
+                        <div x-show="!quoteLoading && quote && !quote.available" x-cloak class="rounded-xl bg-red-50 border border-red-200/70 px-4 py-4 flex items-start gap-3">
+                            <i class="fas fa-circle-xmark text-red-500 mt-0.5"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-red-800">Not available</p>
+                                <p class="mt-0.5 text-sm text-red-700" x-text="quote?.message"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="kv-card p-5 lg:sticky lg:top-6">
+                <h3 class="font-bold text-ink-900 text-sm">Your selection</h3>
+                <dl class="mt-4 space-y-3 text-sm">
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-ink-500 shrink-0">Service</dt>
+                        <dd class="font-semibold text-ink-900 text-right min-w-0 truncate" x-text="serviceName || '—'"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-ink-500 shrink-0">Country</dt>
+                        <dd class="font-semibold text-ink-900 text-right min-w-0 truncate" x-text="countryName || '—'"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3 pt-3 border-t border-ink-100">
+                        <dt class="text-ink-500">Price</dt>
+                        <dd class="font-extrabold text-ink-900 text-lg" x-text="quote?.available ? quote.price_formatted : '—'"></dd>
+                    </div>
+                    <div class="flex items-center justify-between gap-3">
+                        <dt class="text-ink-500">Balance</dt>
+                        <dd class="font-semibold text-ink-700">1,253 XAF</dd>
+                    </div>
+                </dl>
+
+                <div class="mt-5 space-y-2.5">
+                    <template x-if="step === 2">
+                        <button type="button" @click="step = 1" class="kv-btn-ghost w-full !justify-start"><i class="fas fa-arrow-left"></i> Change service</button>
+                    </template>
+                    <template x-if="step === 3">
+                        <button type="button" @click="step = 2" class="kv-btn-ghost w-full !justify-start"><i class="fas fa-arrow-left"></i> Change country</button>
+                    </template>
+
+                    <button type="button" x-show="step === 1" @click="serviceId && (step = 2)" :disabled="!serviceId"
+                            class="kv-btn-primary w-full">
+                        Continue <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="button" x-show="step === 2" @click="fetchQuote()" :disabled="!countryId || quoteLoading"
+                            class="kv-btn-primary w-full" x-cloak>
+                        <span x-show="!quoteLoading">Check availability <i class="fas fa-arrow-right"></i></span>
+                        <span x-show="quoteLoading"><i class="fas fa-circle-notch fa-spin"></i> Checking…</span>
+                    </button>
+
+                    <form method="POST" action="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders" x-show="step === 3" x-cloak
+                          x-ref="orderForm" @submit="onSubmit($event)">
+                        <input type="hidden" name="_token" value="AkEUTRpveW3LlH796SD0Uxmgz6Ib5zmkEaNXZyWr" autocomplete="off">                        <input type="hidden" name="service_id" :value="serviceId">
+                        <input type="hidden" name="country_id" :value="countryId">
+                        <input type="hidden" name="vpn_acknowledged" :value="vpnAck ? '1' : ''">
+                        <button type="submit" :disabled="!quote?.available || !quote?.sufficient || purchasing || (serviceSlug() === 'facebook' && !vpnAck)"
+                                class="kv-btn-primary w-full h-11">
+                            <span x-show="!purchasing && !(serviceSlug() === 'facebook' && !vpnAck)"><i class="fas fa-bolt"></i> Purchase number</span>
+                            <span x-show="serviceSlug() === 'facebook' && !vpnAck"><i class="fas fa-lock"></i> Confirm VPN notice above</span>
+                            <span x-show="purchasing"><i class="fas fa-circle-notch fa-spin"></i> Purchasing…</span>
+                        </button>
+                        <p x-show="vpnError" x-cloak class="mt-2 text-xs font-semibold text-red-600 text-center">
+                            Please confirm that you understand the Facebook VPN requirement before continuing.
+                        </p>
+                    </form>
+                </div>
+
+                <p class="mt-4 text-[11px] leading-relaxed text-ink-400 text-center">
+                    Charged only on successful assignment.<br>Auto-refund on expiry or failure.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        function buyFlow(config) {
+            return {
+                step: 1,
+                serviceId: config.initialService || null,
+                serviceName: null,
+                countryId: config.initialCountry || null,
+                countryName: null,
+                serviceQuery: '',
+                countryQuery: '',
+                quote: null,
+                quoteLoading: false,
+                purchasing: false,
+                vpnAgreed: false,
+                vpnAck: false,
+                vpnError: false,
+
+                serviceNames: {"2":"Facebook","3":"Telegram","4":"TikTok","1":"WhatsApp"},
+                countryNames: {"47":"Argentina","37":"Australia","11":"Austria","9":"Belgium","46":"Brazil","43":"Cameroon","3":"Canada","50":"Chile","49":"Colombia","19":"Czech Republic","14":"Denmark","44":"Egypt","15":"Finland","5":"France","4":"Germany","42":"Ghana","21":"Greece","27":"India","29":"Indonesia","16":"Ireland","26":"Israel","7":"Italy","35":"Japan","41":"Kenya","30":"Malaysia","48":"Mexico","45":"Morocco","8":"Netherlands","38":"New Zealand","40":"Nigeria","13":"Norway","28":"Pakistan","32":"Philippines","18":"Poland","17":"Portugal","20":"Romania","25":"Saudi Arabia","31":"Singapore","39":"South Africa","36":"South Korea","6":"Spain","12":"Sweden","10":"Switzerland","33":"Thailand","23":"Turkey","22":"Ukraine","24":"United Arab Emirates","2":"United Kingdom","1":"United States","34":"Vietnam"},
+
+                init() {
+                    if (this.serviceId) this.serviceName = this.serviceNames[this.serviceId];
+                    if (this.countryId) this.countryName = this.countryNames[this.countryId];
+                    if (this.serviceId && this.countryId) this.fetchQuote();
+                    else if (this.serviceId) this.step = 2;
+                },
+                serviceMatch(id) {
+                    return !this.serviceQuery || this.serviceNames[id].toLowerCase().includes(this.serviceQuery.toLowerCase());
+                },
+                countryMatch(id) {
+                    return !this.countryQuery || this.countryNames[id].toLowerCase().includes(this.countryQuery.toLowerCase());
+                },
+                anyServiceVisible() {
+                    return Object.values(this.serviceNames).some(n => !this.serviceQuery || n.toLowerCase().includes(this.serviceQuery.toLowerCase()));
+                },
+                anyCountryVisible() {
+                    return Object.values(this.countryNames).some(n => !this.countryQuery || n.toLowerCase().includes(this.countryQuery.toLowerCase()));
+                },
+                serviceSlug() {
+                    return (config.slugs && config.slugs[this.serviceId]) || '';
+                },
+                acknowledgeVpn() {
+                    if (!this.vpnAgreed) { this.vpnError = true; return; }
+                    this.vpnAck = true;
+                    this.vpnError = false;
+                },
+                onSubmit(event) {
+                    if (this.serviceSlug() === 'facebook' && !this.vpnAck) {
+                        event.preventDefault();
+                        this.vpnError = true;
+                        return;
+                    }
+                    this.purchasing = true;
+                },
+                selectService(id, name) {
+                    this.serviceId = id; this.serviceName = name; this.quote = null;
+                    this.vpnAck = false; this.vpnAgreed = false; this.vpnError = false;
+                    this.step = 2;
+                },
+                selectCountry(id, name) {
+                    this.countryId = id; this.countryName = name; this.quote = null;
+                },
+                async fetchQuote() {
+                    this.step = 3;
+                    this.quoteLoading = true;
+                    this.quote = null;
+                    try {
+                        const res = await fetch(config.quoteUrl + '?country_id=' + this.countryId + '&service_id=' + this.serviceId, {
+                            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        this.quote = await res.json();
+                    } catch (e) {
+                        this.quote = { available: false, message: 'Unable to check availability. Please try again.' };
+                    }
+                    this.quoteLoading = false;
+                }
+            }
+        }
+    </script>
+            </div>
+        </main>
+
+        <footer class="hidden lg:block border-t border-ink-200/70 py-4">
+            <div class="max-w-7xl mx-auto px-6 flex items-center justify-between text-xs text-ink-400">
+                <span>&copy; 2026 KamVerify</span>
+                <span class="space-x-4">
+                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/pages/terms" class="hover:text-ink-600">Terms</a>
+                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/pages/privacy" class="hover:text-ink-600">Privacy</a>
+                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/pages/refund-policy" class="hover:text-ink-600">Refunds</a>
+                    <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/support" class="hover:text-ink-600">Support</a>
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-ink-200 pb-[env(safe-area-inset-bottom)]">
+        <div class="grid grid-cols-5 h-16">
+            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/dashboard" class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-ink-500">
+                <i class="fas fa-gauge-high text-base"></i>Home
+            </a>
+            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders" class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-ink-500">
+                <i class="fas fa-rectangle-list text-base"></i>Orders
+            </a>
+            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/orders/create" class="flex flex-col items-center justify-center -mt-5">
+                <span class="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-pop ring-2 ring-brand-300">
+                    <i class="fas fa-plus text-lg"></i>
+                </span>
+                <span class="text-[11px] font-medium text-ink-500 mt-0.5">Buy</span>
+            </a>
+            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/wallet" class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-ink-500">
+                <i class="fas fa-wallet text-base"></i>Wallet
+            </a>
+            <a href="https://flying-garmin-dispatch-constitute.trycloudflare.com/support" class="flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-ink-500">
+                <i class="fas fa-headset text-base"></i>Support
+            </a>
+        </div>
+    </nav>
+</div>
+
+<div id="kv-toasts" class="fixed z-[70] inset-x-0 top-4 sm:left-auto sm:right-4 sm:w-96 px-4 sm:px-0 space-y-2 pointer-events-none" aria-live="polite">
+    </div>
+
+<script>
+    // Global toast helper: window.kvToast('Saved!', 'success')
+    window.kvToast = function (text, type = 'success') {
+        const styles = {
+            success: ['border-emerald-200', 'fa-check-circle text-emerald-500'],
+            error:   ['border-red-200', 'fa-exclamation-circle text-red-500'],
+            warning: ['border-amber-200', 'fa-exclamation-triangle text-amber-500'],
+            info:    ['border-sky-200', 'fa-info-circle text-sky-500'],
+        };
+        const [border, icon] = styles[type] || styles.info;
+        const el = document.createElement('div');
+        el.className = 'pointer-events-auto flex items-start gap-3 rounded-xl border bg-white p-4 shadow-pop ' + border
+            + ' transition-all duration-200 opacity-0 translate-y-2';
+        el.innerHTML = '<i class="fas mt-0.5 ' + icon + '"></i>'
+            + '<p class="flex-1 text-sm text-ink-700"></p>'
+            + '<button class="text-ink-400 hover:text-ink-600" aria-label="Dismiss"><i class="fas fa-times text-xs"></i></button>';
+        el.querySelector('p').textContent = text;
+        el.querySelector('button').addEventListener('click', () => el.remove());
+        document.getElementById('kv-toasts').appendChild(el);
+        requestAnimationFrame(() => el.classList.remove('opacity-0', 'translate-y-2'));
+        setTimeout(() => { el.classList.add('opacity-0'); setTimeout(() => el.remove(), 200); }, 6000);
+    };
+
+    // Copy-to-clipboard helper with toast feedback
+    window.kvCopy = function (text, label = 'Copied to clipboard') {
+        const done = () => window.kvToast(label, 'success');
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(done).catch(() => window.kvToast('Copy failed', 'error'));
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); done(); }
+            catch (e) { window.kvToast('Copy failed', 'error'); }
+            ta.remove();
+        }
+    };
+</script>
+
+<script>
+    // ---- Notification bell dropdown ----
+    function notifBell(initialUnread) {
+        return {
+            open: false,
+            unread: initialUnread,
+            items: [],
+            loaded: false,
+            pushPrompt: false,
+
+            toggle() {
+                this.open = !this.open;
+                if (this.open && !this.loaded) this.refresh();
+            },
+            async refresh() {
+                try {
+                    const res = await fetch('https://flying-garmin-dispatch-constitute.trycloudflare.com/notifications/feed', { headers: { 'Accept': 'application/json' } });
+                    const data = await res.json();
+                    this.items = data.notifications;
+                    this.unread = data.unread;
+                    this.loaded = true;
+                } catch (e) { /* silent — feed is best-effort */ }
+            },
+            async openItem(n) {
+                if (!n.read) {
+                    fetch('/notifications/' + n.id + '/read', {
+                        method: 'POST',
+                        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' }
+                    });
+                    n.read = true;
+                    this.unread = Math.max(0, this.unread - 1);
+                }
+                window.location.href = n.action_url || 'https://flying-garmin-dispatch-constitute.trycloudflare.com/notifications';
+            },
+            async markAll() {
+                await fetch('https://flying-garmin-dispatch-constitute.trycloudflare.com/notifications/read-all', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' }
+                });
+                this.items.forEach(n => n.read = true);
+                this.unread = 0;
+            },
+            async enablePush() {
+                if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+                    this.pushPrompt = false;
+                    return;
+                }
+                const permission = await Notification.requestPermission();
+                this.pushPrompt = false;
+                if (permission === 'granted') await subscribePush();
+            },
+            init() {
+                // Offer the push opt-in only where supported and not yet decided.
+                this.pushPrompt = ('Notification' in window) && window.Notification.permission === 'default'
+                    && 'BKT2GamcdiqesR476f06h_gpHqyH2oXRMVE_P1MEZTkCHOHPJtUpvL6HQgUqsb5pqFG9gwxFDWuXipx8TTdCg8g' !== '';
+            }
+        }
+    }
+
+    // ---- Web Push subscription (VAPID) ----
+    const VAPID_PUBLIC_KEY = 'BKT2GamcdiqesR476f06h_gpHqyH2oXRMVE_P1MEZTkCHOHPJtUpvL6HQgUqsb5pqFG9gwxFDWuXipx8TTdCg8g';
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+    }
+
+    async function subscribePush() {
+        try {
+            const reg = await navigator.serviceWorker.register('/sw.js');
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+            const json = sub.toJSON();
+            await fetch('https://flying-garmin-dispatch-constitute.trycloudflare.com/push/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, contentEncoding: 'aes128gcm' })
+            });
+        } catch (e) { /* unsupported browser or subscription failed — in-app centre still works */ }
+    }
+
+    // Auto-renew subscriptions for users who already granted permission.
+    if (VAPID_PUBLIC_KEY && 'serviceWorker' in navigator && 'PushManager' in window
+        && 'Notification' in window && window.Notification.permission === 'granted') {
+        subscribePush();
+    }
+</script>
+</body>
+</html>

@@ -1,58 +1,237 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# KamVerify Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive virtual phone number and SMS verification platform built with Laravel. KamVerify allows customers to purchase temporary phone numbers from multiple countries for SMS verification workflows on popular services like WhatsApp, Facebook, Telegram, and more.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Customer Features
+- **User Authentication**: Registration, login, password reset, email verification
+- **Customer Dashboard**: Real-time overview of balance, orders, and activity
+- **Number Purchase Flow**: Select country → Choose service → Purchase number → Receive SMS
+- **Order Management**: View active orders, order history, SMS retrieval
+- **Wallet System**: Deposit funds, view transactions, automatic refunds
+- **Support System**: Create and manage support tickets
+- **Notifications**: Real-time alerts for deposits, orders, SMS, and refunds
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Admin Features
+- **Admin Dashboard**: Platform statistics, recent orders, transactions, and users
+- **User Management**: View, activate/deactivate customers, view wallet and order history
+- **Order Management**: Monitor all orders, manual interventions when needed
+- **Financial Overview**: Revenue tracking, profit analysis, deposit management
+- **Provider Integration**: HeroSMS integration with fallback to mock provider
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Technical Features
+- **Provider Abstraction**: Clean separation between application and SMS providers
+- **Mock Provider**: Development mode for testing without real API calls
+- **Queue System**: Background job processing for SMS checking and order expiration
+- **Payment Abstraction**: Support for multiple payment providers (Stripe, PayPal, Coinbase)
+- **Security**: CSRF protection, input validation, authorization policies
+- **Responsive Design**: Mobile-friendly interface with Tailwind CSS
 
-## Learning Laravel
+## Technology Stack
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Backend**: Laravel 11 (PHP 8.2+)
+- **Frontend**: Blade templates, Tailwind CSS, JavaScript
+- **Database**: MySQL with Eloquent ORM
+- **Queues**: Laravel Queue with Redis support
+- **Cache**: Redis caching support
+- **SMS Provider**: HeroSMS with mock fallback
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Installation
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Prerequisites
+- PHP 8.2 or higher
+- Composer
+- MySQL 5.7+ or SQLite
+- Node.js 18+ and NPM
+- Redis (optional, recommended for production)
 
-## Agentic Development
+### Setup Instructions
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd kamverify.com
+   ```
 
-```bash
-composer require laravel/boost --dev
+2. **Install dependencies**
+   ```bash
+   composer install
+   npm install
+   npm run build
+   ```
 
-php artisan boost:install
+3. **Environment configuration**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+4. **Database setup**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+5. **Start development server**
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+6. **Start queue worker** (in separate terminal)
+   ```bash
+   php artisan queue:work
+   ```
+
+## Configuration
+
+### HeroSMS Integration
+
+To use the real HeroSMS API, configure the following environment variables:
+
+```env
+HERO_SMS_BASE_URL=https://api.herosms.com
+HERO_SMS_API_KEY=your_api_key_here
+HERO_SMS_USE_MOCK=false
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+For development, use the mock provider:
+```env
+HERO_SMS_USE_MOCK=true
+```
 
-## Contributing
+### Payment Integration
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Configure payment providers in `.env`:
 
-## Code of Conduct
+```env
+# Stripe
+STRIPE_API_KEY=pk_test_xxxxx
+STRIPE_SECRET_KEY=sk_test_xxxxx
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# PayPal
+PAYPAL_CLIENT_ID=your_client_id
+PAYPAL_SECRET=your_secret
+PAYPAL_MODE=sandbox
 
-## Security Vulnerabilities
+# Coinbase
+COINBASE_API_KEY=your_api_key
+COINBASE_API_SECRET=your_api_secret
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Default Users
+
+After running database seeders, the following users are created:
+
+**Admin User:**
+- Email: admin@kamverify.com
+- Password: password
+- Role: Admin
+
+**Test Customer:**
+- Email: customer@kamverify.com
+- Password: password
+- Role: Customer
+- Wallet Balance: $100.00
+
+## Project Structure
+
+```
+kamverify.com/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/       # Application controllers
+│   │   ├── Middleware/        # Custom middleware
+│   │   └── Requests/          # Form request validation
+│   ├── Models/                # Eloquent models
+│   ├── Services/              # Business logic services
+│   │   ├── Payments/          # Payment provider abstractions
+│   │   └── Providers/         # SMS provider abstractions
+│   ├── Jobs/                  # Background jobs
+│   ├── Notifications/         # Notification classes
+│   └── Policies/              # Authorization policies
+├── database/
+│   ├── migrations/            # Database migrations
+│   └── seeders/               # Database seeders
+├── resources/
+│   └── views/                 # Blade templates
+├── routes/                    # Application routes
+└── config/                    # Configuration files
+```
+
+## Key Services
+
+### OrderService
+Handles order creation, status updates, cancellation, and refunds.
+
+### WalletService
+Manages wallet operations including deposits, withdrawals, and balance checking.
+
+### PaymentService
+Abstracts payment provider integration with support for multiple payment methods.
+
+### ProviderService
+Manages SMS provider integration with HeroSMS and mock provider fallback.
+
+### SmsService
+Handles SMS message processing and OTP code extraction.
+
+## Development
+
+### Running Tests
+
+```bash
+php artisan test
+```
+
+### Code Style
+
+```bash
+php artisan pint
+```
+
+### Queue Worker
+
+For development, run the queue worker in a separate terminal:
+
+```bash
+php artisan queue:work
+```
+
+### Task Scheduling
+
+The Laravel scheduler handles order expiration checks. In production, add to crontab:
+
+```bash
+* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+## Deployment
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## Security
+
+- CSRF protection enabled on all forms
+- Input validation using Form Requests
+- Authorization policies for sensitive operations
+- Secure password hashing
+- Environment variable protection
+- SQL injection prevention via Eloquent ORM
+- XSS protection via Blade templating
+
+## Support
+
+For technical support and documentation:
+- Email: support@kamverify.com
+- Documentation: See [DEPLOYMENT.md](DEPLOYMENT.md)
+- Issues: GitHub issue tracker
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This platform is proprietary software. All rights reserved.
+
+## Credits
+
+Built with Laravel 11 and modern web technologies.

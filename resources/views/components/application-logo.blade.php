@@ -1,0 +1,1 @@
+<x-kv-logo {{ $attributes }} />

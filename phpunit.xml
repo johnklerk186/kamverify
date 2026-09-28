@@ -32,5 +32,11 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Tests must never reach real providers or charge real money. -->
+        <env name="HERO_SMS_MODE" value="mock"/>
+        <env name="HERO_SMS_USE_MOCK" value="true"/>
+        <env name="HERO_SMS_API_KEY" value=""/>
+        <env name="FAPSHI_USE_MOCK" value="true"/>
+        <env name="FAPSHI_MODE" value="sandbox"/>
     </php>
 </phpunit>

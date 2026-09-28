@@ -30,6 +30,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Demo Environment
+    |--------------------------------------------------------------------------
+    |
+    | Enables the public /demo entry point that signs a visitor into a
+    | dedicated, clearly-marked demo customer account seeded with test
+    | data. Off by default in production — set DEMO_ENABLED=true only on
+    | a staging/review deployment. The demo account is a normal customer
+    | with no elevated privileges and no access to real user data.
+    |
+    */
+
+    // Off by default — production builds must opt in explicitly.
+    'demo_enabled' => env('DEMO_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |
