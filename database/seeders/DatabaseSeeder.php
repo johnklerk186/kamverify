@@ -14,12 +14,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create admin user
+        // Create admin user. In production the password comes from
+        // ADMIN_SEED_PASSWORD — if unset, a random one is used so a
+        // seeded deploy never ships a publicly-known admin login.
         $admin = User::firstOrCreate(
             ['email' => 'admin@kamverify.com'],
             [
                 'name' => 'Admin',
-                'password' => bcrypt('password'),
+                'password' => bcrypt(env('ADMIN_SEED_PASSWORD',
+                    app()->environment('production') ? \Illuminate\Support\Str::random(24) : 'password')),
                 'role' => 'admin',
                 'is_active' => true,
             ]
@@ -30,7 +33,8 @@ class DatabaseSeeder extends Seeder
             ['email' => 'customer@kamverify.com'],
             [
                 'name' => 'Test Customer',
-                'password' => bcrypt('password'),
+                'password' => bcrypt(env('CUSTOMER_SEED_PASSWORD',
+                    app()->environment('production') ? \Illuminate\Support\Str::random(24) : 'password')),
                 'role' => 'customer',
                 'is_active' => true,
             ]
