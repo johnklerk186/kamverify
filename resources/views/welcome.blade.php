@@ -291,34 +291,31 @@
             <h2 class="text-2xl sm:text-3xl font-extrabold text-ink-900">Simple ways to pay</h2>
             <p class="mt-3 text-ink-500">Fund your KamVerify wallet with the payment method that works for you.</p>
         </div>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div class="kv-card p-5 text-center" data-reveal>
-                <div class="w-12 h-12 rounded-xl bg-yellow-400 grid place-items-center mx-auto">
-                    <span class="text-xs font-black text-ink-900 tracking-tight">MTN</span>
-                </div>
-                <p class="mt-3 text-sm font-bold text-ink-900">MTN Mobile Money</p>
-                <p class="mt-0.5 text-xs text-emerald-600 font-semibold">Available now</p>
-            </div>
-            <div class="kv-card p-5 text-center" data-reveal data-reveal-delay="70">
-                <div class="w-12 h-12 rounded-xl bg-orange-500 grid place-items-center mx-auto">
-                    <i class="fas fa-mobile-screen text-white"></i>
-                </div>
-                <p class="mt-3 text-sm font-bold text-ink-900">Orange Money</p>
-                <p class="mt-0.5 text-xs text-ink-400 font-semibold">Coming soon</p>
-            </div>
-            <div class="kv-card p-5 text-center" data-reveal data-reveal-delay="140">
-                <div class="w-12 h-12 rounded-xl bg-amber-500 grid place-items-center mx-auto">
-                    <i class="fab fa-bitcoin text-white text-lg"></i>
-                </div>
-                <p class="mt-3 text-sm font-bold text-ink-900">Bitcoin</p>
-                <p class="mt-0.5 text-xs text-ink-400 font-semibold">Coming soon</p>
-            </div>
-            <div class="kv-card p-5 text-center" data-reveal data-reveal-delay="210">
-                <div class="w-12 h-12 rounded-xl bg-ink-800 grid place-items-center mx-auto">
-                    <i class="fas fa-credit-card text-white"></i>
-                </div>
-                <p class="mt-3 text-sm font-bold text-ink-900">Credit / Debit Cards</p>
-                <p class="mt-0.5 text-xs text-ink-400 font-semibold">Coming soon</p>
+        @php
+            $paymentMethods = [
+                ['name' => 'MTN Mobile Money', 'tile' => '<span class="text-[10px] font-black text-ink-900 tracking-tight">MTN</span>', 'bg' => 'bg-yellow-400', 'live' => true],
+                ['name' => 'Orange Money', 'tile' => '<i class="fas fa-mobile-screen text-white text-xs"></i>', 'bg' => 'bg-orange-500', 'live' => false],
+                ['name' => 'Bitcoin', 'tile' => '<i class="fab fa-bitcoin text-white text-xs"></i>', 'bg' => 'bg-amber-500', 'live' => false],
+                ['name' => 'Credit / Debit Cards', 'tile' => '<i class="fas fa-credit-card text-white text-xs"></i>', 'bg' => 'bg-ink-800', 'live' => false],
+            ];
+        @endphp
+        <div class="kv-marquee max-w-5xl mx-auto" data-reveal>
+            <div class="kv-marquee-track">
+                @for($copy = 0; $copy < 2; $copy++)
+                    @foreach($paymentMethods as $method)
+                        <div class="kv-marquee-item" @if($copy === 1) aria-hidden="true" @endif>
+                            <div class="flex items-center gap-2.5 rounded-xl border border-ink-200/70 bg-white pl-2 pr-4 py-2">
+                                <div class="w-8 h-8 rounded-lg {{ $method['bg'] }} grid place-items-center shrink-0">{!! $method['tile'] !!}</div>
+                                <div class="whitespace-nowrap">
+                                    <p class="text-xs font-bold text-ink-900 leading-tight">{{ $method['name'] }}</p>
+                                    <p class="text-[10px] font-semibold leading-tight {{ $method['live'] ? 'text-emerald-600' : 'text-ink-400' }}">
+                                        {{ $method['live'] ? 'Available now' : 'Coming soon' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @endfor
             </div>
         </div>
         <p class="mt-6 text-center text-xs text-ink-400">

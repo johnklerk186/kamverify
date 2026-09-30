@@ -114,3 +114,32 @@
         transition: none !important;
     }
 }
+
+/* Payment-logo marquee — the track holds the logo set twice and
+   translates -50%, so the loop is seamless with no gap or jump.
+   Each item carries its own right margin so -50% lands exactly on
+   the duplicated set. Pauses on hover; disabled for reduced motion. */
+.kv-marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+.kv-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: kv-marquee 30s linear infinite;
+}
+.kv-marquee-item {
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+.kv-marquee:hover .kv-marquee-track {
+    animation-play-state: paused;
+}
+@keyframes kv-marquee {
+    to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .kv-marquee-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; gap: .75rem; }
+    .kv-marquee-item { margin-right: 0; }
+}
