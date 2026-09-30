@@ -126,15 +126,19 @@ class CountryAvailabilityService
                 'dial_code' => $country->dial_code,
                 'flag'      => countryFlag($country->code),
                 'stock'     => $stock,
-                'popular'   => (bool) ($override?->is_popular),
+                'popular'   => (bool) ($override?->is_popular) || (bool) $country->is_popular,
                 'enabled'   => $enabled,
             ];
         }
 
-        usort($countries, fn ($a, $b) => strcmp($a['name'], $b['name']));
+        // Popular countries first, then the rest — alphabetical
+        // within each group, deterministic.
+        usort($countries, fn ($a, $b) =>
+            ($b['popular'] <=> $a['popular']) ?: strcmp($a['name'], $b['name']));
 
-        // Popular chips: admin-pinned first (in admin's order); when
-        // none are pinned, auto-promote the highest-stock countries.
+        // Popular chips: per-service pins first (in admin's order),
+        // then globally-popular countries (alphabetical). When nothing
+        // is configured, auto-promote the highest-stock countries.
         $popularIds = ServiceCountry::where('service_id', $service->id)
             ->where('is_popular', true)
             ->orderBy('popular_sort')
@@ -143,12 +147,28 @@ class CountryAvailabilityService
             ->values()
             ->all();
 
+        $globalPopular = collect($countries)
+            ->filter(fn ($c) => $c['popular'] && !in_array($c['id'], $popularIds, true))
+            ->sortBy('name')
+            ->pluck('id')
+            ->all();
+        $popularIds = array_merge($popularIds, $globalPopular);
+
         if (empty($popularIds)) {
             $popularIds = collect($countries)
                 ->sortByDesc(fn ($c) => $c['stock'] ?? 0)
                 ->take(6)
                 ->pluck('id')
                 ->all();
+
+            // Auto-promoted entries carry the badge/ordering too so
+            // chips, badges and list order stay consistent.
+            $countries = array_map(function ($c) use ($popularIds) {
+                $c['popular'] = $c['popular'] || in_array($c['id'], $popularIds, true);
+                return $c;
+            }, $countries);
+            usort($countries, fn ($a, $b) =>
+                ($b['popular'] <=> $a['popular']) ?: strcmp($a['name'], $b['name']));
         }
 
         return [

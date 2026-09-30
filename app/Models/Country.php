@@ -13,6 +13,7 @@ class Country extends Model
         'dial_code',
         'flag',
         'is_active',
+        'is_popular',
         'provider_mapping',
         'pricing_config',
         'sort_order',
@@ -20,6 +21,7 @@ class Country extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_popular' => 'boolean',
         'provider_mapping' => 'array',
         'pricing_config' => 'array',
     ];

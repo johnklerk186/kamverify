@@ -373,6 +373,8 @@ class DatabaseSeeder extends Seeder
                     'name' => $country['name'],
                     'dial_code' => $country['dial_code'],
                     'is_active' => !in_array($country['code'], $inactiveCountries, true),
+                    'is_popular' => in_array($country['code'],
+                        ['US', 'GB', 'AU', 'AT', 'MX', 'ES', 'DE', 'BR'], true),
                     'sort_order' => 0,
                 ]
             );

@@ -121,6 +121,55 @@ class ServiceCountrySelectorTest extends TestCase
         $this->assertDatabaseMissing('service_countries', ['country_id' => $country->id]);
     }
 
+    public function test_global_is_popular_marks_badge_and_chips(): void
+    {
+        [$provider, $country, $service] = $this->seedMarketplace();
+        $country->update(['is_popular' => true]);
+
+        $data = app(CountryAvailabilityService::class)->forService($service);
+
+        $this->assertTrue($data['countries'][0]['popular']);
+        $this->assertContains($country->id, $data['popular']);
+    }
+
+    public function test_popular_countries_sort_first_then_alphabetical(): void
+    {
+        [$provider, $country, $service] = $this->seedMarketplace();
+        $cm = Country::create(['name' => 'Cameroon', 'code' => 'CM', 'dial_code' => '+237', 'is_active' => true, 'is_popular' => true]);
+        ProviderCountry::create([
+            'provider_id' => $provider->id, 'country_id' => $cm->id,
+            'provider_country_code' => '39', 'is_active' => true,
+        ]);
+
+        $data = app(CountryAvailabilityService::class)->forService($service);
+        $names = collect($data['countries'])->pluck('name')->all();
+
+        // CM is globally popular → first; US follows
+        $this->assertSame('Cameroon', $names[0]);
+        $this->assertSame('United States', $names[1]);
+    }
+
+    public function test_admin_can_toggle_global_popular(): void
+    {
+        [$provider, $country, $service] = $this->seedMarketplace();
+        $admin = $this->admin();
+        $this->assertFalse((bool) $country->fresh()->is_popular);
+
+        $this->actingAs($admin, 'admin')
+            ->put(route('admin.countries.toggle-popular', $country))
+            ->assertSessionHas('success');
+
+        $this->assertTrue((bool) $country->fresh()->is_popular);
+
+        // Toggling does not affect availability/active state
+        $this->assertTrue((bool) $country->fresh()->is_active);
+
+        // Customer cannot reach the admin toggle
+        $this->actingAs($this->customer())
+            ->put(route('admin.countries.toggle-popular', $country));
+        $this->assertTrue((bool) $country->fresh()->is_popular);
+    }
+
     public function test_purchase_still_works_after_selector_change(): void
     {
         [$provider, $country, $service] = $this->seedMarketplace();

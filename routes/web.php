@@ -156,6 +156,7 @@ Route::middleware(['admin', 'throttle:120,1'])->prefix('admin')->name('admin.')-
         Route::put('/{country}', [AdminCountryController::class, 'update'])->name('update');
         Route::delete('/{country}', [AdminCountryController::class, 'destroy'])->name('destroy');
         Route::put('/{country}/toggle-status', [AdminCountryController::class, 'toggleStatus'])->name('toggle-status');
+        Route::put('/{country}/toggle-popular', [AdminCountryController::class, 'togglePopular'])->name('toggle-popular');
     });
 
     // Services

@@ -111,66 +111,57 @@
 
                 {{-- STEP 2: Country — service-specific list --}}
                 <div class="kv-card" x-show="step === 2" x-cloak>
-                    <div class="px-5 sm:px-6 py-4 border-b border-ink-100">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                <h2 class="font-bold text-ink-900">2. Select Country</h2>
-                                <p class="mt-0.5 text-xs text-ink-500">
-                                    Showing countries available for <strong class="text-ink-800" x-text="serviceName"></strong>
-                                    <span x-show="!countriesLoading && countryCount > 0" class="text-ink-400">· <span x-text="countryCount"></span> countries available</span>
-                                </p>
-                            </div>
-                            <div class="relative w-full sm:w-56">
-                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i>
-                                <input type="text" x-model="countryQuery" placeholder="Search countries…"
-                                       class="kv-input !pl-8 !py-2.5 !text-base sm:!text-sm">
-                            </div>
+                    <div class="px-5 sm:px-6 pt-5 pb-4 sm:pt-6 border-b border-ink-100">
+                        <h2 class="font-bold text-ink-900">2. Select Country</h2>
+                        <p class="mt-0.5 text-xs text-ink-500">
+                            Showing countries available for <strong class="text-ink-800" x-text="serviceName"></strong>
+                        </p>
+
+                        {{-- Large full-width search — 16px on mobile so no iOS zoom --}}
+                        <div class="relative mt-4">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 text-sm"></i>
+                            <input type="text" x-model="countryQuery" placeholder="Search countries..."
+                                   class="kv-input !pl-11 !py-3.5 !rounded-xl !text-base sm:!text-sm !bg-white">
                         </div>
 
-                        {{-- Popular chips — per service, horizontally scrollable --}}
+                        {{-- Popular chips — wrap naturally on small screens --}}
                         <div x-show="!countriesLoading && popularCountries().length" x-cloak
-                             class="mt-3 -mx-1 px-1 flex gap-2 overflow-x-auto pb-1" style="scrollbar-width: thin;">
+                             class="mt-3 flex flex-wrap gap-2">
                             <template x-for="c in popularCountries()" :key="'pop-' + c.id">
                                 <button type="button" @click="selectCountry(c.id, c.name)"
-                                        class="shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+                                        class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition"
                                         :class="countryId === c.id ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-ink-200/70 bg-white text-ink-700 hover:border-brand-300 hover:bg-ink-50'">
                                     <span x-text="c.flag"></span><span x-text="c.name"></span>
                                 </button>
                             </template>
                         </div>
+
+                        <p x-show="!countriesLoading && countryCount > 0" x-cloak
+                           class="mt-3 text-xs font-medium text-ink-400">
+                            <span x-text="countryCount"></span> countries available
+                        </p>
                     </div>
 
                     {{-- Loading skeleton --}}
-                    <div x-show="countriesLoading" class="p-5 space-y-3">
+                    <div x-show="countriesLoading" class="p-4 sm:p-5 space-y-2.5">
                         <template x-for="i in 8" :key="i">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-8 h-8 rounded-lg bg-ink-100 animate-pulse"></div>
-                                <div class="flex-1 space-y-1.5">
-                                    <div class="h-3.5 w-32 rounded bg-ink-100 animate-pulse"></div>
-                                    <div class="h-2.5 w-16 rounded bg-ink-100 animate-pulse"></div>
-                                </div>
+                            <div class="flex items-center gap-3.5 rounded-xl border border-ink-100 px-4 py-3.5">
+                                <div class="w-7 h-5 rounded bg-ink-100 animate-pulse"></div>
+                                <div class="h-3.5 w-32 rounded bg-ink-100 animate-pulse"></div>
                             </div>
                         </template>
                     </div>
 
                     {{-- Country cards --}}
-                    <div x-show="!countriesLoading" class="divide-y divide-ink-100 max-h-[26rem] overflow-y-auto">
+                    <div x-show="!countriesLoading" class="p-4 sm:p-5 space-y-2.5 max-h-[28rem] overflow-y-auto">
                         <template x-for="c in filteredCountries()" :key="c.id">
                             <button type="button" @click="selectCountry(c.id, c.name)"
-                                    class="w-full flex items-center gap-3.5 px-5 sm:px-6 py-3.5 text-left transition"
-                                    :class="countryId === c.id ? 'bg-brand-50' : 'hover:bg-ink-50'">
-                                <span class="text-2xl" x-text="c.flag"></span>
-                                <span class="flex-1 min-w-0">
-                                    <span class="block text-sm font-semibold text-ink-800 truncate" x-text="c.name"></span>
-                                    <span class="block text-xs text-ink-400" x-text="c.dial_code"></span>
-                                </span>
-                                <span x-show="c.popular" class="kv-badge bg-amber-50 text-amber-700 shrink-0">
-                                    <i class="fas fa-star text-[9px]"></i> Popular
-                                </span>
-                                <span x-show="countryId === c.id" class="w-5 h-5 rounded-full bg-brand-600 text-white grid place-items-center shrink-0">
-                                    <i class="fas fa-check text-[9px]"></i>
-                                </span>
-                                <i x-show="countryId !== c.id" class="fas fa-chevron-right text-ink-300 text-xs shrink-0"></i>
+                                    class="w-full flex items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition"
+                                    :class="countryId === c.id ? 'border-brand-500 bg-brand-50' : 'border-ink-200/70 bg-white hover:border-brand-300 hover:bg-ink-50/60'">
+                                <span class="text-xl leading-none shrink-0" x-text="c.flag"></span>
+                                <span class="flex-1 min-w-0 text-sm font-semibold text-ink-800 truncate" x-text="c.name"></span>
+                                <span x-show="c.popular" class="kv-badge bg-brand-50 text-brand-700 shrink-0">Popular</span>
+                                <i class="fas fa-chevron-right text-ink-300 text-xs shrink-0"></i>
                             </button>
                         </template>
                     </div>

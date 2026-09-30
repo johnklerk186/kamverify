@@ -24,8 +24,18 @@
                                 <p class="font-semibold text-ink-900 text-sm">{{ $country->name }}</p>
                                 <p class="text-xs text-ink-400 font-mono">{{ $country->code }} · {{ $country->dial_code }}</p>
                             </div>
+                            @if($country->is_popular)
+                                <span class="kv-badge bg-brand-50 text-brand-700 hidden sm:inline-flex"><i class="fas fa-star text-[9px]"></i> Popular</span>
+                            @endif
                             <x-status-badge :status="$country->is_active ? 'active' : 'inactive'" />
                             <div class="flex items-center gap-1.5">
+                                <form method="POST" action="{{ route('admin.countries.toggle-popular', $country) }}">
+                                    @csrf @method('PUT')
+                                    <button type="submit" class="p-2 {{ $country->is_popular ? 'text-amber-500 hover:text-ink-400' : 'text-ink-400 hover:text-amber-500' }} transition"
+                                            title="{{ $country->is_popular ? 'Remove popular badge' : 'Mark as popular' }}">
+                                        <i class="{{ $country->is_popular ? 'fas' : 'far' }} fa-star"></i>
+                                    </button>
+                                </form>
                                 <a href="{{ route('admin.countries.show', $country) }}" class="p-2 text-ink-400 hover:text-brand-600 transition" title="View"><i class="fas fa-eye"></i></a>
                                 <a href="{{ route('admin.countries.edit', $country) }}" class="p-2 text-ink-400 hover:text-brand-600 transition" title="Edit"><i class="fas fa-pen"></i></a>
                                 <form method="POST" action="{{ route('admin.countries.toggle-status', $country) }}">

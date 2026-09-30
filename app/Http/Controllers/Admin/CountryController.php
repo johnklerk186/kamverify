@@ -76,4 +76,21 @@ class CountryController extends Controller
 
         return back()->with('success', 'Country status updated successfully.');
     }
+
+    /**
+     * Popular is a static badge/chip attribute only — it never affects
+     * availability, pricing or provider mappings.
+     */
+    public function togglePopular(Country $country)
+    {
+        $country->update(['is_popular' => !$country->is_popular]);
+
+        // Bust cached storefront lists for every customer-facing service
+        $availability = app(\App\Services\CountryAvailabilityService::class);
+        \App\Models\Service::where('customer_enabled', true)->each(
+            fn ($s) => $availability->forget($s));
+
+        return back()->with('success',
+            "{$country->name} " . ($country->is_popular ? 'marked popular.' : 'removed from popular.'));
+    }
 }
