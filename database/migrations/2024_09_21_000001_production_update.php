@@ -10,45 +10,21 @@ return new class extends Migration
     {
         // Customer-facing service catalogue is gated independently of
         // is_active so admin keeps managing the full service list while
-        // only whitelisted services are sellable. Guarded so the
-        // migration can be re-run after a partial failure (MySQL DDL
-        // is not transactional, so an earlier attempt may have already
-        // added the column).
-        if (!Schema::hasColumn('services', 'customer_enabled')) {
-            Schema::table('services', function (Blueprint $table) {
-                $table->boolean('customer_enabled')->default(false)->after('is_active');
-            });
-        }
+        // only whitelisted services are sellable.
+        Schema::table('services', function (Blueprint $table) {
+            $table->boolean('customer_enabled')->default(false)->after('is_active');
+        });
 
-        if (!Schema::hasTable('push_subscriptions')) {
-            Schema::create('push_subscriptions', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-                $table->text('endpoint');
-                $table->string('public_key')->nullable();
-                $table->string('auth_token')->nullable();
-                $table->string('content_encoding', 20)->default('aesgcm');
-                $table->timestamps();
-            });
-        }
-
-        // MySQL cannot index a full TEXT column — use a prefix length
-        // there; other drivers take the plain unique key. Try/catch
-        // covers installs where the table was created before this fix
-        // (the CREATE succeeded, then the old index statement failed).
-        try {
-            if (Schema::getConnection()->getDriverName() === 'mysql') {
-                \Illuminate\Support\Facades\DB::statement(
-                    'ALTER TABLE push_subscriptions ADD UNIQUE KEY push_sub_user_endpoint_unique (user_id, endpoint(191))'
-                );
-            } else {
-                Schema::table('push_subscriptions', function (Blueprint $table) {
-                    $table->unique(['user_id', 'endpoint'], 'push_sub_user_endpoint_unique');
-                });
-            }
-        } catch (\Throwable $e) {
-            // Index already present — nothing to do.
-        }
+        Schema::create('push_subscriptions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->text('endpoint');
+            $table->string('public_key')->nullable();
+            $table->string('auth_token')->nullable();
+            $table->string('content_encoding', 20)->default('aesgcm');
+            $table->timestamps();
+            $table->unique(['user_id', 'endpoint'], 'push_sub_user_endpoint_unique');
+        });
 
         // Enable only the four launch services for customers.
         \App\Models\Service::whereIn('slug', ['facebook', 'whatsapp', 'telegram', 'tiktok'])
@@ -64,10 +40,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('push_subscriptions');
-        if (Schema::hasColumn('services', 'customer_enabled')) {
-            Schema::table('services', function (Blueprint $table) {
-                $table->dropColumn('customer_enabled');
-            });
-        }
+        Schema::table('services', function (Blueprint $table) {
+            $table->dropColumn('customer_enabled');
+        });
     }
 };
