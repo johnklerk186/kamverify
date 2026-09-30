@@ -302,7 +302,7 @@
                         <button type="button" @click="step = 2" class="kv-btn-ghost w-full !justify-start"><i class="fas fa-arrow-left"></i> Change country</button>
                     </template>
 
-                    <button type="button" x-show="step === 1" @click="serviceId && (step = 2)" :disabled="!serviceId"
+                    <button type="button" x-show="step === 1" @click="serviceId && gateServiceNotice()" :disabled="!serviceId"
                             class="kv-btn-primary w-full">
                         Continue <i class="fas fa-arrow-right"></i>
                     </button>
@@ -335,6 +335,42 @@
                 </p>
             </div>
         </div>
+
+        {{-- Service instruction modal — shown once before country selection,
+             dismissible per service. Config lives in serviceNotices above. --}}
+        <div x-show="noticeSlug" x-cloak x-transition.opacity.duration.200ms
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-950/60 backdrop-blur-sm"
+             role="dialog" aria-modal="true">
+            <div x-show="noticeSlug"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                 class="w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl bg-white shadow-2xl border border-ink-100 overflow-hidden">
+                <div class="px-5 sm:px-6 py-5 overflow-y-auto">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 grid place-items-center shrink-0">
+                            <i class="fas fa-triangle-exclamation text-amber-600"></i>
+                        </div>
+                        <h3 class="font-bold text-ink-900 text-base leading-snug min-w-0"
+                            x-text="serviceNotices[noticeSlug] ? serviceNotices[noticeSlug].title : ''"></h3>
+                    </div>
+                    <p class="mt-4 text-sm text-ink-700 leading-relaxed">
+                        <strong class="font-extrabold text-ink-900">IMPORTANT:</strong>
+                        <span x-text="serviceNotices[noticeSlug] ? serviceNotices[noticeSlug].message : ''"></span>
+                    </p>
+                    <label class="mt-4 flex items-center gap-2.5 cursor-pointer select-none">
+                        <input type="checkbox" x-model="noticeDontShow"
+                               class="w-4 h-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500">
+                        <span class="text-sm font-medium text-ink-700">Don't show again for this service</span>
+                    </label>
+                </div>
+                <div class="px-5 sm:px-6 py-4 border-t border-ink-100 bg-ink-50/60 shrink-0">
+                    <button type="button" @click="confirmNotice()" class="kv-btn-primary w-full h-11">
+                        OK, I Understand
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -354,6 +390,23 @@
                 vpnAck: false,
                 vpnError: false,
 
+                // Service instruction notices — shown on service pick,
+                // before country selection. Add WhatsApp/TikTok entries
+                // here when ready; each is remembered per-service via
+                // localStorage key kv_notice_off_<slug>.
+                serviceNotices: {
+                    facebook: {
+                        title: 'Instructions for Facebook / Meta Viewpoints',
+                        message: 'Connect a VPN to the SAME COUNTRY as this number BEFORE opening Facebook, and keep it on while you request the code. Failure to do so you won\u2019t receive a code.',
+                    },
+                    telegram: {
+                        title: 'Instructions for Telegram',
+                        message: 'Connect a VPN to the SAME COUNTRY as this number BEFORE opening Telegram, and keep it on while you request the code. Failure to do so you won\u2019t receive a code.',
+                    },
+                },
+                noticeSlug: null,
+                noticeDontShow: false,
+
                 // Per-service country list (fetched after service pick)
                 serviceCountries: [],
                 popularIds: [],
@@ -367,7 +420,7 @@
                     if (this.serviceId) this.serviceName = this.serviceNames[this.serviceId];
                     if (this.countryId) this.countryName = this.countryNames[this.countryId];
                     if (this.serviceId && this.countryId) this.fetchQuote();
-                    else if (this.serviceId) { this.step = 2; this.loadCountries(); }
+                    else if (this.serviceId) this.gateServiceNotice();
                 },
                 serviceMatch(id) {
                     return !this.serviceQuery || this.serviceNames[id].toLowerCase().includes(this.serviceQuery.toLowerCase());
@@ -429,6 +482,32 @@
                     this.serviceId = id; this.serviceName = name; this.quote = null;
                     this.countryId = null; this.countryName = null;
                     this.vpnAck = false; this.vpnAgreed = false; this.vpnError = false;
+                    this.gateServiceNotice();
+                },
+                // Show the service's instruction modal first if one is
+                // configured and not permanently dismissed; otherwise go
+                // straight to country selection.
+                gateServiceNotice() {
+                    const slug = this.serviceSlug();
+                    if (this.serviceNotices[slug] && !this.noticeDismissed(slug)) {
+                        this.noticeSlug = slug;
+                        this.noticeDontShow = false;
+                        return;
+                    }
+                    this.proceedToCountries();
+                },
+                noticeDismissed(slug) {
+                    try { return localStorage.getItem('kv_notice_off_' + slug) === '1'; }
+                    catch (e) { return false; }
+                },
+                confirmNotice() {
+                    if (this.noticeSlug && this.noticeDontShow) {
+                        try { localStorage.setItem('kv_notice_off_' + this.noticeSlug, '1'); } catch (e) {}
+                    }
+                    this.noticeSlug = null;
+                    this.proceedToCountries();
+                },
+                proceedToCountries() {
                     this.step = 2;
                     this.loadCountries();
                 },

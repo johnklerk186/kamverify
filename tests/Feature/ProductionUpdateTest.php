@@ -293,6 +293,33 @@ class ProductionUpdateTest extends TestCase
             ->assertSee('vpnAck', false);
     }
 
+    public function test_service_instruction_modal_configured_for_facebook_and_telegram_only(): void
+    {
+        [$provider, $country, $service] = $this->seedMarketplace();
+        Service::create(['name' => 'Facebook', 'slug' => 'facebook', 'is_active' => true, 'customer_enabled' => true]);
+        Service::create(['name' => 'Telegram', 'slug' => 'telegram', 'is_active' => true, 'customer_enabled' => true]);
+        Service::create(['name' => 'TikTok', 'slug' => 'tiktok', 'is_active' => true, 'customer_enabled' => true]);
+
+        $html = $this->actingAs($this->customer())
+            ->get('/orders/create')
+            ->assertOk()
+            ->getContent();
+
+        // Notice config present for facebook + telegram with exact copy
+        $this->assertStringContainsString('Instructions for Facebook / Meta Viewpoints', $html);
+        $this->assertStringContainsString('Instructions for Telegram', $html);
+        $this->assertStringContainsString('facebook:', $html);
+        $this->assertStringContainsString('telegram:', $html);
+        $this->assertStringContainsString("Don't show again for this service", $html);
+        $this->assertStringContainsString('OK, I Understand', $html);
+        $this->assertStringContainsString('kv_notice_off_', $html);
+
+        // WhatsApp (seeded service) and TikTok have no notice entries —
+        // they must not appear as keys inside serviceNotices
+        $this->assertStringNotContainsString('whatsapp:', $html);
+        $this->assertStringNotContainsString('tiktok:', $html);
+    }
+
     // ---------- Currency ----------
 
     public function test_customer_pages_display_xaf_not_dollars(): void
