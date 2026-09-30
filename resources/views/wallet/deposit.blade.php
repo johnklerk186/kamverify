@@ -62,7 +62,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="font-semibold text-ink-900 text-sm">MTN Mobile Money</p>
-                            <p class="text-xs text-ink-500">You'll be redirected to a secure payment page</p>
+                            <p class="text-xs text-ink-500">Approve the prompt sent to your phone</p>
                         </div>
                         <i class="fas fa-circle-check text-brand-600 text-lg shrink-0"></i>
                     </div>
@@ -95,15 +95,26 @@
                 </div>
 
                 @if(!$sandbox)
-                    <p class="mt-5 text-xs text-ink-400 flex items-start gap-2">
-                        <i class="fas fa-lock mt-0.5"></i>
-                        You'll be redirected to Fapshi's secure checkout to enter your mobile money number and approve the payment. Your wallet is credited only after the payment is verified.
+                    <div class="mt-5">
+                        <label for="phone" class="kv-label">MTN Mobile Money number</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 font-semibold text-sm">+237</span>
+                            <input id="phone" type="tel" name="phone" x-model="phone" inputmode="numeric"
+                                   maxlength="12" autocomplete="tel" required
+                                   class="kv-input !pl-14 @error('phone') border-red-400 focus:ring-red-500 @enderror"
+                                   placeholder="6XXXXXXXX">
+                        </div>
+                        @error('phone')<p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
+                    <p class="mt-4 text-xs text-ink-400 flex items-start gap-2">
+                        <i class="fas fa-mobile-screen mt-0.5"></i>
+                        We'll send a payment request to this number — approve the MTN MoMo prompt on your phone. Your wallet is credited only after the payment is verified.
                     </p>
                 @endif
 
-                <button type="submit" class="kv-btn-primary w-full h-12 mt-7 text-base" :disabled="loading || !amount || amount < {{ $minDeposit }}">
-                    <span x-show="!loading"><i class="fas fa-arrow-right-to-bracket"></i> {{ $sandbox ? 'Simulate deposit' : 'Continue to Payment' }}</span>
-                    <span x-show="loading" x-cloak><i class="fas fa-circle-notch fa-spin"></i> Processing…</span>
+                <button type="submit" class="kv-btn-primary w-full h-12 mt-7 text-base" :disabled="loading || !amount || amount < {{ $minDeposit }} || (!phone && {{ $sandbox ? 'false' : 'true' }})">
+                    <span x-show="!loading"><i class="fas fa-mobile-screen"></i> {{ $sandbox ? 'Simulate deposit' : 'Pay with MTN MoMo' }}</span>
+                    <span x-show="loading" x-cloak><i class="fas fa-circle-notch fa-spin"></i> Sending…</span>
                 </button>
             </form>
         </div>

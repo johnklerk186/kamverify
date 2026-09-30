@@ -181,7 +181,47 @@ class ProductionUpdateTest extends TestCase
 
     // ---------- Fapshi protocol (mocked HTTP) ----------
 
-    public function test_fapshi_initiate_pay_sends_documented_parameters(): void
+    public function test_fapshi_direct_pay_sends_documented_parameters(): void
+    {
+        config(['services.fapshi.mode' => 'sandbox']);
+        config(['services.fapshi.use_mock' => false]);
+        config(['services.fapshi.api_user' => 'test-user', 'services.fapshi.api_key' => 'test-key']);
+
+        Http::fake([
+            'sandbox.fapshi.com/direct-pay' => Http::response([
+                'transId' => 'abc123',
+                'message' => 'Payment request sent',
+                'dateInitiated' => '2024-09-21',
+            ]),
+        ]);
+
+        $provider = new \App\Services\Payments\FapshiPaymentProvider();
+        $result = $provider->createPayment(5000, 'XAF', [
+            'phone' => '237670000000',
+            'name' => 'Test User',
+            'email' => 'c@example.com',
+            'user_id' => 7,
+            'external_id' => 'KV-PAY-TEST',
+        ]);
+
+        $this->assertSame('abc123', $result['payment_id']);
+        $this->assertNull($result['redirect_url']); // no hosted redirect
+        $this->assertTrue($result['direct_pay']);
+
+        Http::assertSent(function ($request) {
+            return $request->url() === 'https://sandbox.fapshi.com/direct-pay'
+                && $request->hasHeader('apiuser', 'test-user')
+                && $request->hasHeader('apikey', 'test-key')
+                && $request['amount'] === 5000
+                && $request['phone'] === '670000000' // 237 prefix stripped
+                && $request['medium'] === 'mtn'
+                && $request['externalId'] === 'KV-PAY-TEST'
+                && $request['userId'] === '7'
+                && !isset($request['redirectUrl']); // direct pay never sends it
+        });
+    }
+
+    public function test_fapshi_initiate_pay_still_used_without_phone(): void
     {
         config(['services.fapshi.mode' => 'sandbox']);
         config(['services.fapshi.use_mock' => false]);
@@ -189,33 +229,28 @@ class ProductionUpdateTest extends TestCase
 
         Http::fake([
             'sandbox.fapshi.com/initiate-pay' => Http::response([
-                'message' => 'Payment link generated',
                 'link' => 'https://checkout.fapshi.com/pay/abc123',
                 'transId' => 'abc123',
-                'dateInitiated' => '2024-09-21',
             ]),
         ]);
 
-        $provider = new \App\Services\Payments\FapshiPaymentProvider();
-        $result = $provider->createPayment(5000, 'XAF', [
-            'email' => 'c@example.com',
-            'redirect_url' => 'https://kamverify.test/wallet/deposit/return',
-            'user_id' => 7,
-            'external_id' => 'KV-PAY-TEST',
-        ]);
+        $result = (new \App\Services\Payments\FapshiPaymentProvider())
+            ->createPayment(5000, 'XAF', ['user_id' => 7]);
 
         $this->assertSame('abc123', $result['payment_id']);
         $this->assertSame('https://checkout.fapshi.com/pay/abc123', $result['redirect_url']);
+        $this->assertFalse($result['direct_pay']);
+    }
 
-        Http::assertSent(function ($request) {
-            return $request->url() === 'https://sandbox.fapshi.com/initiate-pay'
-                && $request->hasHeader('apiuser', 'test-user')
-                && $request->hasHeader('apikey', 'test-key')
-                && $request['amount'] === 5000
-                && $request['redirectUrl'] === 'https://kamverify.test/wallet/deposit/return'
-                && $request['externalId'] === 'KV-PAY-TEST'
-                && $request['userId'] === '7';
-        });
+    public function test_live_deposit_requires_phone(): void
+    {
+        [$provider, $country, $service] = $this->seedMarketplace();
+        config(['services.fapshi.use_mock' => false]);
+
+        $this->actingAs($this->customer())->post('/wallet/deposit', [
+            'amount' => 5000,
+            'payment_method' => 'mtn_momo',
+        ])->assertSessionHasErrors('phone');
     }
 
     public function test_fapshi_status_mapping(): void

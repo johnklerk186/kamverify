@@ -50,9 +50,17 @@ class FapshiPaymentProvider implements PaymentInterface
     }
 
     /**
-     * Fapshi initiate-pay: creates a hosted checkout link the customer is
-     * redirected to. Requires amount (int XAF, min 100). $metadata may carry
-     * redirect_url, email, user_id, external_id, message.
+     * Two collection modes:
+     *
+     *  - direct-pay (default when a phone number is supplied): charges the
+     *    customer's MoMo wallet directly — Fapshi pushes the approval
+     *    prompt to the phone, no redirect. Requires amount + phone
+     *    (9-digit Cameroon number); medium auto/fixed to 'mtn'.
+     *  - initiate-pay (fallback, no phone): hosted checkout link the
+     *    customer is redirected to. Links expire after 24h.
+     *
+     * $metadata may carry phone, medium, name, email, user_id,
+     * external_id, redirect_url (initiate-pay only), message.
      */
     public function createPayment(float $amount, string $currency, array $metadata = []): array
     {
@@ -62,19 +70,31 @@ class FapshiPaymentProvider implements PaymentInterface
 
         $this->assertConfigured();
 
+        $phone = isset($metadata['phone'])
+            ? $this->normalizePhone((string) $metadata['phone'])
+            : null;
+        $direct = $phone !== null;
+
+        $body = array_filter([
+            'amount'      => (int) round($amount),
+            'phone'       => $phone,
+            'medium'      => $direct ? ($metadata['medium'] ?? 'mtn') : null,
+            'name'        => $direct ? ($metadata['name'] ?? null) : null,
+            'email'       => $metadata['email'] ?? null,
+            'redirectUrl' => $direct ? null : ($metadata['redirect_url'] ?? null),
+            'userId'      => isset($metadata['user_id']) ? (string) $metadata['user_id'] : null,
+            'externalId'  => $metadata['external_id'] ?? null,
+            'message'     => $metadata['message'] ?? 'KamVerify wallet deposit',
+        ], fn ($v) => $v !== null);
+
+        $endpoint = $direct ? '/direct-pay' : '/initiate-pay';
+
         $response = Http::timeout(30)
             ->withHeaders($this->authHeaders())
-            ->post($this->baseUrl . '/initiate-pay', array_filter([
-                'amount'      => (int) round($amount),
-                'email'       => $metadata['email'] ?? null,
-                'redirectUrl' => $metadata['redirect_url'] ?? null,
-                'userId'      => isset($metadata['user_id']) ? (string) $metadata['user_id'] : null,
-                'externalId'  => $metadata['external_id'] ?? null,
-                'message'     => $metadata['message'] ?? 'KamVerify wallet deposit',
-            ], fn ($v) => $v !== null));
+            ->post($this->baseUrl . $endpoint, $body);
 
         if ($response->failed()) {
-            Log::error('Fapshi initiate-pay failed', [
+            Log::error('Fapshi ' . ltrim($endpoint, '/') . ' failed', [
                 'status' => $response->status(),
                 'error'  => $response->json('message') ?? $response->body(),
             ]);
@@ -85,7 +105,11 @@ class FapshiPaymentProvider implements PaymentInterface
 
         $data = $response->json();
 
-        if (empty($data['transId']) || empty($data['link'])) {
+        if (empty($data['transId'])) {
+            throw new \Exception('Fapshi did not return a transaction ID.');
+        }
+
+        if (!$direct && empty($data['link'])) {
             throw new \Exception('Fapshi did not return a payment link.');
         }
 
@@ -94,9 +118,23 @@ class FapshiPaymentProvider implements PaymentInterface
             'status'       => 'pending',
             'amount'       => $amount,
             'currency'     => 'XAF',
-            'redirect_url' => $data['link'],
+            'redirect_url' => $direct ? null : $data['link'],
+            'direct_pay'   => $direct,
             'initiated_at' => $data['dateInitiated'] ?? null,
         ];
+    }
+
+    /**
+     * Accepts 6XXXXXXXX or 2376XXXXXXXX and returns the 9-digit
+     * Cameroon MSISDN Fapshi expects.
+     */
+    protected function normalizePhone(string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', $phone);
+        if (str_starts_with($digits, '237') && strlen($digits) === 12) {
+            $digits = substr($digits, 3);
+        }
+        return $digits;
     }
 
     /**

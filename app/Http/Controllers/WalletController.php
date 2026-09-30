@@ -71,7 +71,7 @@ class WalletController extends Controller
         try {
             $payment = $this->paymentService->createPayment($user, $amount, $providerName, [
                 'payment_method' => 'mtn_momo',
-                'medium' => 'mobile money',
+                'medium' => 'mtn',
                 'phone' => $request->phone,
                 'user_id' => $user->id,
                 'name' => $user->name,
@@ -93,9 +93,11 @@ class WalletController extends Controller
         }
 
         if ($live) {
-            // Redirect the customer to the Fapshi hosted checkout. The wallet
-            // credits only after backend verification (webhook or the return
-            // status check).
+            // Direct Pay: Fapshi pushes the approval prompt to the
+            // customer's phone — no redirect. A hosted-checkout link is
+            // still honoured if the provider ever returns one. The wallet
+            // credits only after backend verification (webhook / status
+            // check), never on request success alone.
             $checkoutUrl = $payment->provider_response['redirect_url'] ?? null;
 
             if ($checkoutUrl) {
@@ -103,7 +105,7 @@ class WalletController extends Controller
             }
 
             return redirect()->route('wallet.index')
-                ->with('warning', 'Your payment was initiated but no checkout link was returned. Contact support if the problem persists.');
+                ->with('success', 'Payment request sent — approve the MTN MoMo prompt on your phone. Your wallet credits automatically once the payment confirms.');
         }
 
         // Sandbox mode: simulate an instant successful deposit.

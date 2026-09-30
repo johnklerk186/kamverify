@@ -23,10 +23,11 @@ class DepositRequest extends FormRequest
             // Whole XAF only — no decimals, no other currencies.
             'amount' => "required|integer|min:{$min}|max:{$max}",
             'payment_method' => 'required|in:mtn_momo,mock',
-            // Optional — the Fapshi hosted checkout collects the mobile
-            // money number itself. Accepted (and validated) if supplied.
+            // Direct Pay charges this number — required for live deposits,
+            // optional for the sandbox mock.
             'phone' => [
                 'nullable',
+                'required_if:payment_method,mtn_momo',
                 'regex:/^(237)?6\d{8}$/',
             ],
         ];
