@@ -71,7 +71,7 @@ class WalletController extends Controller
         try {
             $payment = $this->paymentService->createPayment($user, $amount, $providerName, [
                 'payment_method' => 'mtn_momo',
-                'medium' => 'mtn',
+                'medium' => 'mobile money',
                 'phone' => $request->phone,
                 'user_id' => $user->id,
                 'name' => $user->name,

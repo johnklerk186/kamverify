@@ -55,7 +55,7 @@ class FapshiPaymentProvider implements PaymentInterface
      *  - direct-pay (default when a phone number is supplied): charges the
      *    customer's MoMo wallet directly — Fapshi pushes the approval
      *    prompt to the phone, no redirect. Requires amount + phone
-     *    (9-digit Cameroon number); medium auto/fixed to 'mtn'.
+     *    (9-digit Cameroon number); medium is 'mobile money' for MTN.
      *  - initiate-pay (fallback, no phone): hosted checkout link the
      *    customer is redirected to. Links expire after 24h.
      *
@@ -78,7 +78,7 @@ class FapshiPaymentProvider implements PaymentInterface
         $body = array_filter([
             'amount'      => (int) round($amount),
             'phone'       => $phone,
-            'medium'      => $direct ? ($metadata['medium'] ?? 'mtn') : null,
+            'medium'      => $direct ? ($metadata['medium'] ?? 'mobile money') : null,
             'name'        => $direct ? ($metadata['name'] ?? null) : null,
             'email'       => $metadata['email'] ?? null,
             'redirectUrl' => $direct ? null : ($metadata['redirect_url'] ?? null),

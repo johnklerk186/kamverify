@@ -214,7 +214,7 @@ class ProductionUpdateTest extends TestCase
                 && $request->hasHeader('apikey', 'test-key')
                 && $request['amount'] === 5000
                 && $request['phone'] === '670000000' // 237 prefix stripped
-                && $request['medium'] === 'mtn'
+                && $request['medium'] === 'mobile money' // Fapshi's label for MTN
                 && $request['externalId'] === 'KV-PAY-TEST'
                 && $request['userId'] === '7'
                 && !isset($request['redirectUrl']); // direct pay never sends it
