@@ -92,3 +92,25 @@
         @apply border-l-4 border-brand-200 bg-brand-50/60 rounded-r-xl px-4 py-3 my-4 text-ink-600;
     }
 }
+
+/* Scroll-reveal — the hidden state is only added by JS once the
+   IntersectionObserver exists, so no-JS browsers and reduced-motion
+   users always see the content normally. */
+.kv-reveal {
+    opacity: 0;
+    transform: translateY(25px);
+    transition: opacity .6s cubic-bezier(.22, 1, .36, 1),
+                transform .6s cubic-bezier(.22, 1, .36, 1);
+    will-change: opacity, transform;
+}
+.kv-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+    .kv-reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}

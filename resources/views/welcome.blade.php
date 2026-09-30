@@ -25,7 +25,7 @@
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 lg:pt-24 lg:pb-28">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div data-reveal>
                 <span class="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/10 px-3.5 py-1.5 text-xs font-semibold text-brand-200">
                     <i class="fas fa-bolt"></i> Pay-per-use · No subscription
                 </span>
@@ -60,7 +60,7 @@
             </div>
 
             {{-- Quick purchase widget --}}
-            <div class="relative">
+            <div class="relative" data-reveal data-reveal-delay="150">
                 <div class="kv-card !shadow-pop p-6 sm:p-7" x-data="quickBuy()">
                     <div class="flex items-center justify-between mb-5">
                         <h2 class="text-lg font-bold text-ink-900">Get a number</h2>
@@ -114,19 +114,19 @@
 <section class="border-b border-ink-200/70 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <dl class="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
-            <div>
+            <div data-reveal>
                 <dt class="text-3xl font-extrabold text-ink-900">{{ $stats['countries'] }}</dt>
                 <dd class="text-sm text-ink-500 mt-1">Countries supported</dd>
             </div>
-            <div>
+            <div data-reveal data-reveal-delay="70">
                 <dt class="text-3xl font-extrabold text-ink-900">{{ $stats['services'] }}</dt>
                 <dd class="text-sm text-ink-500 mt-1">Supported services</dd>
             </div>
-            <div>
+            <div data-reveal data-reveal-delay="140">
                 <dt class="text-3xl font-extrabold text-ink-900">{{ $stats['orders_completed'] }}</dt>
                 <dd class="text-sm text-ink-500 mt-1">Verifications delivered</dd>
             </div>
-            <div>
+            <div data-reveal data-reveal-delay="210">
                 <dt class="text-3xl font-extrabold text-ink-900">{{ $stats['avg_delivery'] }}</dt>
                 <dd class="text-sm text-ink-500 mt-1">Avg. code delivery</dd>
             </div>
@@ -137,14 +137,14 @@
 {{-- ==================== SERVICES ==================== --}}
 <section id="services" class="py-16 lg:py-20 bg-ink-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="text-center max-w-2xl mx-auto mb-12" data-reveal>
             <h2 class="text-3xl font-extrabold text-ink-900">Verify the apps you actually use</h2>
             <p class="mt-3 text-ink-500">Receive SMS codes for the most popular platforms — catalog updates as providers add coverage.</p>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach($services as $service)
                 @php [$icon, $color] = serviceIcon($service->icon); @endphp
-                <div class="kv-card p-5 flex items-center gap-3.5 hover:border-brand-300 transition-colors">
+                <div class="kv-card p-5 flex items-center gap-3.5 hover:border-brand-300 transition-colors" data-reveal data-reveal-delay="{{ min($loop->index * 60, 420) }}">
                     <div class="w-11 h-11 rounded-xl bg-ink-50 flex items-center justify-center shrink-0">
                         <i class="{{ $icon }} text-xl {{ $color }}"></i>
                     </div>
@@ -165,13 +165,13 @@
 {{-- ==================== COUNTRIES ==================== --}}
 <section id="countries" class="py-16 lg:py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="text-center max-w-2xl mx-auto mb-12" data-reveal>
             <h2 class="text-3xl font-extrabold text-ink-900">Numbers from {{ $stats['countries'] }} countries</h2>
             <p class="mt-3 text-ink-500">Local numbers across every region — availability and pricing shown live at checkout.</p>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             @foreach($countries as $country)
-                <div class="kv-card !rounded-xl px-4 py-3.5 flex items-center gap-3">
+                <div class="kv-card !rounded-xl px-4 py-3.5 flex items-center gap-3" data-reveal data-reveal-delay="{{ min($loop->index * 45, 360) }}">
                     <span class="text-2xl leading-none">{{ countryFlag($country->code) }}</span>
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-ink-900 truncate">{{ $country->name }}</p>
@@ -189,7 +189,7 @@
 {{-- ==================== HOW IT WORKS ==================== --}}
 <section id="how-it-works" class="py-16 lg:py-20 bg-ink-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="text-center max-w-2xl mx-auto mb-12" data-reveal>
             <h2 class="text-3xl font-extrabold text-ink-900">How KamVerify works</h2>
             <p class="mt-3 text-ink-500">Four steps from sign-up to a working verification code.</p>
         </div>
@@ -203,7 +203,7 @@
                 ];
             @endphp
             @foreach($steps as $i => $step)
-                <div class="kv-card p-6 relative">
+                <div class="kv-card p-6 relative" data-reveal data-reveal-delay="{{ $i * 90 }}">
                     <span class="absolute top-5 right-5 text-4xl font-extrabold text-ink-100">{{ $i + 1 }}</span>
                     <div class="w-11 h-11 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-4">
                         <i class="fas {{ $step['icon'] }}"></i>
@@ -219,7 +219,7 @@
 {{-- ==================== FEATURES ==================== --}}
 <section class="py-16 lg:py-20 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-12">
+        <div class="text-center max-w-2xl mx-auto mb-12" data-reveal>
             <h2 class="text-3xl font-extrabold text-ink-900">Built for reliable verification</h2>
             <p class="mt-3 text-ink-500">The details that make KamVerify dependable for everyday use.</p>
         </div>
@@ -235,7 +235,7 @@
                 ];
             @endphp
             @foreach($features as $feature)
-                <div class="kv-card p-6">
+                <div class="kv-card p-6" data-reveal data-reveal-delay="{{ min($loop->index * 70, 420) }}">
                     <div class="w-11 h-11 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-4">
                         <i class="fas {{ $feature['icon'] }} text-lg"></i>
                     </div>
@@ -252,7 +252,7 @@
     <div class="absolute inset-0 bg-gradient-to-br from-ink-900 via-ink-900 to-brand-900/40"></div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div data-reveal>
                 <h2 class="text-3xl font-extrabold">Your money is never at risk</h2>
                 <p class="mt-4 text-ink-300 max-w-lg">
                     KamVerify only charges your wallet when a number is actually assigned. If anything goes wrong — no stock, provider failure, expired timer — the refund is automatic.
@@ -270,7 +270,7 @@
                     </div>
                 </div>
             </div>
-            <div class="rounded-2xl bg-white/5 border border-white/10 p-6 sm:p-8">
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-6 sm:p-8" data-reveal data-reveal-delay="150">
                 <h3 class="font-bold text-lg mb-5">What you get with every order</h3>
                 <ul class="space-y-4 text-sm">
                     <li class="flex gap-3"><i class="fas fa-check-circle text-brand-400 mt-0.5"></i><span><strong class="text-white">A dedicated number</strong><span class="text-ink-400"> — exclusive to your activation window.</span></span></li>
@@ -287,33 +287,33 @@
 {{-- ==================== PAYMENT METHODS ==================== --}}
 <section class="py-14 lg:py-16 bg-ink-50 border-y border-ink-200/60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-center max-w-2xl mx-auto mb-10" data-reveal>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-ink-900">Simple ways to pay</h2>
             <p class="mt-3 text-ink-500">Fund your KamVerify wallet with the payment method that works for you.</p>
         </div>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div class="kv-card p-5 text-center">
+            <div class="kv-card p-5 text-center" data-reveal>
                 <div class="w-12 h-12 rounded-xl bg-yellow-400 grid place-items-center mx-auto">
                     <span class="text-xs font-black text-ink-900 tracking-tight">MTN</span>
                 </div>
                 <p class="mt-3 text-sm font-bold text-ink-900">MTN Mobile Money</p>
                 <p class="mt-0.5 text-xs text-emerald-600 font-semibold">Available now</p>
             </div>
-            <div class="kv-card p-5 text-center">
+            <div class="kv-card p-5 text-center" data-reveal data-reveal-delay="70">
                 <div class="w-12 h-12 rounded-xl bg-orange-500 grid place-items-center mx-auto">
                     <i class="fas fa-mobile-screen text-white"></i>
                 </div>
                 <p class="mt-3 text-sm font-bold text-ink-900">Orange Money</p>
                 <p class="mt-0.5 text-xs text-ink-400 font-semibold">Coming soon</p>
             </div>
-            <div class="kv-card p-5 text-center">
+            <div class="kv-card p-5 text-center" data-reveal data-reveal-delay="140">
                 <div class="w-12 h-12 rounded-xl bg-amber-500 grid place-items-center mx-auto">
                     <i class="fab fa-bitcoin text-white text-lg"></i>
                 </div>
                 <p class="mt-3 text-sm font-bold text-ink-900">Bitcoin</p>
                 <p class="mt-0.5 text-xs text-ink-400 font-semibold">Coming soon</p>
             </div>
-            <div class="kv-card p-5 text-center">
+            <div class="kv-card p-5 text-center" data-reveal data-reveal-delay="210">
                 <div class="w-12 h-12 rounded-xl bg-ink-800 grid place-items-center mx-auto">
                     <i class="fas fa-credit-card text-white"></i>
                 </div>
@@ -330,7 +330,7 @@
 {{-- ==================== FAQ ==================== --}}
 <section id="faq" class="py-16 lg:py-20 bg-white">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
+        <div class="text-center mb-12" data-reveal>
             <h2 class="text-3xl font-extrabold text-ink-900">Frequently asked questions</h2>
             <p class="mt-3 text-ink-500">Everything you need to know before your first activation.</p>
         </div>
@@ -346,7 +346,7 @@
                 ];
             @endphp
             @foreach($faqs as $i => $faq)
-                <div class="kv-card overflow-hidden">
+                <div class="kv-card overflow-hidden" data-reveal data-reveal-delay="{{ min($i * 60, 300) }}">
                     <button @click="open = open === {{ $i }} ? -1 : {{ $i }}"
                             class="w-full flex items-center justify-between gap-4 px-5 py-4 text-left">
                         <span class="font-semibold text-ink-900 text-sm sm:text-base">{{ $faq['q'] }}</span>
@@ -364,7 +364,7 @@
 {{-- ==================== FINAL CTA ==================== --}}
 <section class="relative overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-r from-brand-700 to-cyan-800"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center" data-reveal>
         <h2 class="text-3xl font-extrabold text-white">Ready for your first number?</h2>
         <p class="mt-3 text-brand-100 max-w-xl mx-auto">Create a free account, fund your wallet, and get verified in minutes.</p>
         <div class="mt-8">
