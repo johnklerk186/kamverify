@@ -120,15 +120,15 @@
             </div>
             <div>
                 <dt class="text-3xl font-extrabold text-ink-900">{{ $stats['services'] }}</dt>
-                <dd class="text-sm text-ink-500 mt-1">Services available</dd>
+                <dd class="text-sm text-ink-500 mt-1">Supported services</dd>
             </div>
             <div>
                 <dt class="text-3xl font-extrabold text-ink-900">{{ $stats['orders_completed'] }}</dt>
                 <dd class="text-sm text-ink-500 mt-1">Verifications delivered</dd>
             </div>
             <div>
-                <dt class="text-3xl font-extrabold text-ink-900">{{ $stats['customers'] }}</dt>
-                <dd class="text-sm text-ink-500 mt-1">Registered customers</dd>
+                <dt class="text-3xl font-extrabold text-ink-900">{{ $stats['avg_delivery'] }}</dt>
+                <dd class="text-sm text-ink-500 mt-1">Avg. code delivery</dd>
             </div>
         </dl>
     </div>

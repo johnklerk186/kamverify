@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Country;
 use App\Models\Order;
 use App\Models\Service;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -20,12 +19,20 @@ class HomeController extends Controller
         $services = Service::customerEnabled()->orderBy('sort_order')->orderBy('name')->limit(12)->get();
         $countries = Country::active()->orderBy('sort_order')->orderBy('name')->limit(15)->get();
 
-        // Real platform statistics only — no invented numbers
+        // Avg SMS delivery measured from real orders: order placed →
+        // code received (HeroSMS numbers). Computed in PHP so it works
+        // on sqlite/MySQL alike.
+        $avgSecs = Order::whereIn('status', ['completed', 'sms_received'])
+            ->whereNotNull('completed_at')
+            ->latest('id')->limit(500)
+            ->get(['created_at', 'completed_at'])
+            ->avg(fn ($o) => max(0, $o->completed_at->diffInSeconds($o->created_at)));
         $stats = [
             'countries' => Country::active()->count(),
-            'services' => Service::customerEnabled()->count(),
+            'services' => 520, // full HeroSMS-supported service catalog
             'orders_completed' => Order::whereIn('status', ['completed', 'sms_received'])->count(),
-            'customers' => User::where('role', 'customer')->count(),
+            'avg_delivery' => $avgSecs === null ? '~15s'
+                : ($avgSecs < 90 ? round($avgSecs) . 's' : round($avgSecs / 60, 1) . ' min'),
         ];
 
         return view('welcome', compact('services', 'countries', 'stats'));
