@@ -67,12 +67,6 @@
                         @endforeach
                     </select>
                 </div>
-                @if(($services->firstWhere('slug', 'facebook')?->id ?? 0) === (int) request('service'))
-                    <label class="flex items-start gap-2.5 text-xs text-ink-700">
-                        <input type="checkbox" name="vpn_acknowledged" value="1" class="mt-0.5" required>
-                        <span>I understand that I need a USA VPN connected on the same phone used for Facebook verification.</span>
-                    </label>
-                @endif
                 <button type="submit" class="kv-btn-primary w-full"><i class="fas fa-bolt"></i> Purchase number</button>
             </form>
         </div>
@@ -192,37 +186,6 @@
                             <p class="text-sm text-ink-800">Use the assigned number in TikTok's normal verification process, then wait for the SMS code here. KamVerify delivers the SMS — TikTok decides whether to accept the number.</p>
                         </div>
 
-                        {{-- IMPORTANT: Facebook / Meta VPN notice — must be acknowledged before purchase --}}
-                        <div x-show="serviceSlug() === 'facebook' && !vpnAck" x-cloak
-                             class="mb-4 rounded-xl border-2 border-amber-400 bg-amber-50 px-4 py-4 sm:px-5">
-                            <div class="flex items-start gap-3">
-                                <div class="w-9 h-9 rounded-xl bg-amber-400/30 grid place-items-center shrink-0">
-                                    <i class="fas fa-triangle-exclamation text-amber-600"></i>
-                                </div>
-                                <div class="min-w-0">
-                                    <p class="font-extrabold text-amber-900 text-sm uppercase tracking-wide">Important — Facebook Verification</p>
-                                    <p class="mt-1.5 text-sm text-amber-900 leading-relaxed">
-                                        When using KamVerify for Facebook verification, you must have a <strong>VPN connected to a USA location</strong> on the same phone you are using to request the Facebook verification code.
-                                    </p>
-                                    <p class="mt-1.5 text-sm text-amber-900 leading-relaxed">
-                                        Make sure the VPN is already connected before you start the Facebook verification process and keep it connected while requesting the code. If you request the Facebook code without the required VPN connection, you may not receive the verification code.
-                                    </p>
-                                    <label class="mt-3 flex items-start gap-2.5 cursor-pointer">
-                                        <input type="checkbox" x-model="vpnAgreed" @change="vpnError = false"
-                                               class="mt-0.5 w-4 h-4 rounded border-amber-400 text-brand-600 focus:ring-brand-500">
-                                        <span class="text-sm font-semibold text-amber-900">I understand that I need to use a USA VPN on the same phone I am using to request my Facebook verification code.</span>
-                                    </label>
-                                    <p x-show="vpnError" x-cloak class="mt-2 text-xs font-semibold text-red-600">
-                                        Please confirm that you understand the Facebook VPN requirement before continuing.
-                                    </p>
-                                    <button type="button" @click="acknowledgeVpn()"
-                                            class="mt-3 inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold px-4 py-2.5 transition-colors">
-                                        <i class="fas fa-check"></i> I Understand — Continue
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
                         {{-- Loading --}}
                         <div x-show="quoteLoading" class="space-y-3">
                             <div class="h-4 w-40 rounded bg-ink-100 animate-pulse"></div>
@@ -317,16 +280,11 @@
                         @csrf
                         <input type="hidden" name="service_id" :value="serviceId">
                         <input type="hidden" name="country_id" :value="countryId">
-                        <input type="hidden" name="vpn_acknowledged" :value="vpnAck ? '1' : ''">
-                        <button type="submit" :disabled="!quote?.available || !quote?.sufficient || purchasing || (serviceSlug() === 'facebook' && !vpnAck)"
+                        <button type="submit" :disabled="!quote?.available || !quote?.sufficient || purchasing"
                                 class="kv-btn-primary w-full h-11">
-                            <span x-show="!purchasing && !(serviceSlug() === 'facebook' && !vpnAck)"><i class="fas fa-bolt"></i> Purchase number</span>
-                            <span x-show="serviceSlug() === 'facebook' && !vpnAck"><i class="fas fa-lock"></i> Confirm VPN notice above</span>
+                            <span x-show="!purchasing"><i class="fas fa-bolt"></i> Purchase number</span>
                             <span x-show="purchasing"><i class="fas fa-circle-notch fa-spin"></i> Purchasing…</span>
                         </button>
-                        <p x-show="vpnError" x-cloak class="mt-2 text-xs font-semibold text-red-600 text-center">
-                            Please confirm that you understand the Facebook VPN requirement before continuing.
-                        </p>
                     </form>
                 </div>
 
@@ -386,10 +344,6 @@
                 quote: null,
                 quoteLoading: false,
                 purchasing: false,
-                vpnAgreed: false,
-                vpnAck: false,
-                vpnError: false,
-
                 // Service instruction notices — shown on service pick,
                 // before country selection. Add WhatsApp/TikTok entries
                 // here when ready; each is remembered per-service via
@@ -465,23 +419,12 @@
                 serviceSlug() {
                     return (config.slugs && config.slugs[this.serviceId]) || '';
                 },
-                acknowledgeVpn() {
-                    if (!this.vpnAgreed) { this.vpnError = true; return; }
-                    this.vpnAck = true;
-                    this.vpnError = false;
-                },
                 onSubmit(event) {
-                    if (this.serviceSlug() === 'facebook' && !this.vpnAck) {
-                        event.preventDefault();
-                        this.vpnError = true;
-                        return;
-                    }
                     this.purchasing = true;
                 },
                 selectService(id, name) {
                     this.serviceId = id; this.serviceName = name; this.quote = null;
                     this.countryId = null; this.countryName = null;
-                    this.vpnAck = false; this.vpnAgreed = false; this.vpnError = false;
                     this.gateServiceNotice();
                 },
                 // Show the service's instruction modal first if one is

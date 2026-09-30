@@ -18,19 +18,7 @@ class StoreOrderRequest extends FormRequest
         return [
             'country_id' => 'required|exists:countries,id',
             'service_id' => 'required|exists:services,id',
-            // Facebook/Meta orders require the VPN notice acknowledgment.
-            'vpn_acknowledged' => 'nullable',
         ];
-    }
-
-    public function withValidator($validator): void
-    {
-        $validator->after(function ($v) {
-            $slug = \App\Models\Service::where('id', $this->service_id)->value('slug');
-            if (in_array($slug, ['facebook', 'meta'], true) && !$this->boolean('vpn_acknowledged')) {
-                $v->errors()->add('vpn_acknowledged', 'Please confirm that you understand the Facebook VPN requirement before continuing.');
-            }
-        });
     }
 
     public function messages(): array

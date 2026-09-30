@@ -249,48 +249,34 @@ class ProductionUpdateTest extends TestCase
 
     // ---------- Facebook VPN notice ----------
 
-    public function test_facebook_service_requires_vpn_acknowledgment(): void
+    public function test_facebook_purchase_works_without_extra_gate(): void
     {
         config(['services.herosms.mode' => 'mock']);
         [$provider, $country, $service] = $this->seedMarketplace();
         $service->update(['slug' => 'facebook']);
 
+        // The instruction modal is the sole notice now — no second
+        // checkbox gate blocks the purchase itself.
         $user = $this->customer();
         $this->actingAs($user)->post('/orders', [
             'service_id' => $service->id,
             'country_id' => $country->id,
-        ]);
-
-        $this->assertDatabaseCount('orders', 0); // blocked without acknowledgment
-    }
-
-    public function test_facebook_purchase_succeeds_with_vpn_acknowledgment(): void
-    {
-        config(['services.herosms.mode' => 'mock']);
-        [$provider, $country, $service] = $this->seedMarketplace();
-        $service->update(['slug' => 'facebook']);
-
-        $user = $this->customer();
-        $this->actingAs($user)->post('/orders', [
-            'service_id' => $service->id,
-            'country_id' => $country->id,
-            'vpn_acknowledged' => '1',
         ]);
 
         $this->assertDatabaseCount('orders', 1);
     }
 
-    public function test_vpn_notice_renders_only_in_buy_page_markup(): void
+    public function test_old_vpn_acknowledgment_panel_removed(): void
     {
         [$provider, $country, $service] = $this->seedMarketplace();
         Service::create(['name' => 'Facebook', 'slug' => 'facebook', 'is_active' => true, 'customer_enabled' => true]);
 
-        // The notice markup exists on the page but is gated to facebook via JS
         $this->actingAs($this->customer())
             ->get('/orders/create')
             ->assertOk()
-            ->assertSee('Important — Facebook Verification', false)
-            ->assertSee('vpnAck', false);
+            ->assertDontSee('Important — Facebook Verification', false)
+            ->assertDontSee('vpn_acknowledged', false)
+            ->assertDontSee('vpnAck', false);
     }
 
     public function test_service_instruction_modal_configured_for_facebook_and_telegram_only(): void
