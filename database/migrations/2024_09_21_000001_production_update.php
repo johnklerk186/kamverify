@@ -19,11 +19,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->text('endpoint');
+            // MySQL cannot put a unique index on a TEXT column — the
+            // sha256 hash is fixed-length and enforces the same
+            // one-subscription-per-endpoint-per-user rule.
+            $table->string('endpoint_hash', 64);
             $table->string('public_key')->nullable();
             $table->string('auth_token')->nullable();
             $table->string('content_encoding', 20)->default('aesgcm');
             $table->timestamps();
-            $table->unique(['user_id', 'endpoint'], 'push_sub_user_endpoint_unique');
+            $table->unique(['user_id', 'endpoint_hash'], 'push_sub_user_endpoint_unique');
         });
 
         // Enable only the four launch services for customers.

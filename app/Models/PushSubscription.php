@@ -10,10 +10,18 @@ class PushSubscription extends Model
     protected $fillable = [
         'user_id',
         'endpoint',
+        'endpoint_hash',
         'public_key',
         'auth_token',
         'content_encoding',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (PushSubscription $sub) {
+            $sub->endpoint_hash = hash('sha256', (string) $sub->endpoint);
+        });
+    }
 
     public function user(): BelongsTo
     {
