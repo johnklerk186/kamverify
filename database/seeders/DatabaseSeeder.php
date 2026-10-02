@@ -14,36 +14,42 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create admin user. In production the password comes from
-        // ADMIN_SEED_PASSWORD — if unset, a random one is used so a
-        // seeded deploy never ships a publicly-known admin login.
+        // Seed passwords come from the environment. In production there is
+        // no fallback — a missing variable fails loudly rather than creating
+        // an account with a guessable or unknown password.
         $adminPassword = env('ADMIN_SEED_PASSWORD');
+        $customerPassword = env('CUSTOMER_SEED_PASSWORD');
+
+        if (app()->environment('production') && (!$adminPassword || !$customerPassword)) {
+            throw new \RuntimeException(
+                'Set ADMIN_SEED_PASSWORD and CUSTOMER_SEED_PASSWORD in the environment before seeding in production.'
+            );
+        }
+
+        // Create admin user
         $admin = User::firstOrCreate(
             ['email' => 'admin@kamverify.com'],
             [
                 'name' => 'Admin',
-                'password' => bcrypt($adminPassword
-                    ?? (app()->environment('production') ? \Illuminate\Support\Str::random(24) : 'password')),
+                'password' => bcrypt($adminPassword ?? 'password'),
                 'role' => 'admin',
                 'is_active' => true,
             ]
         );
 
-        // An explicitly configured ADMIN_SEED_PASSWORD is kept in sync so
-        // re-running db:seed (e.g. after fixing deployment env) resets the
-        // admin login deterministically instead of leaving a random one.
+        // Explicitly configured passwords are kept in sync so re-running
+        // db:seed (e.g. after fixing deployment env) resets the login
+        // deterministically instead of leaving a stale one.
         if ($adminPassword) {
             $admin->forceFill(['password' => bcrypt($adminPassword)])->save();
         }
 
         // Create test customer user
-        $customerPassword = env('CUSTOMER_SEED_PASSWORD');
         $customer = User::firstOrCreate(
             ['email' => 'customer@kamverify.com'],
             [
                 'name' => 'Test Customer',
-                'password' => bcrypt($customerPassword
-                    ?? (app()->environment('production') ? \Illuminate\Support\Str::random(24) : 'password')),
+                'password' => bcrypt($customerPassword ?? 'password'),
                 'role' => 'customer',
                 'is_active' => true,
             ]

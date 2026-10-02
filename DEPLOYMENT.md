@@ -99,9 +99,19 @@ php artisan migrate --force
 
 ### 6. Seed the Database
 
+Set the seeded account passwords first — `db:seed` aborts in production
+if they are missing:
+
+```bash
+ADMIN_SEED_PASSWORD=...
+CUSTOMER_SEED_PASSWORD=...
+```
+
 ```bash
 php artisan db:seed --force
 ```
+
+Admin login: `admin@kamverify.com` + `ADMIN_SEED_PASSWORD` at `/admin/login`.
 
 ### 7. Set Permissions
 
