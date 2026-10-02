@@ -29,9 +29,12 @@ class WalletController extends Controller
      */
     protected function livePaymentsEnabled(): bool
     {
-        return !filter_var(env('FAPSHI_USE_MOCK', true), FILTER_VALIDATE_BOOL)
-            && !empty(env('FAPSHI_API_KEY'))
-            && !empty(env('FAPSHI_API_USER'));
+        // Read via config(), not env(): env() returns null once the
+        // production config is cached (bootstrap/cache/config.php),
+        // which would silently flip live deposits back to sandbox.
+        return !filter_var(config('services.fapshi.use_mock', true), FILTER_VALIDATE_BOOL)
+            && !empty(config('services.fapshi.api_key'))
+            && !empty(config('services.fapshi.api_user'));
     }
 
     public function index()
