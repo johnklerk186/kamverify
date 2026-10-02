@@ -14,11 +14,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Seed passwords come from the environment. In production there is
-        // no fallback — a missing variable fails loudly rather than creating
-        // an account with a guessable or unknown password.
-        $adminPassword = env('ADMIN_SEED_PASSWORD');
-        $customerPassword = env('CUSTOMER_SEED_PASSWORD');
+        // Seed passwords come from the environment via config (env() alone
+        // returns null once the production config cache exists). In
+        // production there is no fallback — a missing variable fails loudly
+        // rather than creating an account with a guessable password.
+        $adminPassword = config('kamverify.seed_passwords.admin');
+        $customerPassword = config('kamverify.seed_passwords.customer');
 
         if (app()->environment('production') && (!$adminPassword || !$customerPassword)) {
             throw new \RuntimeException(
