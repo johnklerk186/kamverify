@@ -17,28 +17,41 @@ class DatabaseSeeder extends Seeder
         // Create admin user. In production the password comes from
         // ADMIN_SEED_PASSWORD — if unset, a random one is used so a
         // seeded deploy never ships a publicly-known admin login.
+        $adminPassword = env('ADMIN_SEED_PASSWORD');
         $admin = User::firstOrCreate(
             ['email' => 'admin@kamverify.com'],
             [
                 'name' => 'Admin',
-                'password' => bcrypt(env('ADMIN_SEED_PASSWORD',
-                    app()->environment('production') ? \Illuminate\Support\Str::random(24) : 'password')),
+                'password' => bcrypt($adminPassword
+                    ?? (app()->environment('production') ? \Illuminate\Support\Str::random(24) : 'password')),
                 'role' => 'admin',
                 'is_active' => true,
             ]
         );
 
+        // An explicitly configured ADMIN_SEED_PASSWORD is kept in sync so
+        // re-running db:seed (e.g. after fixing deployment env) resets the
+        // admin login deterministically instead of leaving a random one.
+        if ($adminPassword) {
+            $admin->forceFill(['password' => bcrypt($adminPassword)])->save();
+        }
+
         // Create test customer user
+        $customerPassword = env('CUSTOMER_SEED_PASSWORD');
         $customer = User::firstOrCreate(
             ['email' => 'customer@kamverify.com'],
             [
                 'name' => 'Test Customer',
-                'password' => bcrypt(env('CUSTOMER_SEED_PASSWORD',
-                    app()->environment('production') ? \Illuminate\Support\Str::random(24) : 'password')),
+                'password' => bcrypt($customerPassword
+                    ?? (app()->environment('production') ? \Illuminate\Support\Str::random(24) : 'password')),
                 'role' => 'customer',
                 'is_active' => true,
             ]
         );
+
+        if ($customerPassword) {
+            $customer->forceFill(['password' => bcrypt($customerPassword)])->save();
+        }
 
         // Generate referral code for customer
         $customer->generateReferralCode();
