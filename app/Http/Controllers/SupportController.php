@@ -49,6 +49,20 @@ class SupportController extends Controller
                 'is_admin' => false,
             ]);
 
+            $user = Auth::user();
+            app(\App\Services\AdminMailer::class)->send(
+                'ticket.created:' . $ticket->id,
+                'KamVerify — New Support Ticket',
+                'A customer opened a support ticket',
+                [
+                    'Customer' => $user->name . ' <' . $user->email . '>',
+                    'Ticket' => $ticket->ticket_id,
+                    'Category' => ucfirst($ticket->category),
+                    'Subject' => $ticket->subject,
+                    'Message' => \Illuminate\Support\Str::limit($request->message, 200),
+                ]
+            );
+
             return redirect()->route('support.show', $ticket->id)
                 ->with('success', 'Support ticket created successfully.');
 
@@ -75,12 +89,27 @@ class SupportController extends Controller
         ]);
 
         try {
-            SupportMessage::create([
+            $replyMessage = SupportMessage::create([
                 'ticket_id' => $ticket->id,
                 'user_id' => Auth::id(),
                 'message' => $request->message,
                 'is_admin' => Auth::user()->isAdmin(),
             ]);
+
+            // Customer replies need admin attention — admin's own replies don't.
+            if (!$replyMessage->is_admin) {
+                app(\App\Services\AdminMailer::class)->send(
+                    'ticket.reply:' . $replyMessage->id,
+                    'KamVerify — New Support Ticket Reply',
+                    'A customer replied to a support ticket',
+                    [
+                        'Customer' => Auth::user()->name . ' <' . Auth::user()->email . '>',
+                        'Ticket' => $ticket->ticket_id,
+                        'Subject' => $ticket->subject,
+                        'Message' => \Illuminate\Support\Str::limit($request->message, 200),
+                    ]
+                );
+            }
 
             // Update ticket status if it was closed
             if ($ticket->status === 'closed') {

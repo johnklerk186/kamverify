@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\Provider;
 use App\Notifications\OrderCreated;
+use App\Services\AdminMailer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -27,7 +28,7 @@ class OrderService
 
     public function createOrder(User $user, Country $country, Service $service, Provider $provider, float $providerCost): Order
     {
-        return DB::transaction(function () use ($user, $country, $service, $provider, $providerCost) {
+        $order = DB::transaction(function () use ($user, $country, $service, $provider, $providerCost) {
             $sellingPrice = $this->pricingService->calculateSellingPrice($providerCost, $country, $service);
             $profit = $this->pricingService->calculateProfit($sellingPrice, $providerCost);
 
@@ -70,6 +71,21 @@ class OrderService
 
             return $order;
         });
+
+        app(AdminMailer::class)->send(
+            'order.created:' . $order->id,
+            'KamVerify — New Number Purchase',
+            'A customer purchased a number',
+            [
+                'Customer' => $user->name . ' <' . $user->email . '>',
+                'Order' => $order->order_id,
+                'Service' => $service->name,
+                'Country' => $country->name,
+                'Price' => xaf($order->selling_price),
+            ]
+        );
+
+        return $order;
     }
 
     public function assignNumber(Order $order, string $phoneNumber, string $providerActivationId, ?float $actualCost = null): Order
@@ -116,6 +132,19 @@ class OrderService
             'phone_number' => $phoneNumber,
             'provider_activation_id' => $providerActivationId,
         ]);
+
+        app(AdminMailer::class)->send(
+            'order.assigned:' . $order->id,
+            'KamVerify — Number Assigned',
+            'A provider assigned a number to an order',
+            [
+                'Customer' => $order->user->name . ' <' . $order->user->email . '>',
+                'Order' => $order->order_id,
+                'Service' => $order->service->name,
+                'Country' => $order->country->name,
+                'Number' => $phoneNumber,
+            ]
+        );
 
         return $order;
     }
@@ -165,6 +194,34 @@ class OrderService
                 $notice[0], $notice[1], $notice[2],
                 url('/orders/' . $order->id), 'View Order'
             ));
+        }
+
+        // Admin-side lifecycle emails — the same funnel, same exactly-once
+        // guarantee. 'completed' means the SMS/code arrived (no OTP is ever
+        // included). Dedupe keys make redeliveries impossible.
+        $adminSubject = match ($status) {
+            'completed' => 'KamVerify — Order Completed (SMS received)',
+            'cancelled' => 'KamVerify — Order Cancelled',
+            'expired'   => 'KamVerify — Order Expired',
+            'failed'    => 'KamVerify — Order Failed',
+            default     => null,
+        };
+
+        if ($adminSubject) {
+            app(AdminMailer::class)->send(
+                'order.' . $status . ':' . $order->id,
+                $adminSubject,
+                'Order ' . $status . ($status === 'completed' ? ' — verification code received' : ''),
+                array_filter([
+                    'Customer' => $order->user->name . ' <' . $order->user->email . '>',
+                    'Order' => $order->order_id,
+                    'Service' => $order->service->name ?? null,
+                    'Country' => $order->country->name ?? null,
+                    'Number' => $order->phone_number,
+                    'Price' => xaf($order->selling_price),
+                    'Refunded' => $order->refund_amount > 0 ? xaf($order->refund_amount) : null,
+                ], fn ($v) => $v !== null)
+            );
         }
 
         Log::info('Order status updated', [
@@ -249,6 +306,18 @@ class OrderService
                 'View Wallet',
                 'fa-rotate-left'
             ));
+
+            app(AdminMailer::class)->send(
+                'order.refunded:' . $order->id,
+                'KamVerify — Refund Processed',
+                'A customer wallet refund was issued',
+                [
+                    'Customer' => $order->user->name . ' <' . $order->user->email . '>',
+                    'Amount' => xaf($refundAmount),
+                    'Order' => $order->order_id,
+                    'Reason' => 'Order cancellation or expiration',
+                ]
+            );
 
             Log::info('Order refunded successfully', [
                 'order_id' => $order->order_id,

@@ -80,6 +80,19 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Admin alert — dedupe key per user makes repeat submissions safe.
+        app(\App\Services\AdminMailer::class)->send(
+            'user.registered:' . $user->id,
+            'KamVerify — New Customer Registration',
+            'A new customer registered',
+            array_filter([
+                'Name' => $user->name,
+                'Email' => $user->email,
+                'Registered' => $user->created_at?->toDayDateTimeString() ?? now()->toDayDateTimeString(),
+                'Referred by' => $user->referred_by ? 'Yes (referral code used)' : null,
+            ], fn ($v) => $v !== null)
+        );
+
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false));

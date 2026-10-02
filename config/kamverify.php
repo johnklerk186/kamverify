@@ -19,4 +19,11 @@ return [
         'customer' => env('CUSTOMER_SEED_PASSWORD'),
     ],
 
+    /*
+    | Inbox that receives admin activity emails (deposits, orders,
+    | refunds, support tickets, registrations). Unset = disabled.
+    */
+
+    'admin_notification_email' => env('ADMIN_NOTIFICATION_EMAIL'),
+
 ];

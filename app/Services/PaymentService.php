@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\KamVerifyNotification;
 use App\Notifications\DepositSuccessful;
+use App\Services\AdminMailer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -91,13 +92,13 @@ class PaymentService
 
     public function processSuccessfulPayment(Payment $payment): void
     {
-        DB::transaction(function () use ($payment) {
+        $credited = DB::transaction(function () use ($payment) {
             // Re-fetch under a row lock — concurrent webhooks/callbacks
             // must not both pass the completed check and double-credit.
             $payment = Payment::lockForUpdate()->findOrFail($payment->id);
 
             if ($payment->status === 'completed') {
-                return; // Already processed (idempotent)
+                return false; // Already processed (idempotent)
             }
 
             if (in_array($payment->status, ['failed', 'cancelled', 'expired', 'refunded'], true)) {
@@ -107,7 +108,7 @@ class PaymentService
                     'payment_id' => $payment->payment_id,
                     'status' => $payment->status,
                 ]);
-                return;
+                return false;
             }
 
             // Credit wallet
@@ -138,19 +139,35 @@ class PaymentService
                 'user_id' => $payment->user_id,
                 'amount' => $payment->amount,
             ]);
+
+            return true;
         });
+
+        if ($credited) {
+            app(AdminMailer::class)->send(
+                'deposit.completed:' . $payment->id,
+                'KamVerify — New Deposit Received',
+                'Deposit confirmed & wallet credited',
+                [
+                    'Customer' => $payment->user->name . ' <' . $payment->user->email . '>',
+                    'Amount' => xaf($payment->amount),
+                    'Reference' => $payment->payment_id,
+                    'Method' => $this->paymentMethodLabel($payment),
+                ]
+            );
+        }
     }
 
     public function processFailedPayment(Payment $payment, string $reason = null): void
     {
-        DB::transaction(function () use ($payment, $reason) {
+        $marked = DB::transaction(function () use ($payment, $reason) {
             $payment = Payment::lockForUpdate()->findOrFail($payment->id);
 
             if ($payment->status === 'failed') {
-                return; // idempotent
+                return false; // idempotent
             }
             if ($payment->status === 'completed') {
-                return; // never un-complete a credited payment
+                return false; // never un-complete a credited payment
             }
 
             $payment->update([
@@ -166,7 +183,24 @@ class PaymentService
                 'Try Again',
                 'fa-wallet'
             ));
+
+            return true;
         });
+
+        if ($marked) {
+            app(AdminMailer::class)->send(
+                'deposit.failed:' . $payment->id,
+                'KamVerify — Deposit Failed',
+                'A deposit failed at the payment provider',
+                [
+                    'Customer' => $payment->user->name . ' <' . $payment->user->email . '>',
+                    'Amount' => xaf($payment->amount),
+                    'Reference' => $payment->payment_id,
+                    'Method' => $this->paymentMethodLabel($payment),
+                    'Reason' => $reason ?? 'Unknown',
+                ]
+            );
+        }
 
         Log::info('Payment failed', [
             'payment_id' => $payment->payment_id,
@@ -195,11 +229,11 @@ class PaymentService
 
     protected function terminalTransition(Payment $payment, string $status, string $title, string $message): void
     {
-        DB::transaction(function () use ($payment, $status, $title, $message) {
+        $transitioned = DB::transaction(function () use ($payment, $status, $title, $message) {
             $payment = Payment::lockForUpdate()->findOrFail($payment->id);
 
             if (in_array($payment->status, ['completed', $status], true)) {
-                return; // credited payments never downgrade; idempotent
+                return false; // credited payments never downgrade; idempotent
             }
 
             $payment->update(['status' => $status]);
@@ -212,7 +246,23 @@ class PaymentService
                 'Deposit Again',
                 'fa-wallet'
             ));
+
+            return true;
         });
+
+        if ($transitioned) {
+            app(AdminMailer::class)->send(
+                'deposit.' . $status . ':' . $payment->id,
+                'KamVerify — Deposit ' . ucfirst($status),
+                'A deposit was ' . $status,
+                [
+                    'Customer' => $payment->user->name . ' <' . $payment->user->email . '>',
+                    'Amount' => xaf($payment->amount),
+                    'Reference' => $payment->payment_id,
+                    'Method' => $this->paymentMethodLabel($payment),
+                ]
+            );
+        }
     }
 
     /**
@@ -302,6 +352,19 @@ class PaymentService
                 ['payment_id' => $payment->payment_id]
             );
         }
+
+        app(AdminMailer::class)->send(
+            'payment.refunded:' . $payment->id,
+            'KamVerify — Refund Processed',
+            'A payment refund was processed',
+            [
+                'Customer' => $payment->user->name . ' <' . $payment->user->email . '>',
+                'Amount' => xaf($amount ?? $payment->amount),
+                'Reference' => $payment->payment_id,
+                'Method' => $this->paymentMethodLabel($payment),
+                'Wallet debited' => $wasCompleted ? 'Yes' : 'No (deposit never credited)',
+            ]
+        );
 
         Log::info('Payment refunded', [
             'payment_id' => $payment->payment_id,
