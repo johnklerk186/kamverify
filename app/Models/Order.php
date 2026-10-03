@@ -26,6 +26,8 @@ class Order extends Model
         'completed_at',
         'refund_amount',
         'provider_response',
+        'provider_refund_status',
+        'cancellation_reason',
     ];
 
     protected $casts = [

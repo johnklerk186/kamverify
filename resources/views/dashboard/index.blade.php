@@ -13,7 +13,7 @@
                             {{ xaf($wallet->balance) }}
                         </p>
                         <p class="mt-1 text-xs text-ink-400">
-                            {{ xaf($wallet->total_deposited) }} deposited · {{ xaf($wallet->total_withdrawn) }} spent
+                            {{ xaf($wallet->total_deposited) }} deposited · {{ xaf($orderStats['total_spent'] ?? 0) }} spent
                         </p>
                     </div>
                     <div class="flex gap-3">

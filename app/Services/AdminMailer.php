@@ -46,7 +46,11 @@ class AdminMailer
                 return; // already sent for this event instance
             }
 
-            Mail::to($to)->queue(new AdminActivityMail($subject, $heading, $fields, $note));
+            // afterCommit: when called inside a DB transaction (order
+            // create/refund/status transitions), the queued mail must
+            // not fire before the state it describes is durable.
+            Mail::to($to)->queue(new AdminActivityMail($subject, $heading, $fields, $note))
+                ->afterCommit();
         } catch (\Throwable $e) {
             Log::warning('Admin notification email failed', [
                 'dedupe_key' => $dedupeKey,

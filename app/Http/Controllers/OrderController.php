@@ -129,10 +129,19 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        // Auto-expire orders whose window has passed
-        if ($order->isExpired() && in_array($order->status, ['number_assigned', 'waiting_for_sms', 'pending', 'processing'])) {
+        // Auto-expire orders whose window has passed. Orders that hold a
+        // provider activation MUST go through ExpireOrderJob — it releases
+        // the activation at HeroSMS (or ingests a late OTP) before the
+        // local refund. Calling expireOrder directly here would refund the
+        // customer while the provider still holds the activation cost.
+        if ($order->isExpired()) {
             try {
-                $this->orderService->expireOrder($order);
+                if (in_array($order->status, ['number_assigned', 'waiting_for_sms'])) {
+                    \App\Jobs\ExpireOrderJob::dispatchSync($order);
+                } elseif (in_array($order->status, ['pending', 'processing'])) {
+                    // No provider activation purchased — nothing to release.
+                    $this->orderService->expireOrder($order, 'expired_no_sms', 'none');
+                }
                 $order->refresh();
             } catch (\Exception $e) {
                 // already handled by background job; ignore
@@ -238,7 +247,7 @@ class OrderController extends Controller
             } catch (\Exception $e) {
                 // Provider purchase failed — wind the order back and refund
                 // so funds are never stuck on a dead activation.
-                $this->orderService->cancelOrder($order, true, force: true);
+                $this->orderService->cancelOrder($order, true, true, 'provider_purchase_failed', 'none');
 
                 $user->notify(new \App\Notifications\KamVerifyNotification(
                     'order_failed',
@@ -371,18 +380,23 @@ class OrderController extends Controller
                     'Cancellation accepted — your refund will be processed automatically within a few minutes unless a code arrives first.');
             }
 
-            $message = match ($e->errorCode) {
-                'OTP_RECEIVED', 'NEW_OTP_RECEIVED' => 'This number already received a code — the order can no longer be cancelled.',
-                'FINISHED', 'CANCELED', 'REFUNDED' => 'This activation is already finished at the provider.',
-                default => 'The provider declined cancellation for this number. Please contact support if you need help.',
-            };
-            return back()->with('error', $message);
+            if (in_array($e->errorCode, ['FINISHED', 'CANCELED', 'REFUNDED'], true)) {
+                // Provider already ended the activation — the cost is not
+                // held anymore, so resolving locally with a refund is safe.
+                $providerOutcome = 'provider_resolved';
+            } else {
+                $message = match ($e->errorCode) {
+                    'OTP_RECEIVED', 'NEW_OTP_RECEIVED' => 'This number already received a code — the order can no longer be cancelled.',
+                    default => 'The provider declined cancellation for this number. Please contact support if you need help.',
+                };
+                return back()->with('error', $message);
+            }
         } catch (\Exception $e) {
             return back()->with('error', 'The provider declined cancellation for this number. Please contact support if you need help.');
         }
 
         try {
-            $this->orderService->cancelOrder($order, true);
+            $this->orderService->cancelOrder($order, true, false, 'customer_cancel', $providerOutcome ?? 'released');
 
             return redirect()->route('orders.index')
                 ->with('success', 'Order cancelled and refunded to your wallet.');

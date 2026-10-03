@@ -68,12 +68,44 @@ class OrderController extends Controller
         }
 
         try {
+            $orderService = app(\App\Services\OrderService::class);
+
+            // An active order may hold a paid provider activation — try to
+            // release it first so KamVerify isn't charged for a number the
+            // customer was refunded for. If the provider reports a code was
+            // received, the order is effectively delivered: refuse.
+            $providerOutcome = 'none';
+            if ($order->provider_activation_id && $order->isActive()) {
+                try {
+                    $provider = app(\App\Services\ProviderService::class)
+                        ->getProviderForModel($order->provider);
+                    $provider->cancelActivation($order->provider_activation_id);
+                    $providerOutcome = 'released';
+                } catch (\App\Exceptions\HeroSmsException $e) {
+                    if (in_array($e->errorCode, ['OTP_RECEIVED', 'NEW_OTP_RECEIVED'], true)) {
+                        return back()->with('error',
+                            'Provider reports a code was already received — this order is delivered, not refundable.');
+                    }
+                    // FINISHED/CANCELED/REFUNDED or other refusal — the
+                    // provider side is settled one way or the other.
+                    $providerOutcome = in_array($e->errorCode, ['FINISHED', 'CANCELED', 'REFUNDED'], true)
+                        ? 'provider_resolved' : 'cancel_rejected';
+                } catch (\Throwable $e) {
+                    $providerOutcome = 'provider_unreachable';
+                }
+            } elseif (in_array($order->status, ['completed', 'sms_received'], true)) {
+                $providerOutcome = 'consumed';
+            }
+
             if ($target === 'refunded') {
                 // refundOrder is idempotent + row-locked — safe to call
                 // even if a refund was partially processed before.
-                app(\App\Services\OrderService::class)->refundOrder($order);
+                $orderService->refundOrder($order, null, 'admin_override', $providerOutcome);
             } else {
-                app(\App\Services\OrderService::class)->updateStatus($order, $target, force: true);
+                // failed/cancelled — wind the order down AND refund; a
+                // cancelled order must never silently keep the money.
+                $orderService->updateStatus($order, $target, force: true);
+                $orderService->refundOrder($order->fresh(), null, 'admin_override', $providerOutcome);
             }
 
             app(\App\Services\AuditService::class)->log(

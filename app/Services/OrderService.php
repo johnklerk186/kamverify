@@ -37,12 +37,12 @@ class OrderService
                 throw new \Exception('Insufficient wallet balance');
             }
 
-            // Deduct from wallet
-            $this->walletService->withdraw($user, $sellingPrice, 'Order purchase', [
+            // Deduct from wallet — a purchase debit, not a generic withdrawal
+            $purchaseTxn = $this->walletService->withdraw($user, $sellingPrice, 'Order purchase', [
                 'order_type' => 'number_purchase',
                 'service' => $service->name,
                 'country' => $country->name,
-            ]);
+            ], 'purchase');
 
             // Create order
             $order = Order::create([
@@ -57,6 +57,10 @@ class OrderService
                 'status' => 'pending',
                 'expires_at' => Carbon::now()->addMinutes(15), // Default 15 minutes
             ]);
+
+            // Backfill the order reference onto the purchase transaction
+            // so the ledger links debit → order both ways.
+            $purchaseTxn->update(['reference' => $order->order_id]);
 
             // Send notification
             $user->notify(new OrderCreated($order));
@@ -236,27 +240,38 @@ class OrderService
      * Cancel an order. $force bypasses the customer-facing canCancel()
      * rule — used internally when a provider purchase fails mid-flight
      * and the order must be wound back with a refund.
+     *
+     * $providerRefundStatus records what happened provider-side:
+     *   released            — provider accepted our cancellation (cost returned)
+     *   provider_resolved   — provider reports the activation already finished/cancelled
+     *   provider_unreachable— provider call failed; auto-expiry assumed
+     *   consumed            — provider kept the cost (SMS delivered)
+     *   none                — no activation was ever purchased
      */
-    public function cancelOrder(Order $order, bool $refund = true, bool $force = false): Order
+    public function cancelOrder(Order $order, bool $refund = true, bool $force = false,
+        ?string $reason = 'customer_cancel', ?string $providerRefundStatus = null): Order
     {
         if (!$force && !$order->canCancel()) {
             throw new \Exception('Order cannot be cancelled');
         }
 
-        return DB::transaction(function () use ($order, $refund) {
+        return DB::transaction(function () use ($order, $refund, $reason, $providerRefundStatus) {
+            $order->cancellation_reason = $reason;
+            $order->provider_refund_status = $providerRefundStatus;
             $this->updateStatus($order, 'cancelled');
 
             if ($refund) {
-                $this->refundOrder($order);
+                $this->refundOrder($order, null, $reason, $providerRefundStatus);
             }
 
             return $order;
         });
     }
 
-    public function refundOrder(Order $order, float $refundAmount = null): Order
+    public function refundOrder(Order $order, float $refundAmount = null,
+        ?string $reason = 'order_cancellation', ?string $providerRefundStatus = null): Order
     {
-        return DB::transaction(function () use ($order, $refundAmount) {
+        return DB::transaction(function () use ($order, $refundAmount, $reason, $providerRefundStatus) {
             // Lock the row and refuse to refund twice. refund_amount
             // defaults to 0 (not null) in the schema — a processed refund
             // is signalled by a positive amount, a refunded status, or an
@@ -275,16 +290,33 @@ class OrderService
                 throw new \Exception('Refund amount cannot exceed selling price');
             }
 
-            // Refund to wallet
+            // Provider outcome decides whether KamVerify lost the
+            // activation cost. A completed/delivered order is 'consumed'.
+            $providerRefundStatus = $providerRefundStatus ?? $order->provider_refund_status
+                ?? (in_array($order->status, ['completed', 'sms_received'])
+                    ? 'consumed'
+                    : ($order->provider_activation_id ? 'released' : 'none'));
+
+            // Refund to wallet — a REFUND credit, never a deposit.
             $transaction = $this->walletService->deposit($order->user, $refundAmount, 'Order refund', [
                 'order_id' => $order->order_id,
                 'refund_type' => 'order_cancellation',
-            ]);
+                'refund_reason' => $reason,
+                'provider_refund_status' => $providerRefundStatus,
+            ], 'refund', $order->order_id);
+
+            $costLost = $providerRefundStatus === 'consumed' ? (float) $order->purchase_price : 0.0;
 
             $order->update([
                 'refund_amount' => $refundAmount,
                 // Expired orders keep their expired status; the refund is recorded via refund_amount
                 'status' => $order->status === 'expired' ? 'expired' : 'refunded',
+                'provider_refund_status' => $providerRefundStatus,
+                'cancellation_reason' => $order->cancellation_reason ?? $reason,
+                // P&L truth: money in (selling) − money returned − provider
+                // cost that was never recovered. Full refund + provider
+                // released → 0; consumed → −purchase_price (a real loss).
+                'profit' => round((float) $order->selling_price - $refundAmount - $costLost, 2),
             ]);
 
             \App\Models\Refund::create([
@@ -295,7 +327,7 @@ class OrderService
                 'amount' => $refundAmount,
                 'type' => 'order',
                 'status' => 'processed',
-                'reason' => 'Order cancellation or expiration',
+                'reason' => $reason,
             ]);
 
             $order->user->notify(new \App\Notifications\KamVerifyNotification(
@@ -315,7 +347,8 @@ class OrderService
                     'Customer' => $order->user->name . ' <' . $order->user->email . '>',
                     'Amount' => xaf($refundAmount),
                     'Order' => $order->order_id,
-                    'Reason' => 'Order cancellation or expiration',
+                    'Reason' => $reason,
+                    'Provider cost' => $providerRefundStatus,
                 ]
             );
 
@@ -328,17 +361,20 @@ class OrderService
         });
     }
 
-    public function expireOrder(Order $order): Order
+    public function expireOrder(Order $order, ?string $reason = 'expired_no_sms',
+        ?string $providerRefundStatus = null): Order
     {
         if (!$order->isExpired()) {
             throw new \Exception('Order is not expired');
         }
 
-        return DB::transaction(function () use ($order) {
+        return DB::transaction(function () use ($order, $reason, $providerRefundStatus) {
+            $order->cancellation_reason = $reason;
+            $order->provider_refund_status = $providerRefundStatus;
             $this->updateStatus($order, 'expired');
-            
+
             // Auto refund on expiration
-            $this->refundOrder($order);
+            $this->refundOrder($order, null, $reason, $providerRefundStatus);
 
             return $order;
         });
@@ -398,6 +434,19 @@ class OrderService
             'cancelled_orders' => Order::where('user_id', $user->id)
                 ->where('status', 'cancelled')
                 ->count(),
+            'total_spent' => $this->totalSpent($user),
         ];
+    }
+
+    /**
+     * Customer "Spent" — money actually spent on COMPLETED orders only.
+     * Never derive this from wallet debits: cancelled/refunded/expired
+     * purchases return the money, so they are not spending.
+     */
+    public function totalSpent(User $user): float
+    {
+        return round((float) Order::where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->sum('selling_price'), 2);
     }
 }

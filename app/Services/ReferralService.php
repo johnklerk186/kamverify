@@ -103,7 +103,10 @@ class ReferralService
                 'processed_at' => now(),
             ]);
 
-            // Credit wallet
+            // Credit wallet — an internal reward credit, not a customer
+            // deposit (the wallet_transactions.type enum predates a
+            // 'reward' value; 'adjustment' + reward_id metadata keeps it
+            // out of the deposits figure while staying schema-legal).
             $this->walletService->deposit(
                 $referral->referrer,
                 $rewardAmount,
@@ -112,7 +115,8 @@ class ReferralService
                     'referral_id' => $referral->id,
                     'reward_id' => $reward->id,
                     'order_id' => $order->id,
-                ]
+                ],
+                'adjustment'
             );
 
             Log::info('Referral reward processed', [

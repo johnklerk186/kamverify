@@ -36,6 +36,7 @@ class ExpireOrderJob implements ShouldQueue
             // provider so we're not charged for a number we just refunded.
             // Edge case: if the provider says an OTP already arrived, the
             // activation succeeded — ingest the SMS and COMPLETE instead.
+            $providerOutcome = 'released';
             try {
                 $provider = $providerService->getProviderForModel($this->order->provider);
                 $provider->cancelActivation($this->order->provider_activation_id);
@@ -46,6 +47,7 @@ class ExpireOrderJob implements ShouldQueue
                 }
                 // FINISHED/CANCELED/NO_ACTIVATION etc. — provider-side
                 // already resolved; proceed with local expiry+refund.
+                $providerOutcome = 'provider_resolved';
                 Log::info('Provider cancel on expiry declined', [
                     'order_id' => $this->order->order_id,
                     'code' => $e->errorCode,
@@ -53,12 +55,13 @@ class ExpireOrderJob implements ShouldQueue
             } catch (\Throwable $e) {
                 // Provider unreachable — still expire locally; HeroSMS
                 // auto-refunds un-coded activations at 20 minutes anyway.
+                $providerOutcome = 'provider_unreachable';
                 Log::warning('Provider cancel on expiry unreachable', [
                     'order_id' => $this->order->order_id,
                 ]);
             }
 
-            $orderService->expireOrder($this->order);
+            $orderService->expireOrder($this->order, 'expired_no_sms', $providerOutcome);
 
             Log::info('Order expired successfully', [
                 'order_id' => $this->order->order_id,

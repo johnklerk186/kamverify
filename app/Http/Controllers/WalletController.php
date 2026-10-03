@@ -44,8 +44,9 @@ class WalletController extends Controller
         $transactions = $this->walletService->getTransactions($user, 50);
         $pendingPayments = Payment::where('user_id', $user->id)->where('status', 'pending')->latest()->get();
         $sandbox = !$this->livePaymentsEnabled();
+        $totalSpent = app(\App\Services\OrderService::class)->totalSpent($user);
 
-        return view('wallet.index', compact('wallet', 'transactions', 'pendingPayments', 'sandbox'));
+        return view('wallet.index', compact('wallet', 'transactions', 'pendingPayments', 'sandbox', 'totalSpent'));
     }
 
     public function deposit()

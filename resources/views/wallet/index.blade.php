@@ -28,7 +28,7 @@
                 <p class="mt-1.5 text-3xl font-extrabold text-white">{{ xaf($wallet->balance) }}</p>
             </div>
             <x-stat-card label="Total deposited" :value="xaf($wallet->total_deposited)" icon="fa-arrow-down" accent="green" />
-            <x-stat-card label="Total spent" :value="xaf($wallet->total_withdrawn)" icon="fa-arrow-up" accent="brand" />
+            <x-stat-card label="Total spent" :value="xaf($totalSpent ?? 0)" icon="fa-arrow-up" accent="brand" />
         </div>
 
         {{-- Pending payments --}}

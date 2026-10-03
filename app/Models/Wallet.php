@@ -34,20 +34,21 @@ class Wallet extends Model
         return $this->hasMany(WalletTransaction::class);
     }
 
-    public function deposit(float $amount, string $description = null): WalletTransaction
+    public function deposit(float $amount, string $description = null, string $type = 'deposit', string $reference = null): WalletTransaction
     {
         return $this->transactions()->create([
             'transaction_id' => 'TXN-' . strtoupper(uniqid()),
             'user_id' => $this->user_id,
             'wallet_id' => $this->id,
             'amount' => $amount,
-            'type' => 'deposit',
+            'type' => $type,
             'status' => 'completed',
+            'reference' => $reference,
             'description' => $description ?? 'Wallet deposit',
         ]);
     }
 
-    public function withdraw(float $amount, string $description = null): WalletTransaction
+    public function withdraw(float $amount, string $description = null, string $type = 'withdrawal', string $reference = null): WalletTransaction
     {
         if ($this->balance < $amount) {
             throw new \Exception('Insufficient balance');
@@ -58,8 +59,9 @@ class Wallet extends Model
             'user_id' => $this->user_id,
             'wallet_id' => $this->id,
             'amount' => -$amount,
-            'type' => 'withdrawal',
+            'type' => $type,
             'status' => 'completed',
+            'reference' => $reference,
             'description' => $description ?? 'Wallet withdrawal',
         ]);
     }

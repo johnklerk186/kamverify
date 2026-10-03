@@ -28,6 +28,18 @@ class AnalyticsService
     ];
 
     /**
+     * Provider cost was actually incurred when the activation reached
+     * the provider's billable states (number assigned onward) or when a
+     * wound-down order's cost was consumed rather than released.
+     * pending/processing orders have no activation yet — no cost.
+     */
+    protected function costIncurredScope($query)
+    {
+        return $query->whereIn('status', ['number_assigned', 'waiting_for_sms', 'sms_received', 'completed'])
+            ->orWhere('provider_refund_status', 'consumed');
+    }
+
+    /**
      * Resolve a range key (today|yesterday|last7|last30|this_month|
      * last_month|custom) to an inclusive [from, to] Carbon pair.
      */
@@ -117,8 +129,16 @@ class AnalyticsService
 
         $paidOrders = (clone $orders)->whereIn('status', self::SALE_STATUSES);
         $grossSales = (float) (clone $paidOrders)->sum('selling_price');
-        $providerCost = (float) (clone $paidOrders)->sum('purchase_price');
-        $grossProfit = (float) (clone $paidOrders)->sum('profit');
+
+        // Provider cost = activations HeroSMS actually charged for:
+        // live/delivered orders, plus refunded orders whose activation
+        // was consumed (OTP delivered) rather than released.
+        $providerCost = (float) (clone $orders)
+            ->where(fn ($q) => $this->costIncurredScope($q))
+            ->sum('purchase_price');
+        $grossProfit = (float) (clone $orders)
+            ->where(fn ($q) => $this->costIncurredScope($q))
+            ->sum('profit');
         $refunded = (float) (clone $orders)->whereIn('status', ['refunded', 'cancelled', 'expired'])
             ->sum('refund_amount');
         $deposits = (float) WalletTransaction::where('type', 'deposit')
@@ -171,8 +191,8 @@ class AnalyticsService
         $todayCost = (float) (clone $todayOrders)->whereIn('status', self::SALE_STATUSES)->sum('purchase_price');
 
         $allSales = (float) Order::whereIn('status', self::SALE_STATUSES)->sum('selling_price');
-        $allCost = (float) Order::whereIn('status', self::SALE_STATUSES)->sum('purchase_price');
-        $allProfit = (float) Order::whereIn('status', self::SALE_STATUSES)->sum('profit');
+        $allCost = (float) Order::where(fn ($q) => $this->costIncurredScope($q))->sum('purchase_price');
+        $allProfit = (float) Order::where(fn ($q) => $this->costIncurredScope($q))->sum('profit');
 
         return [
             'today_sales'    => round($todaySales, 2),

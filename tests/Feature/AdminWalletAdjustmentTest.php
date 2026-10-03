@@ -28,10 +28,12 @@ class AdminWalletAdjustmentTest extends TestCase
 
         $response->assertSessionHas('success');
         $this->assertEquals(52000, $wallet->fresh()->balance);
-        $this->assertEquals(52000, $wallet->fresh()->total_deposited);
+        // An admin credit is an adjustment — it must not inflate the
+        // "real money deposited through Fapshi" figure.
+        $this->assertEquals(50000, $wallet->fresh()->total_deposited);
 
         $txn = $wallet->transactions()->latest()->first();
-        $this->assertSame('deposit', $txn->type);
+        $this->assertSame('adjustment', $txn->type);
         $this->assertEquals(2000, $txn->amount);
         $this->assertStringContainsString('manual top-up', $txn->description);
         $this->assertSame($admin->id, $txn->metadata['admin_id']);
@@ -61,7 +63,7 @@ class AdminWalletAdjustmentTest extends TestCase
 
         $response->assertSessionHas('success');
         $this->assertEquals(49800, $wallet->fresh()->balance);
-        $this->assertSame('withdrawal', $wallet->transactions()->latest()->first()->type);
+        $this->assertSame('adjustment', $wallet->transactions()->latest()->first()->type);
     }
 
     public function test_debit_cannot_exceed_balance(): void

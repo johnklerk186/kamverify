@@ -39,11 +39,18 @@ class WalletService
         return $wallet ?? $this->createWallet($user);
     }
 
-    public function deposit(User $user, float $amount, string $description = null, array $metadata = null): WalletTransaction
+    /**
+     * Credit the wallet. $type must reflect WHY money came in:
+     * 'deposit' = external customer money (Fapshi), 'refund' = order
+     * money returned, 'reward' = referral credit, 'adjustment' = admin
+     * credit. Only real deposits increment total_deposited — refunds
+     * and rewards must never inflate the deposited figure.
+     */
+    public function deposit(User $user, float $amount, string $description = null, array $metadata = null, string $type = 'deposit', string $reference = null): WalletTransaction
     {
-        return DB::transaction(function () use ($user, $amount, $description, $metadata) {
+        return DB::transaction(function () use ($user, $amount, $description, $metadata, $type, $reference) {
             $wallet = $this->lockWallet($user);
-            
+
             if (!$wallet->is_active) {
                 throw new \Exception('Wallet is not active');
             }
@@ -52,24 +59,27 @@ class WalletService
                 throw new \Exception('Deposit amount must be positive');
             }
 
-            $transaction = $wallet->deposit($amount, $description ?? 'Wallet deposit');
-            
+            $transaction = $wallet->deposit($amount, $description ?? 'Wallet deposit', $type, $reference);
+
             if ($metadata) {
                 $transaction->metadata = $metadata;
                 $transaction->save();
             }
 
             $wallet->balance += $amount;
-            $wallet->total_deposited += $amount;
+            if ($type === 'deposit') {
+                $wallet->total_deposited += $amount;
+            }
             $wallet->save();
 
             // No notification here — deposit() also serves refunds and
             // adjustments. The caller fires the event-specific notice
             // (DepositSuccessful, Refund Issued, …) so labels stay honest.
 
-            Log::info('Wallet deposit successful', [
+            Log::info('Wallet credit successful', [
                 'user_id' => $user->id,
                 'amount' => $amount,
+                'type' => $type,
                 'transaction_id' => $transaction->transaction_id,
             ]);
 
@@ -77,11 +87,16 @@ class WalletService
         });
     }
 
-    public function withdraw(User $user, float $amount, string $description = null, array $metadata = null): WalletTransaction
+    /**
+     * Debit the wallet. $type must reflect WHY money went out:
+     * 'purchase' = number order, 'adjustment' = admin debit,
+     * 'withdrawal' = anything else.
+     */
+    public function withdraw(User $user, float $amount, string $description = null, array $metadata = null, string $type = 'withdrawal', string $reference = null): WalletTransaction
     {
-        return DB::transaction(function () use ($user, $amount, $description, $metadata) {
+        return DB::transaction(function () use ($user, $amount, $description, $metadata, $type, $reference) {
             $wallet = $this->lockWallet($user);
-            
+
             if (!$wallet->is_active) {
                 throw new \Exception('Wallet is not active');
             }
@@ -94,8 +109,8 @@ class WalletService
                 throw new \Exception('Insufficient balance');
             }
 
-            $transaction = $wallet->withdraw($amount, $description ?? 'Wallet withdrawal');
-            
+            $transaction = $wallet->withdraw($amount, $description ?? 'Wallet withdrawal', $type, $reference);
+
             if ($metadata) {
                 $transaction->metadata = $metadata;
                 $transaction->save();
@@ -105,9 +120,10 @@ class WalletService
             $wallet->total_withdrawn += $amount;
             $wallet->save();
 
-            Log::info('Wallet withdrawal successful', [
+            Log::info('Wallet debit successful', [
                 'user_id' => $user->id,
                 'amount' => $amount,
+                'type' => $type,
                 'transaction_id' => $transaction->transaction_id,
             ]);
 

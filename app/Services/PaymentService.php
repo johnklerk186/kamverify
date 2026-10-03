@@ -111,7 +111,7 @@ class PaymentService
                 return false;
             }
 
-            // Credit wallet
+            // Credit wallet — a real external DEPOSIT
             $transaction = $this->walletService->deposit(
                 $payment->user,
                 $payment->amount,
@@ -120,7 +120,9 @@ class PaymentService
                     'payment_id' => $payment->payment_id,
                     'provider' => $payment->provider,
                     'payment_method' => $payment->provider_response['medium'] ?? $payment->provider_response['payment_method'] ?? null,
-                ]
+                ],
+                'deposit',
+                $payment->payment_id
             );
 
             $payment->update([
@@ -349,7 +351,9 @@ class PaymentService
                 $payment->user,
                 $amount ?? $payment->amount,
                 'Payment refund — ' . $payment->payment_id,
-                ['payment_id' => $payment->payment_id]
+                ['payment_id' => $payment->payment_id],
+                'adjustment',
+                $payment->payment_id
             );
         }
 

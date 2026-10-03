@@ -38,7 +38,7 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <x-stat-card label="Balance" :value="xaf($wallet->balance ?? 0)" icon="fa-wallet" accent="brand" />
             <x-stat-card label="Deposited" :value="xaf($wallet->total_deposited ?? 0)" icon="fa-arrow-down" accent="green" />
-            <x-stat-card label="Spent" :value="xaf($wallet->total_withdrawn ?? 0)" icon="fa-arrow-up" accent="amber" />
+            <x-stat-card label="Spent" :value="xaf($totalSpent ?? 0)" icon="fa-arrow-up" accent="amber" />
             <x-stat-card label="Orders" :value="$user->orders()->count()" icon="fa-receipt" accent="blue" />
         </div>
 

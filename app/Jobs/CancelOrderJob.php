@@ -81,7 +81,7 @@ class CancelOrderJob implements ShouldQueue
 
             if (in_array($e->errorCode, ['FINISHED', 'CANCELED', 'REFUNDED'], true)) {
                 // Already resolved at the provider — safe to refund locally.
-                $this->finish($order, $orderService);
+                $this->finish($order, $orderService, 'provider_resolved');
                 return;
             }
 
@@ -96,14 +96,14 @@ class CancelOrderJob implements ShouldQueue
             return;
         }
 
-        $this->finish($order, $orderService);
+        $this->finish($order, $orderService, 'released');
     }
 
-    protected function finish(Order $order, OrderService $orderService): void
+    protected function finish(Order $order, OrderService $orderService, string $providerOutcome = 'released'): void
     {
         try {
             $order->update(['cancel_requested_at' => null]);
-            $orderService->cancelOrder($order->fresh(), true);
+            $orderService->cancelOrder($order->fresh(), true, false, 'customer_cancel_deferred', $providerOutcome);
 
             $this->notify($order, 'order_cancelled', 'Order Cancelled',
                 'Your order was cancelled and ' . xaf($order->selling_price) . ' was refunded to your wallet.');

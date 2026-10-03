@@ -40,8 +40,9 @@ class UserController extends Controller
         $wallet = $user->wallet;
         $orders = $user->orders()->orderBy('created_at', 'desc')->limit(20)->get();
         $transactions = $wallet ? $wallet->transactions()->orderBy('created_at', 'desc')->limit(20)->get() : collect();
+        $totalSpent = app(\App\Services\OrderService::class)->totalSpent($user);
 
-        return view('admin.users.show', compact('user', 'wallet', 'orders', 'transactions'));
+        return view('admin.users.show', compact('user', 'wallet', 'orders', 'transactions', 'totalSpent'));
     }
 
     public function toggleStatus(User $user)
@@ -87,14 +88,16 @@ class UserController extends Controller
                     $user,
                     $amount,
                     'Admin credit — ' . $data['reason'],
-                    ['admin_id' => $request->user()->id, 'reason' => $data['reason']]
+                    ['admin_id' => $request->user()->id, 'reason' => $data['reason']],
+                    'adjustment'
                 );
             } else {
                 $txn = $walletService->withdraw(
                     $user,
                     $amount,
                     'Admin debit — ' . $data['reason'],
-                    ['admin_id' => $request->user()->id, 'reason' => $data['reason']]
+                    ['admin_id' => $request->user()->id, 'reason' => $data['reason']],
+                    'adjustment'
                 );
             }
         } catch (\Exception $e) {
