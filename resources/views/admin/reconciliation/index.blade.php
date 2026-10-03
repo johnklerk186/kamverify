@@ -143,19 +143,34 @@
                 <h3 class="text-sm font-bold text-ink-900 uppercase tracking-wider mb-3">
                     <i class="fas fa-arrow-right-arrow-left text-ink-400 mr-2"></i>Pending reclassifications ({{ count($tx['proposals']) }})
                 </h3>
-                @if(empty($tx['proposals']))
+                @if(empty($tx['proposals']) && empty($report['wallets']) && empty($report['orders']['profit_fixes']))
                     <p class="text-sm text-ink-500">Every transaction is correctly classified.</p>
                 @else
-                    <ul class="space-y-2 text-xs">
-                        @foreach($tx['proposals'] as $p)
-                            <li class="flex items-center justify-between gap-3 border-b border-ink-50 pb-2">
-                                <span class="font-mono text-ink-600">{{ $p['transaction']->transaction_id }}</span>
-                                <span>{{ ucfirst($p['from']) }} → <strong>{{ ucfirst($p['to']) }}</strong></span>
-                                <span class="font-bold">{{ xaf($p['transaction']->amount) }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
-                    <p class="mt-3 text-xs text-ink-500">Apply with <code class="font-mono bg-ink-50 px-1.5 py-0.5 rounded">php artisan wallet:reconcile --apply</code> — every change is audit-logged with before/after values.</p>
+                    @if(!empty($tx['proposals']))
+                        <ul class="space-y-2 text-xs">
+                            @foreach($tx['proposals'] as $p)
+                                <li class="flex items-center justify-between gap-3 border-b border-ink-50 pb-2">
+                                    <span class="font-mono text-ink-600">{{ $p['transaction']->transaction_id }}</span>
+                                    <span>{{ ucfirst($p['from']) }} → <strong>{{ ucfirst($p['to']) }}</strong></span>
+                                    <span class="font-bold">{{ xaf($p['transaction']->amount) }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    @if(!empty($report['wallets']) || !empty($report['orders']['profit_fixes']))
+                        <p class="mt-2 text-xs text-ink-500">
+                            + {{ count($report['wallets']) }} wallet total fix{{ count($report['wallets']) === 1 ? '' : 'es' }},
+                            {{ count($report['orders']['profit_fixes']) }} order profit fix{{ count($report['orders']['profit_fixes']) === 1 ? '' : 'es' }}.
+                        </p>
+                    @endif
+                    <form method="POST" action="{{ route('admin.reconciliation.apply') }}" class="mt-3"
+                          onsubmit="return confirm('Apply {{ count($tx['proposals']) + count($report['wallets']) + count($report['orders']['profit_fixes']) }} corrections? Every change is audit-logged with before/after values.')">
+                        @csrf
+                        <button type="submit" class="kv-btn-primary text-xs">
+                            <i class="fas fa-wrench"></i> Apply corrections
+                        </button>
+                    </form>
+                    <p class="mt-2 text-xs text-ink-500">Same audited path as <code class="font-mono bg-ink-50 px-1.5 py-0.5 rounded">php artisan wallet:reconcile --apply</code>.</p>
                 @endif
             </div>
 

@@ -19,4 +19,20 @@ class ReconciliationController extends Controller
 
         return view('admin.reconciliation.index', compact('report'));
     }
+
+    /**
+     * Apply the safe corrections shown on this page — the same audited
+     * path as `wallet:reconcile --apply`. Ambiguous records are never
+     * touched; every write lands in audit_logs under reconcile.*.
+     */
+    public function apply(ReconciliationService $recon)
+    {
+        $report = $recon->buildReport();
+        $written = $recon->applyReport($report);
+
+        return back()->with('success',
+            $written === 0
+                ? 'Ledger is already consistent — nothing to correct.'
+                : "{$written} correction(s) applied. Audit trail: Audit Logs → reconcile.*");
+    }
 }

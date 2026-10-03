@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\AuditService;
 use App\Services\ReconciliationService;
 use Illuminate\Console\Command;
 
@@ -18,7 +17,7 @@ class ReconcileWalletAccounting extends Command
 
     protected $description = 'Audit wallet transactions, orders and balances; report (or repair with --apply) misclassified records.';
 
-    public function handle(ReconciliationService $recon, AuditService $audit): int
+    public function handle(ReconciliationService $recon): int
     {
         $apply = (bool) $this->option('apply');
         $report = $recon->buildReport();
@@ -112,35 +111,7 @@ class ReconcileWalletAccounting extends Command
 
         $this->newLine();
         $this->info('Applying corrections…');
-        $written = 0;
-
-        foreach ($t['proposals'] as $p) {
-            $txn = $p['transaction'];
-            $audit->log('reconcile.transaction_type', $txn,
-                ['type' => $p['from']],
-                ['type' => $p['to'], 'reason' => $p['reason']]);
-            $txn->update(['type' => $p['to']]);
-            $written++;
-        }
-
-        foreach ($report['wallets'] as $w) {
-            $audit->log('reconcile.wallet_totals', $w['wallet'],
-                ['total_deposited' => $w['deposited_from'], 'total_withdrawn' => $w['withdrawn_from']],
-                ['total_deposited' => $w['deposited_to'], 'total_withdrawn' => $w['withdrawn_to'], 'reason' => 'recomputed from ledger']);
-            $w['wallet']->update([
-                'total_deposited' => $w['deposited_to'],
-                'total_withdrawn' => $w['withdrawn_to'],
-            ]);
-            $written++;
-        }
-
-        foreach ($o['profit_fixes'] as $f) {
-            $audit->log('reconcile.order_profit', $f['order'],
-                ['profit' => $f['from']],
-                ['profit' => $f['to'], 'reason' => 'selling − refund − unrecovered provider cost']);
-            $f['order']->update(['profit' => $f['to']]);
-            $written++;
-        }
+        $written = $recon->applyReport($report);
 
         $this->info("{$written} correction(s) written — every change is in audit_logs under reconcile.*");
         return self::SUCCESS;

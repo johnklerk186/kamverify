@@ -190,6 +190,35 @@ class ReconciliationTest extends TestCase
         $this->assertEquals((float) $order->selling_price, $overview['refundable_outstanding']);
     }
 
+    public function test_admin_apply_button_retypes_via_audited_path(): void
+    {
+        [$p, $country, $service] = $this->seedMarketplace();
+        $admin = $this->admin();
+        $user = $this->customer();
+        $order = $this->buy($user, $country, $service);
+
+        $legacy = WalletTransaction::create([
+            'transaction_id' => 'TXN-LEGACY4',
+            'user_id' => $user->id,
+            'wallet_id' => $user->wallet->id,
+            'amount' => $order->selling_price,
+            'type' => 'deposit',
+            'status' => 'completed',
+            'description' => 'Order refund',
+            'metadata' => ['refund_type' => 'order_cancellation'],
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->post(route('admin.reconciliation.apply'))
+            ->assertSessionHas('success');
+
+        $this->assertSame('refund', $legacy->fresh()->type);
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'reconcile.transaction_type',
+            'model_id' => $legacy->id,
+        ]);
+    }
+
     public function test_dry_run_changes_nothing(): void
     {
         [$p, $country, $service] = $this->seedMarketplace();

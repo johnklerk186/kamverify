@@ -146,6 +146,49 @@ class ReconciliationService
     }
 
     /**
+     * Write the report's corrections. Used by `wallet:reconcile --apply`
+     * AND the admin "Apply corrections" action — both go through the
+     * same audited path. Every write lands in audit_logs (reconcile.*)
+     * with before/after values. Balances are never modified.
+     */
+    public function applyReport(array $report): int
+    {
+        $audit = app(AuditService::class);
+        $written = 0;
+
+        foreach ($report['transactions']['proposals'] as $p) {
+            $txn = $p['transaction'];
+            $audit->log('reconcile.transaction_type', $txn,
+                ['type' => $p['from']],
+                ['type' => $p['to'], 'reason' => $p['reason']]);
+            $txn->update(['type' => $p['to']]);
+            $written++;
+        }
+
+        foreach ($report['wallets'] as $w) {
+            $audit->log('reconcile.wallet_totals', $w['wallet'],
+                ['total_deposited' => $w['deposited_from'], 'total_withdrawn' => $w['withdrawn_from']],
+                ['total_deposited' => $w['deposited_to'], 'total_withdrawn' => $w['withdrawn_to'],
+                 'reason' => 'recomputed from ledger']);
+            $w['wallet']->update([
+                'total_deposited' => $w['deposited_to'],
+                'total_withdrawn' => $w['withdrawn_to'],
+            ]);
+            $written++;
+        }
+
+        foreach ($report['orders']['profit_fixes'] as $f) {
+            $audit->log('reconcile.order_profit', $f['order'],
+                ['profit' => $f['from']],
+                ['profit' => $f['to'], 'reason' => 'selling − refund − unrecovered provider cost']);
+            $f['order']->update(['profit' => $f['to']]);
+            $written++;
+        }
+
+        return $written;
+    }
+
+    /**
      * Classify a wallet transaction into its true ledger type.
      * Confidence 'high' means a concrete linkage exists; anything else
      * is 'ambiguous' and must be left for manual review.
