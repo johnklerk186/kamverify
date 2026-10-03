@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\FacebookAuditService;
 use App\Services\ReconciliationService;
+use Carbon\Carbon;
 
 /**
  * Admin-only financial reconciliation: per-customer ledger integrity,
@@ -18,6 +20,21 @@ class ReconciliationController extends Controller
         $report = $recon->buildReport();
 
         return view('admin.reconciliation.index', compact('report'));
+    }
+
+    /**
+     * Facebook/Meta compatibility audit — read-only. Answers which
+     * prefixes/countries correlate with no-SMS failures and how much
+     * HeroSMS cost was or was not recovered on them. Optional ?days=N
+     * window; default is all history.
+     */
+    public function facebook(FacebookAuditService $audit)
+    {
+        $days = request()->integer('days');
+        $since = $days > 0 ? Carbon::now()->subDays($days) : null;
+        $report = $audit->buildReport($since);
+
+        return view('admin.reconciliation.facebook', compact('report', 'days'));
     }
 
     /**

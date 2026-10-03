@@ -213,6 +213,7 @@ Route::middleware(['admin', 'throttle:120,1'])->prefix('admin')->name('admin.')-
     // Financial reconciliation — ledger integrity + provider costs
     Route::get('/reconciliation', [AdminReconciliationController::class, 'index'])->name('reconciliation.index');
     Route::post('/reconciliation/apply', [AdminReconciliationController::class, 'apply'])->name('reconciliation.apply');
+    Route::get('/reconciliation/facebook', [AdminReconciliationController::class, 'facebook'])->name('reconciliation.facebook');
 
     // Referrals
     Route::prefix('referrals')->name('referrals.')->group(function () {

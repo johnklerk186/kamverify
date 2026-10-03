@@ -12,6 +12,13 @@
 
     <div class="space-y-5">
 
+        <div class="flex justify-end">
+            <a href="{{ route('admin.reconciliation.facebook') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-ink-900 text-white text-sm font-semibold hover:bg-ink-800 transition">
+                <i class="fa-brands fa-facebook"></i> Facebook/Meta compatibility audit
+            </a>
+        </div>
+
         {{-- Platform integrity --}}
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <x-stat-card label="Deposits" :value="xaf($pl['deposits'])" icon="fa-arrow-down" accent="green" sub="External money in (Fapshi)" />
