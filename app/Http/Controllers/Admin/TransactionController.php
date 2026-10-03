@@ -28,13 +28,20 @@ class TransactionController extends Controller
         }
 
         $transactions = $query->latest()->paginate(25)->withQueryString();
+
+        // Batch-resolve related orders (reference column or metadata.order_id)
+        $orderRefs = $transactions->getCollection()
+            ->map(fn ($t) => $t->reference ?? ($t->metadata['order_id'] ?? null))
+            ->filter()->unique()->values();
+        $relatedOrders = \App\Models\Order::whereIn('order_id', $orderRefs)->get()->keyBy('order_id');
         $types = WalletTransaction::select('type')->distinct()->pluck('type');
         $totals = [
             'deposits' => WalletTransaction::where('type', 'deposit')->where('status', 'completed')->sum('amount'),
-            'withdrawals' => abs(WalletTransaction::where('type', 'withdrawal')->where('status', 'completed')->sum('amount')),
+            'purchases' => abs(WalletTransaction::where('type', 'purchase')->where('status', 'completed')->sum('amount')),
             'refunds' => WalletTransaction::where('type', 'refund')->where('status', 'completed')->sum('amount'),
+            'adjustments' => WalletTransaction::where('type', 'adjustment')->where('status', 'completed')->sum('amount'),
         ];
 
-        return view('admin.transactions.index', compact('transactions', 'types', 'totals'));
+        return view('admin.transactions.index', compact('transactions', 'types', 'totals', 'relatedOrders'));
     }
 }

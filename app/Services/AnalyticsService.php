@@ -214,6 +214,9 @@ class AnalyticsService
             'total_sales'    => round($allSales, 2),
             'total_deposits' => round((float) WalletTransaction::where('type', 'deposit')->sum('amount'), 2),
             'total_refunds'  => round((float) WalletTransaction::where('type', 'refund')->sum('amount'), 2),
+            // Money still owed: wound-down orders that never got a refund
+            'refundable_outstanding' => round((float) Order::whereIn('status', ['cancelled', 'expired', 'failed'])
+                ->where('refund_amount', '<=', 0)->sum('selling_price'), 2),
             'provider_cost'  => usdToXaf($allCost),
             'gross_profit'   => round($allProfit, 2),
             'margin'         => $allSales > 0 ? round(($allProfit / $allSales) * 100, 1) : 0.0,

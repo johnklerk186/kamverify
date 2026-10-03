@@ -3,10 +3,11 @@
     <x-slot name="header">Wallet transactions</x-slot>
 
     <div class="space-y-5">
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <x-stat-card label="Deposits" :value="xaf($totals['deposits'])" icon="fa-arrow-down" accent="green" />
-            <x-stat-card label="Purchases" :value="xaf($totals['withdrawals'])" icon="fa-arrow-up" accent="brand" />
+            <x-stat-card label="Purchases" :value="xaf($totals['purchases'])" icon="fa-basket-shopping" accent="brand" />
             <x-stat-card label="Refunds" :value="xaf($totals['refunds'])" icon="fa-rotate-left" accent="amber" />
+            <x-stat-card label="Adjustments" :value="xaf($totals['adjustments'])" icon="fa-sliders" accent="violet" />
         </div>
 
         <form method="GET" action="{{ route('admin.transactions.index') }}" class="kv-card p-4 flex flex-col sm:flex-row gap-3">
@@ -40,6 +41,8 @@
                                 <th class="kv-th">Transaction</th>
                                 <th class="kv-th">Customer</th>
                                 <th class="kv-th">Type</th>
+                                <th class="kv-th">Direction</th>
+                                <th class="kv-th">Related</th>
                                 <th class="kv-th">Description</th>
                                 <th class="kv-th">Amount</th>
                                 <th class="kv-th">Status</th>
@@ -48,14 +51,31 @@
                         </thead>
                         <tbody class="divide-y divide-ink-100">
                             @foreach($transactions as $tx)
-                                @php $credit = in_array($tx->type, ['deposit','refund','reward']); @endphp
+                                @php
+                                    $credit = (float) $tx->amount > 0;
+                                    $relatedOrder = $relatedOrders[$tx->reference ?? ($tx->metadata['order_id'] ?? '')] ?? null;
+                                @endphp
                                 <tr class="hover:bg-ink-50/60 transition">
                                     <td class="kv-td font-mono text-xs font-semibold text-ink-900">{{ $tx->transaction_id }}</td>
                                     <td class="kv-td text-xs text-ink-600">{{ $tx->user->email ?? '—' }}</td>
                                     <td class="kv-td"><span class="kv-badge {{ transactionTypeColor($tx->type) }}">{{ ucfirst($tx->type) }}</span></td>
+                                    <td class="kv-td">
+                                        <span class="kv-badge {{ $credit ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
+                                            {{ $credit ? 'CREDIT' : 'DEBIT' }}
+                                        </span>
+                                    </td>
+                                    <td class="kv-td text-xs">
+                                        @if($relatedOrder)
+                                            <a href="{{ route('admin.orders.show', $relatedOrder) }}" class="font-mono text-brand-600 hover:text-brand-700">{{ $relatedOrder->order_id }}</a>
+                                        @elseif($tx->reference)
+                                            <span class="font-mono text-ink-500">{{ $tx->reference }}</span>
+                                        @else
+                                            <span class="text-ink-300">—</span>
+                                        @endif
+                                    </td>
                                     <td class="kv-td text-xs text-ink-600 max-w-[16rem] truncate">{{ $tx->description ?? '—' }}</td>
                                     <td class="kv-td font-bold {{ $credit ? 'text-emerald-600' : 'text-ink-900' }}">
-                                        {{ $credit ? '+' : '−' }}{{ xaf($tx->amount) }}
+                                        {{ $credit ? '+' : '−' }}{{ xaf(abs($tx->amount)) }}
                                     </td>
                                     <td class="kv-td"><x-status-badge :status="$tx->status" /></td>
                                     <td class="kv-td text-xs text-ink-500">{{ $tx->created_at->format('M d, H:i') }}</td>
@@ -67,12 +87,12 @@
 
                 <ul class="md:hidden divide-y divide-ink-100">
                     @foreach($transactions as $tx)
-                        @php $credit = in_array($tx->type, ['deposit','refund','reward']); @endphp
+                        @php $credit = (float) $tx->amount > 0; @endphp
                         <li class="px-5 py-4">
                             <div class="flex justify-between items-center gap-3">
-                                <span class="kv-badge {{ transactionTypeColor($tx->type) }}">{{ ucfirst($tx->type) }}</span>
+                                <span class="kv-badge {{ transactionTypeColor($tx->type) }}">{{ ucfirst($tx->type) }} · {{ $credit ? 'CREDIT' : 'DEBIT' }}</span>
                                 <span class="text-xs font-bold {{ $credit ? 'text-emerald-600' : 'text-ink-900' }}">
-                                    {{ $credit ? '+' : '−' }}{{ xaf($tx->amount) }}
+                                    {{ $credit ? '+' : '−' }}{{ xaf(abs($tx->amount)) }}
                                 </span>
                             </div>
                             <p class="mt-1.5 text-xs text-ink-600 truncate">{{ $tx->description ?? $tx->transaction_id }}</p>

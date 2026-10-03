@@ -34,6 +34,14 @@
                 <x-stat-card label="Provider cost" :value="xaf($stats['provider_cost'])" icon="fa-server" accent="ink" sub="All-time COGS" />
                 <x-stat-card label="Deposits" :value="xaf($stats['total_deposits'])" icon="fa-arrow-down" accent="blue" :href="route('admin.transactions.index', ['type' => 'deposit'])" :sub="xaf($stats['total_refunds']).' refunded'" />
             </div>
+            @if($stats['refundable_outstanding'] > 0)
+                <div class="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800 flex items-center justify-between gap-4">
+                    <span><i class="fas fa-hourglass-half mr-1"></i>
+                        <strong>{{ xaf($stats['refundable_outstanding']) }}</strong> is owed on ended orders that were never refunded — customers are missing money.
+                    </span>
+                    <a href="{{ route('admin.reconciliation.index') }}" class="shrink-0 font-semibold text-amber-900 hover:underline">Open reconciliation →</a>
+                </div>
+            @endif
         </div>
 
         <div class="grid lg:grid-cols-3 gap-6 items-start">

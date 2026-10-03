@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\ServiceCountryController as AdminServiceCountryCo
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\RefundController as AdminRefundController;
 use App\Http\Controllers\Admin\TransactionController as AdminTransactionController;
+use App\Http\Controllers\Admin\ReconciliationController as AdminReconciliationController;
 use App\Http\Controllers\Admin\ReferralController as AdminReferralController;
 use App\Http\Controllers\Admin\SupportController as AdminSupportController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
@@ -208,6 +209,9 @@ Route::middleware(['admin', 'throttle:120,1'])->prefix('admin')->name('admin.')-
 
     // Wallet transactions
     Route::get('/transactions', [AdminTransactionController::class, 'index'])->name('transactions.index');
+
+    // Financial reconciliation — ledger integrity + provider costs
+    Route::get('/reconciliation', [AdminReconciliationController::class, 'index'])->name('reconciliation.index');
 
     // Referrals
     Route::prefix('referrals')->name('referrals.')->group(function () {

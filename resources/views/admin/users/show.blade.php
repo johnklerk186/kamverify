@@ -81,7 +81,7 @@
                 @else
                     <ul class="divide-y divide-ink-100">
                         @foreach($transactions as $tx)
-                            @php $credit = in_array($tx->type, ['deposit','refund','reward']); @endphp
+                            @php $credit = (float) $tx->amount > 0; @endphp
                             <li class="flex items-center gap-3 px-5 py-3">
                                 <span class="w-8 h-8 rounded-lg grid place-items-center {{ transactionTypeColor($tx->type) }}">
                                     <i class="fas {{ $credit ? 'fa-arrow-down' : 'fa-arrow-up' }} text-xs"></i>
@@ -91,7 +91,7 @@
                                     <p class="text-[11px] text-ink-400">{{ $tx->created_at->format('M d, H:i') }}</p>
                                 </div>
                                 <span class="text-xs font-bold {{ $credit ? 'text-emerald-600' : 'text-ink-900' }}">
-                                    {{ $credit ? '+' : '−' }}{{ xaf($tx->amount) }}
+                                    {{ $credit ? '+' : '−' }}{{ xaf(abs($tx->amount)) }}
                                 </span>
                             </li>
                         @endforeach

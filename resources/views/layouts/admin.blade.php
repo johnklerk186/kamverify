@@ -31,6 +31,7 @@
             ['route' => 'admin.payments.index',       'pattern' => 'admin.payments.*',     'icon' => 'fa-credit-card',       'label' => 'Payments'],
             ['route' => 'admin.refunds.index',        'pattern' => 'admin.refunds.*',      'icon' => 'fa-rotate-left',       'label' => 'Refunds'],
             ['route' => 'admin.transactions.index',   'pattern' => 'admin.transactions.*', 'icon' => 'fa-money-bill-transfer','label' => 'Transactions'],
+            ['route' => 'admin.reconciliation.index', 'pattern' => 'admin.reconciliation.*','icon' => 'fa-scale-balanced',    'label' => 'Reconciliation'],
             ['route' => 'admin.referrals.index',      'pattern' => 'admin.referrals.*',    'icon' => 'fa-user-plus',         'label' => 'Referrals'],
         ],
         'Users & Support' => [
