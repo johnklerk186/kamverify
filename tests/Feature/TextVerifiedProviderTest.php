@@ -248,6 +248,20 @@ class TextVerifiedProviderTest extends TestCase
         $this->assertEquals(0.75, $r['cost']);
     }
 
+    public function test_national_format_number_is_coerced_to_us_e164(): void
+    {
+        $this->enableTextVerified();
+        Http::fake(array_merge($this->fakeAuth(), [
+            '*/api/pub/v2/verifications' => Http::response([
+                'id' => 'ver_10digit', 'number' => '2025550123', // national format
+                'totalCost' => 0.75, 'state' => 'VERIFICATION_PENDING',
+            ]),
+        ]));
+
+        $r = $this->liveTv()->purchaseNumber('US', 'facebook');
+        $this->assertEquals('+12025550123', $r['phone_number']); // not +2025550123
+    }
+
     public function test_facebook_order_fulfilled_via_textverified_end_to_end(): void
     {
         [$fb, $us, $tv, $hero, $wa, $customer] = $this->enableTextVerified();

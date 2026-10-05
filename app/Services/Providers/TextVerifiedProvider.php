@@ -497,7 +497,18 @@ class TextVerifiedProvider implements ProviderInterface
     protected function normalizePhone(string $number): string
     {
         $digits = preg_replace('/\D/', '', $number);
-        return $digits !== '' ? '+' . $digits : $number;
+        if ($digits === '') {
+            return $number;
+        }
+
+        // TextVerified is US-only but may return the number in national
+        // (10-digit) format. Blindly prefixing '+' would turn a US
+        // number like 2025550123 into +2025550123 — country code +20.
+        if (strlen($digits) === 10) {
+            $digits = '1' . $digits;
+        }
+
+        return '+' . $digits;
     }
 
     // =========================================================================
