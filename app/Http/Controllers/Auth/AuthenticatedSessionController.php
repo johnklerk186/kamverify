@@ -38,6 +38,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // One-shot notice about storefront services in a temporary
+        // outage — shown once per login, dismissed with "Got it".
+        $outage = \App\Models\Service::where('temporarily_unavailable', true)
+            ->customerVisible()
+            ->pluck('name');
+        if ($outage->isNotEmpty()) {
+            $request->session()->flash('service_outage', $outage->all());
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

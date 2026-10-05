@@ -63,7 +63,7 @@ class CountryAvailabilityService
 
     protected function build(Service $service, bool $includeDisabled = false): array
     {
-        if (!$service->is_active || !$service->customer_enabled) {
+        if (!$service->is_active || !$service->customer_enabled || $service->temporarily_unavailable) {
             return ['count' => 0, 'popular' => [], 'countries' => []];
         }
 

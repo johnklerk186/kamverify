@@ -92,4 +92,19 @@ class ServiceController extends Controller
 
         return back()->with('success', 'Customer visibility updated.');
     }
+
+    /**
+     * Temporary outage flag — service stays listed with a
+     * "Temporarily Unavailable" badge and all purchase routes reject
+     * it server-side. Mappings/config are untouched; toggling back
+     * restores normal operation instantly.
+     */
+    public function toggleUnavailable(Service $service)
+    {
+        $service->update(['temporarily_unavailable' => !$service->temporarily_unavailable]);
+
+        return back()->with('success', $service->temporarily_unavailable
+            ? "{$service->name} marked temporarily unavailable — purchases blocked."
+            : "{$service->name} restored — purchases re-enabled.");
+    }
 }

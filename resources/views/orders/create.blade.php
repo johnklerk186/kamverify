@@ -10,7 +10,10 @@
             balance: {{ (int) $wallet->balance }},
             initialService: {{ (int) request('service', 0) }},
             initialCountry: {{ (int) request('country', 0) }},
-            slugs: @json($serviceSlugs)
+            slugs: @json($serviceSlugs),
+            // Service ids in a temporary outage — selectable nowhere;
+            // clicking shows the outage notice instead of proceeding.
+            unavailable: @json($unavailableIds)
         };
     </script>
 
@@ -54,7 +57,7 @@
                     <select name="service_id" class="kv-input w-full" required>
                         <option value="">Choose a service…</option>
                         @foreach($services as $service)
-                            <option value="{{ $service->id }}" @selected((int) request('service') === $service->id)>{{ $service->name }}</option>
+                            <option value="{{ $service->id }}" @selected((int) request('service') === $service->id) @disabled($service->temporarily_unavailable)>{{ $service->name }}{{ $service->temporarily_unavailable ? ' — temporarily unavailable' : '' }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -88,6 +91,21 @@
                     <div class="p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[26rem] overflow-y-auto">
                         @foreach($services as $service)
                             @php [$icon, $color] = serviceIcon($service->slug); @endphp
+                            @if($service->temporarily_unavailable)
+                                {{-- Outage-flagged: listed but never selectable — opens the notice. --}}
+                                <button type="button"
+                                        x-show="serviceMatch({{ $service->id }})"
+                                        @click="showOutage('{{ addslashes($service->name) }}')"
+                                        class="flex items-center gap-3 rounded-xl border border-ink-200/70 px-3.5 py-3 text-left transition bg-ink-50/50 hover:border-amber-300">
+                                    <i class="{{ $icon }} {{ $color }} text-lg w-5 text-center shrink-0 opacity-70"></i>
+                                    <span class="min-w-0">
+                                        <span class="block text-sm font-semibold text-ink-500 truncate">{{ $service->name }}</span>
+                                        <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700">
+                                            <i class="fas fa-triangle-exclamation"></i> Temporarily Unavailable
+                                        </span>
+                                    </span>
+                                </button>
+                            @else
                             <a href="{{ route('orders.create', ['service' => $service->id]) }}"
                                     x-show="serviceMatch({{ $service->id }})"
                                     @click.prevent="selectService({{ $service->id }}, '{{ addslashes($service->name) }}')"
@@ -96,6 +114,7 @@
                                 <i class="{{ $icon }} {{ $color }} text-lg w-5 text-center shrink-0"></i>
                                 <span class="text-sm font-semibold text-ink-800 truncate min-w-0">{{ $service->name }}</span>
                             </a>
+                            @endif
                         @endforeach
                     </div>
                     <div x-show="!anyServiceVisible()" x-cloak class="px-6 py-10 text-center text-sm text-ink-400">
@@ -371,10 +390,22 @@
                 countryNames: @json($countries->pluck('name', 'id')),
 
                 init() {
+                    if (this.serviceId && this.isUnavailable(this.serviceId)) {
+                        // Direct ?service= link to an outage-flagged
+                        // service — show the notice, stay on step 1.
+                        this.showOutage(this.serviceNames[this.serviceId]);
+                        this.serviceId = null;
+                    }
                     if (this.serviceId) this.serviceName = this.serviceNames[this.serviceId];
                     if (this.countryId) this.countryName = this.countryNames[this.countryId];
                     if (this.serviceId && this.countryId) this.fetchQuote();
                     else if (this.serviceId) this.gateServiceNotice();
+                },
+                isUnavailable(id) {
+                    return (config.unavailable || []).includes(Number(id));
+                },
+                showOutage(name) {
+                    window.dispatchEvent(new CustomEvent('kv-service-outage', { detail: name }));
                 },
                 serviceMatch(id) {
                     return !this.serviceQuery || this.serviceNames[id].toLowerCase().includes(this.serviceQuery.toLowerCase());
@@ -423,6 +454,7 @@
                     this.purchasing = true;
                 },
                 selectService(id, name) {
+                    if (this.isUnavailable(id)) { this.showOutage(name); return; }
                     this.serviceId = id; this.serviceName = name; this.quote = null;
                     this.countryId = null; this.countryName = null;
                     this.gateServiceNotice();
@@ -431,6 +463,7 @@
                 // configured and not permanently dismissed; otherwise go
                 // straight to country selection.
                 gateServiceNotice() {
+                    if (this.isUnavailable(this.serviceId)) { this.showOutage(this.serviceName); return; }
                     const slug = this.serviceSlug();
                     if (this.serviceNotices[slug] && !this.noticeDismissed(slug)) {
                         this.noticeSlug = slug;

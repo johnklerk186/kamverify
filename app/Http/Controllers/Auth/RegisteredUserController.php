@@ -95,6 +95,13 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        $outage = \App\Models\Service::where('temporarily_unavailable', true)
+            ->customerVisible()
+            ->pluck('name');
+        if ($outage->isNotEmpty()) {
+            session()->flash('service_outage', $outage->all());
+        }
+
         return redirect(route('dashboard', absolute: false));
     }
 }

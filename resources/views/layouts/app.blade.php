@@ -276,6 +276,11 @@
 
 <x-flash-messages />
 
+{{-- Temporary service outage notice — auto-opens once per login when
+     any storefront service is flagged; re-opened by kv-service-outage
+     events whenever the customer clicks a flagged service. --}}
+<x-service-outage-modal :auto-open="session()->has('service_outage')" :names="session('service_outage', [])" />
+
 <script>
     // ---- Notification bell dropdown ----
     function notifBell(initialUnread) {

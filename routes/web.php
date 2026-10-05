@@ -171,6 +171,7 @@ Route::middleware(['admin', 'throttle:120,1'])->prefix('admin')->name('admin.')-
         Route::delete('/{service}', [AdminServiceController::class, 'destroy'])->name('destroy');
         Route::put('/{service}/toggle-status', [AdminServiceController::class, 'toggleStatus'])->name('toggle-status');
         Route::put('/{service}/toggle-customer', [AdminServiceController::class, 'toggleCustomer'])->name('toggle-customer');
+        Route::put('/{service}/toggle-unavailable', [AdminServiceController::class, 'toggleUnavailable'])->name('toggle-unavailable');
     });
 
     // Providers

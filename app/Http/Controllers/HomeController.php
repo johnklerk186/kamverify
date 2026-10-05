@@ -16,7 +16,9 @@ class HomeController extends Controller
             session(['referral_code' => strtoupper(trim($request->query('ref')))]);
         }
 
-        $services = Service::customerEnabled()->orderBy('sort_order')->orderBy('name')->limit(12)->get();
+        // customerVisible keeps outage-flagged services listed with a
+        // "Temporarily Unavailable" badge; only purchase gates exclude them.
+        $services = Service::customerVisible()->orderBy('sort_order')->orderBy('name')->limit(12)->get();
         $countries = Country::active()->orderBy('sort_order')->orderBy('name')->limit(15)->get();
 
         // Avg SMS delivery measured from real orders: order placed →

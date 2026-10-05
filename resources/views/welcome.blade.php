@@ -75,7 +75,7 @@
                                 <select id="qb-service" x-model="serviceId" class="kv-input !pl-10">
                                     <option value="">Choose a service…</option>
                                     @foreach($services as $service)
-                                        <option value="{{ $service->id }}">{{ $service->name }}</option>
+                                        <option value="{{ $service->id }}" @disabled($service->temporarily_unavailable)>{{ $service->name }}{{ $service->temporarily_unavailable ? ' — temporarily unavailable' : '' }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -144,12 +144,28 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             @foreach($services as $service)
                 @php [$icon, $color] = serviceIcon($service->icon); @endphp
-                <div class="kv-card p-5 flex items-center gap-3.5 hover:border-brand-300 transition-colors" data-reveal data-reveal-delay="{{ min($loop->index * 60, 420) }}">
-                    <div class="w-11 h-11 rounded-xl bg-ink-50 flex items-center justify-center shrink-0">
-                        <i class="{{ $icon }} text-xl {{ $color }}"></i>
+                @if($service->temporarily_unavailable)
+                    <button type="button" data-reveal data-reveal-delay="{{ min($loop->index * 60, 420) }}"
+                            onclick="window.dispatchEvent(new CustomEvent('kv-service-outage', { detail: '{{ addslashes($service->name) }}' }))"
+                            class="kv-card p-5 flex items-center gap-3.5 text-left cursor-pointer opacity-80 hover:border-amber-300 transition-colors">
+                        <div class="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                            <i class="{{ $icon }} text-xl {{ $color }}"></i>
+                        </div>
+                        <span class="min-w-0">
+                            <span class="block font-semibold text-ink-900 text-sm truncate">{{ $service->name }}</span>
+                            <span class="inline-flex items-center gap-1 mt-0.5 text-[11px] font-semibold text-amber-700">
+                                <i class="fas fa-triangle-exclamation"></i> Temporarily Unavailable
+                            </span>
+                        </span>
+                    </button>
+                @else
+                    <div class="kv-card p-5 flex items-center gap-3.5 hover:border-brand-300 transition-colors" data-reveal data-reveal-delay="{{ min($loop->index * 60, 420) }}">
+                        <div class="w-11 h-11 rounded-xl bg-ink-50 flex items-center justify-center shrink-0">
+                            <i class="{{ $icon }} text-xl {{ $color }}"></i>
+                        </div>
+                        <span class="font-semibold text-ink-900 text-sm">{{ $service->name }}</span>
                     </div>
-                    <span class="font-semibold text-ink-900 text-sm">{{ $service->name }}</span>
-                </div>
+                @endif
             @endforeach
         </div>
         @guest
@@ -396,5 +412,7 @@
         };
     }
 </script>
+
+<x-service-outage-modal />
 </body>
 </html>

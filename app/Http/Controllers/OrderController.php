@@ -41,11 +41,14 @@ class OrderController extends Controller
     public function create()
     {
         $countries = Country::active()->orderBy('name')->get();
-        $services = Service::customerEnabled()->orderBy('name')->get();
+        // customerVisible keeps temporarily-unavailable services listed —
+        // they render with an outage badge and cannot be purchased.
+        $services = Service::customerVisible()->orderBy('name')->get();
         $wallet = $this->walletService->getWallet(Auth::user());
         $serviceSlugs = $services->pluck('slug', 'id');
+        $unavailableIds = $services->where('temporarily_unavailable', true)->pluck('id')->values();
 
-        return view('orders.create', compact('countries', 'services', 'wallet', 'serviceSlugs'));
+        return view('orders.create', compact('countries', 'services', 'wallet', 'serviceSlugs', 'unavailableIds'));
     }
 
     /**
@@ -59,7 +62,7 @@ class OrderController extends Controller
 
         $service = Service::where('id', $request->service_id)->customerEnabled()->first();
         if (!$service) {
-            return response()->json(['message' => 'This service is currently disabled.'], 422);
+            return response()->json(['message' => $this->serviceDisabledMessage($request->service_id)], 422);
         }
 
         $data = app(\App\Services\CountryAvailabilityService::class)->forService($service);
@@ -89,7 +92,7 @@ class OrderController extends Controller
         if (!$country || !$service) {
             return response()->json([
                 'available' => false,
-                'message' => 'This combination is currently disabled.',
+                'message' => $this->serviceDisabledMessage($request->service_id),
             ], 422);
         }
 
@@ -120,6 +123,19 @@ class OrderController extends Controller
                 'message' => 'Unable to check availability right now. Please try again.',
             ], 503);
         }
+    }
+
+    /**
+     * Customer-facing reason a service id isn't buyable — the outage
+     * copy for temporarily-unavailable services, generic otherwise.
+     */
+    protected function serviceDisabledMessage($serviceId): string
+    {
+        $service = Service::find($serviceId);
+
+        return $service && $service->temporarily_unavailable
+            ? $service->outageMessage()
+            : 'This service is currently disabled.';
     }
 
     /**
@@ -200,7 +216,10 @@ class OrderController extends Controller
 
         try {
             $country = Country::where('id', $request->country_id)->where('is_active', true)->firstOrFail();
-            $service = Service::where('id', $request->service_id)->customerEnabled()->firstOrFail();
+            $service = Service::where('id', $request->service_id)->customerEnabled()->first();
+            if (!$service) {
+                return back()->with('error', $this->serviceDisabledMessage($request->service_id));
+            }
             $providerModel = Provider::where('is_active', true)->firstOrFail();
             $provider = $this->providerService->getProviderForModel($providerModel);
 

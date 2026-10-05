@@ -32,7 +32,19 @@
                                   title="Customer-facing purchase visibility">
                                 {{ $service->customer_enabled ? 'Storefront' : 'Hidden' }}
                             </span>
+                            @if($service->temporarily_unavailable)
+                                <span class="kv-badge bg-amber-100 text-amber-700" title="Listed but unpurchasable — outage notice shown to customers">
+                                    <i class="fas fa-triangle-exclamation mr-1"></i>Outage
+                                </span>
+                            @endif
                             <div class="flex items-center gap-1.5">
+                                <form method="POST" action="{{ route('admin.services.toggle-unavailable', $service) }}">
+                                    @csrf @method('PUT')
+                                    <button type="submit" class="p-2 text-ink-400 {{ $service->temporarily_unavailable ? 'hover:text-emerald-600' : 'hover:text-amber-600' }} transition"
+                                            title="{{ $service->temporarily_unavailable ? 'Restore availability' : 'Mark temporarily unavailable' }}">
+                                        <i class="fas {{ $service->temporarily_unavailable ? 'fa-circle-check' : 'fa-triangle-exclamation' }}"></i>
+                                    </button>
+                                </form>
                                 <form method="POST" action="{{ route('admin.services.toggle-customer', $service) }}">
                                     @csrf @method('PUT')
                                     <button type="submit" class="p-2 text-ink-400 hover:text-brand-600 transition"
