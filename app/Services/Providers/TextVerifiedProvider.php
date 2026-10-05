@@ -549,7 +549,11 @@ class TextVerifiedProvider implements ProviderInterface
 
         $v = $this->call('GET', "/api/pub/v2/verifications/{$activationId}");
         $state = strtoupper((string) ($v['state'] ?? ''));
-        $number = $this->normalizePhone((string) ($v['number'] ?? ''));
+        // The `to` filter must be the number EXACTLY as TextVerified
+        // stores it (their own client sends data.number verbatim) —
+        // normalizing to E.164 would silently match nothing when the
+        // API holds the national format.
+        $number = (string) ($v['number'] ?? '');
 
         // SMS only exist once the verification is completed
         if ($state !== 'VERIFICATION_COMPLETED' || $number === '') {
@@ -557,10 +561,7 @@ class TextVerifiedProvider implements ProviderInterface
         }
 
         try {
-            $data = $this->call('GET', '/api/pub/v2/sms', [
-                'to' => $number,
-                'reservationType' => 'VERIFICATION',
-            ]);
+            $data = $this->call('GET', '/api/pub/v2/sms', ['to' => $number]);
             $items = $data['data'] ?? $data['items'] ?? (is_array($data) ? $data : []);
             $out = [];
             foreach ((array) $items as $i => $sms) {
@@ -580,12 +581,10 @@ class TextVerifiedProvider implements ProviderInterface
             }
             return $out;
         } catch (\Throwable $e) {
-            return [[
-                'id' => $activationId . '-otp',
-                'sender' => 'SMS',
-                'message' => 'Verification code received',
-                'received_at' => now()->toIso8601String(),
-            ]];
+            // A failed SMS lookup must not fabricate a message — the next
+            // poll retries while the verification stays completed.
+            $this->logCall('GET /sms', 'error', $activationId, 'SMS_FETCH', $e->getMessage());
+            return [];
         }
     }
 

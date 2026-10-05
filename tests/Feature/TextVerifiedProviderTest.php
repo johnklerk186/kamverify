@@ -394,6 +394,36 @@ class TextVerifiedProviderTest extends TestCase
         $this->assertNotNull($order->refund_amount);
     }
 
+    public function test_sms_lookup_uses_the_number_verbatim_from_the_api(): void
+    {
+        $this->enableTextVerified();
+        Http::fake(function ($req) {
+            if (str_contains($req->url(), '/auth')) {
+                return Http::response(['token' => 't', 'expiresAt' => now()->addHour()->toIso8601String()]);
+            }
+            if (str_contains($req->url(), '/sms')) {
+                // The `to` filter must equal the stored number — a
+                // normalized +1 form would return an empty list.
+                return str_contains($req->url(), 'to=2025550123')
+                    ? Http::response(['data' => [[
+                        'id' => 'sms1', 'from_value' => 'Facebook',
+                        'sms_content' => '483920 is your code',
+                        'created_at' => now()->toIso8601String(),
+                    ]]])
+                    : Http::response(['data' => []]);
+            }
+            return Http::response([
+                'id' => 'ver_1', 'number' => '2025550123', // national format
+                'state' => 'VERIFICATION_COMPLETED',
+            ]);
+        });
+
+        $sms = $this->liveTv()->getSms('ver_1');
+        $this->assertCount(1, $sms);
+        $this->assertStringContainsString('483920', $sms[0]['message']);
+        $this->assertEquals('Facebook', $sms[0]['sender']);
+    }
+
     public function test_ambiguous_create_failure_adopts_orphan_instead_of_repurchasing(): void
     {
         $this->enableTextVerified();
