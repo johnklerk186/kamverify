@@ -132,7 +132,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead><tr class="text-left text-xs text-ink-500 border-b border-ink-100">
-                        <th class="py-2 pr-3">#</th><th class="py-2 pr-3">Date</th><th class="py-2 pr-3">Country</th>
+                        <th class="py-2 pr-3">#</th><th class="py-2 pr-3">Date</th><th class="py-2 pr-3">Provider</th><th class="py-2 pr-3">Country</th>
                         <th class="py-2 pr-3">Number</th><th class="py-2 pr-3">Activation</th><th class="py-2 pr-3">Status</th>
                         <th class="py-2 pr-3">SMS</th><th class="py-2 pr-3">Sold</th><th class="py-2 pr-3">Refund</th>
                         <th class="py-2 pr-3">Provider outcome</th><th class="py-2">Reason</th>
@@ -142,6 +142,7 @@
                             <tr class="border-b border-ink-50 align-top">
                                 <td class="py-2 pr-3"><a href="{{ route('admin.orders.show', $r['order']) }}" class="text-brand-600 hover:underline">#{{ $r['order']->id }}</a></td>
                                 <td class="py-2 pr-3 text-xs text-ink-500 whitespace-nowrap">{{ $r['created_at']->format('M d H:i') }}</td>
+                                <td class="py-2 pr-3 text-xs font-medium">{{ $r['provider'] }}</td>
                                 <td class="py-2 pr-3 text-xs">{{ $r['country'] }}</td>
                                 <td class="py-2 pr-3 font-mono text-xs">+{{ $r['masked_phone'] }}</td>
                                 <td class="py-2 pr-3 font-mono text-xs text-ink-500">{{ $r['activation_id'] ?: '—' }}</td>

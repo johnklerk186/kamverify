@@ -37,7 +37,7 @@ class FacebookAuditService
 
         $orders = Order::whereIn('service_id', $services)
             ->when($since, fn ($q) => $q->where('created_at', '>=', $since))
-            ->with('country', 'smsMessages')
+            ->with('country', 'smsMessages', 'provider')
             ->orderByDesc('created_at')
             ->get();
 
@@ -120,6 +120,7 @@ class FacebookAuditService
 
         return [
             'order' => $o,
+            'provider' => $o->provider->name ?? '?',
             'country' => $o->country->name ?? '?',
             'masked_phone' => $this->maskPhone($o->phone_number),
             'prefix' => $digits !== '' ? substr($digits, 0, 4) : 'unknown',

@@ -97,7 +97,11 @@ class OrderController extends Controller
         }
 
         try {
-            $providerModel = Provider::where('is_active', true)->firstOrFail();
+            // Route per-service: facebook → TextVerified, others → HeroSMS.
+            $providerModel = $this->providerService->providerFor($service, $country);
+            if (!$providerModel) {
+                return response()->json(['available' => false, 'message' => 'No provider serves this combination right now.'], 422);
+            }
             $provider = $this->providerService->getProviderForModel($providerModel);
 
             $numbers = $provider->getAvailableNumbers($country->code, $service->slug);
@@ -220,7 +224,11 @@ class OrderController extends Controller
             if (!$service) {
                 return back()->with('error', $this->serviceDisabledMessage($request->service_id));
             }
-            $providerModel = Provider::where('is_active', true)->firstOrFail();
+            // Route per-service: facebook → TextVerified, others → HeroSMS.
+            $providerModel = $this->providerService->providerFor($service, $country);
+            if (!$providerModel) {
+                return back()->with('error', 'This service is temporarily unavailable for the selected country.');
+            }
             $provider = $this->providerService->getProviderForModel($providerModel);
 
             // Get available numbers from provider

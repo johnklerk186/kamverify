@@ -13,6 +13,18 @@ return [
         'reseller_param' => env('HERO_SMS_RESELLER_PARAM', 'userId'),
     ],
 
+    'textverified' => [
+        // TextVerified API v2 — REST/JSON, bearer auth. The bearer token
+        // is generated from X-API-KEY + X-API-USERNAME (account email)
+        // via POST /api/pub/v2/auth and cached for its documented life.
+        'enabled' => env('TEXTVERIFIED_ENABLED', false),
+        'api_key' => env('TEXTVERIFIED_API_KEY'),
+        'username' => env('TEXTVERIFIED_EMAIL'),
+        'base_url' => env('TEXTVERIFIED_BASE_URL', 'https://www.textverified.com'),
+        'mode' => env('TEXTVERIFIED_MODE', 'production'), // mock | production
+        'timeout' => env('TEXTVERIFIED_TIMEOUT', 30),
+    ],
+
     'fapshi' => [
         // sandbox | live — maps to sandbox.fapshi.com / live.fapshi.com
         'mode' => env('FAPSHI_MODE', 'sandbox'),

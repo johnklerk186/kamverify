@@ -24,7 +24,11 @@
                                 <i class="{{ $icon }} {{ $color }}"></i>
                             </span>
                             <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-ink-900 text-sm">{{ $service->name }}</p>
+                                <p class="font-semibold text-ink-900 text-sm">{{ $service->name }}
+                                    @if($service->provider_mapping['provider'] ?? null)
+                                        <span class="text-xs font-normal text-ink-400">→ {{ $service->provider_mapping['provider'] }}</span>
+                                    @endif
+                                </p>
                                 <p class="text-xs text-ink-400 font-mono">{{ $service->slug }}</p>
                             </div>
                             <x-status-badge :status="$service->is_active ? 'active' : 'inactive'" />

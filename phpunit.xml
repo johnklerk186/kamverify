@@ -38,5 +38,9 @@
         <env name="HERO_SMS_API_KEY" value=""/>
         <env name="FAPSHI_USE_MOCK" value="true"/>
         <env name="FAPSHI_MODE" value="sandbox"/>
+        <env name="TEXTVERIFIED_ENABLED" value="true"/>
+        <env name="TEXTVERIFIED_MODE" value="mock"/>
+        <env name="TEXTVERIFIED_API_KEY" value=""/>
+        <env name="TEXTVERIFIED_EMAIL" value=""/>
     </php>
 </phpunit>

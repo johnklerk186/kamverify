@@ -67,8 +67,10 @@ class CountryAvailabilityService
             return ['count' => 0, 'popular' => [], 'countries' => []];
         }
 
-        $provider = Provider::where('is_active', true)->first();
-        if (!$provider) {
+        // Route per-service — facebook resolves to TextVerified when
+        // its provider_mapping override is set; others stay on HeroSMS.
+        $provider = $this->providerService->providerFor($service);
+        if (!$provider || !$provider->is_active) {
             return ['count' => 0, 'popular' => [], 'countries' => []];
         }
 

@@ -46,7 +46,9 @@ class ServiceController extends Controller
 
     public function edit(Service $service)
     {
-        return view('admin.services.edit', compact('service'));
+        $providers = \App\Models\Provider::orderBy('name')->get();
+
+        return view('admin.services.edit', compact('service', 'providers'));
     }
 
     public function update(Request $request, Service $service)
@@ -58,11 +60,17 @@ class ServiceController extends Controller
             'icon' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             'customer_enabled' => 'boolean',
+            'fulfilment_provider' => 'nullable|string|exists:providers,slug',
         ]);
 
-        $service->update($request->only([
+        $mapping = $service->provider_mapping ?? [];
+        $mapping['provider'] = $request->filled('fulfilment_provider')
+            ? $request->input('fulfilment_provider') : null;
+        $mapping = array_filter($mapping);
+
+        $service->update(array_merge($request->only([
             'name', 'slug', 'description', 'icon', 'is_active', 'customer_enabled',
-        ]));
+        ]), ['provider_mapping' => $mapping ?: null]));
 
         return redirect()->route('admin.services.index')
             ->with('success', 'Service updated successfully.');

@@ -453,6 +453,37 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // TextVerified — fulfils Facebook/Meta only (US verifications).
+        // The provider row + mappings are seeded idempotently; routing
+        // activates via services.provider_mapping.provider. HeroSMS
+        // keeps every other service unchanged.
+        $tv = Provider::firstOrCreate(
+            ['slug' => 'textverified'],
+            [
+                'name' => 'TextVerified',
+                'base_url' => 'https://www.textverified.com',
+                'is_active' => true,
+                'config' => ['timeout' => 30],
+            ]
+        );
+        $facebook = Service::where('slug', 'facebook')->first();
+        if ($tv && $facebook) {
+            \App\Models\ProviderService::firstOrCreate(
+                ['provider_id' => $tv->id, 'service_id' => $facebook->id],
+                ['provider_service_code' => 'facebook', 'cost' => 0, 'is_active' => true]
+            );
+            $us = Country::where('code', 'US')->first();
+            if ($us) {
+                \App\Models\ProviderCountry::firstOrCreate(
+                    ['provider_id' => $tv->id, 'country_id' => $us->id],
+                    ['provider_country_code' => 'US', 'is_active' => true]
+                );
+            }
+            if (empty($facebook->provider_mapping['provider'])) {
+                $facebook->update(['provider_mapping' => ['provider' => 'textverified']]);
+            }
+        }
+
         $this->seedBlogPosts();
     }
 
