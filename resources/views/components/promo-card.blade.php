@@ -14,10 +14,10 @@
                 </span>
             </div>
             <p class="mt-2 text-sm font-bold">Special prices for 7 days</p>
-            <p class="mt-1 text-xs text-ink-300">Exclusive prices on your favorite verification services — limited time only.</p>
+            <p class="mt-1 text-xs text-ink-300">We're on promo — enjoy exclusive prices for your favorite verification services.</p>
 
             <a href="{{ route('orders.create') }}" class="mt-3.5 kv-btn w-full !py-2 bg-white text-ink-900 hover:bg-ink-100 text-xs font-bold justify-center">
-                <i class="fas fa-cart-shopping"></i> Shop now
+                <i class="fas fa-cart-shopping"></i> SHOP NOW
             </a>
         </div>
     </div>

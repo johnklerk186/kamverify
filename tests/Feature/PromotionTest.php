@@ -492,7 +492,7 @@ class PromotionTest extends TestCase
 
         $html = $this->actingAs($user)->get('/dashboard')->assertOk()->getContent();
         $this->assertStringContainsString('WEEKLY PROMO', strtoupper($html));
-        $this->assertStringContainsString('Shop now', $html);
+        $this->assertStringContainsString('SHOP NOW', $html);
         $this->assertStringContainsString('Ends in', $html);
     }
 

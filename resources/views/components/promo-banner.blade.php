@@ -16,8 +16,8 @@
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-500/20 border border-brand-400/30 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-brand-200">
                         <i class="fas fa-bolt"></i> Weekly Promo
                     </span>
-                    <h3 class="mt-2.5 text-xl sm:text-2xl font-extrabold tracking-tight">Get verified for less</h3>
-                    <p class="mt-1 text-sm text-ink-300">We're on promo — enjoy exclusive prices on your favorite verification services. Back to normal after the promotion.</p>
+                    <h3 class="mt-2.5 text-xl sm:text-2xl font-extrabold tracking-tight">Get Verified for Less!</h3>
+                    <p class="mt-1 text-sm text-ink-300">We're on promo — enjoy exclusive prices for your favorite verification services. Limited-time prices. Back to normal after the promotion.</p>
                 </div>
 
                 <div class="shrink-0 flex flex-col items-start md:items-end gap-3">
@@ -32,7 +32,7 @@
                     </div>
                     <a href="{{ auth()->check() ? route('orders.create') : route('register') }}"
                        class="kv-btn-primary !px-6 !py-2.5 w-full md:w-auto text-center">
-                        <i class="fas fa-bolt"></i> Get a number
+                        <i class="fas fa-bolt"></i> GET A NUMBER
                     </a>
                 </div>
             </div>
