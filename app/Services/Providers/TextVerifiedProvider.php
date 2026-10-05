@@ -293,8 +293,8 @@ class TextVerifiedProvider implements ProviderInterface
 
         try {
             $data = $this->call('GET', '/api/pub/v2/services', [
-                'numberType' => 'MOBILE',
-                'reservationType' => 'VERIFICATION',
+                'numberType' => 'mobile',
+                'reservationType' => 'verification',
             ]);
             $out = [];
             foreach ((array) ($data['data'] ?? $data) as $row) {
@@ -335,8 +335,8 @@ class TextVerifiedProvider implements ProviderInterface
         try {
             $price = $this->call('POST', '/api/pub/v2/pricing/verifications', [], [
                 'serviceName' => $serviceName,
-                'capability' => 'SMS',
-                'numberType' => 'MOBILE',
+                'capability' => 'sms',
+                'numberType' => 'mobile',
                 'areaCode' => false,
                 'carrier' => false,
             ]);
@@ -349,8 +349,8 @@ class TextVerifiedProvider implements ProviderInterface
             try {
                 $inv = $this->call('POST', '/api/pub/v2/inventory/verifications', [], [
                     'serviceName' => $serviceName,
-                    'capability' => 'SMS',
-                    'numberType' => 'MOBILE',
+                    'capability' => 'sms',
+                    'numberType' => 'mobile',
                 ]);
                 $count = (int) ($inv['quantity'] ?? $inv['count'] ?? $inv['available'] ?? 1);
             } catch (\Throwable $e) {
@@ -388,7 +388,7 @@ class TextVerifiedProvider implements ProviderInterface
             throw new TextVerifiedException('NO_MAPPING', 'No TextVerified mapping for this service');
         }
 
-        $body = ['serviceName' => $serviceName, 'capability' => 'SMS'];
+        $body = ['serviceName' => $serviceName, 'capability' => 'sms'];
         if (!empty($options['max_price']) && $options['max_price'] > 0) {
             $body['maxPrice'] = round((float) $options['max_price'] * 1.10, 4);
         }
@@ -444,7 +444,7 @@ class TextVerifiedProvider implements ProviderInterface
             foreach ((array) Cache::get('tvmock:index', []) as $v) {
                 $created = strtotime((string) ($v['createdAt'] ?? 'now'));
                 if (($v['serviceName'] ?? '') === $serviceName
-                    && ($v['state'] ?? '') === 'VERIFICATION_PENDING'
+                    && $this->normalizeState($v['state'] ?? '') === 'VERIFICATION_PENDING'
                     && $created >= $cutoff) {
                     return $v;
                 }
@@ -459,7 +459,7 @@ class TextVerifiedProvider implements ProviderInterface
 
             foreach ((array) $items as $v) {
                 if (!is_array($v)) continue;
-                $state = strtoupper((string) ($v['state'] ?? ''));
+                $state = $this->normalizeState($v['state'] ?? '');
                 $svc = $v['serviceName'] ?? $v['service_name'] ?? '';
                 $created = isset($v['createdAt']) ? strtotime((string) $v['createdAt'])
                     : (isset($v['created_at']) ? strtotime((string) $v['created_at']) : 0);
@@ -492,6 +492,20 @@ class TextVerifiedProvider implements ProviderInterface
             'cost' => isset($v['totalCost']) ? (float) $v['totalCost'] : (isset($v['total_cost']) ? (float) $v['total_cost'] : null),
             'status' => 'success',
         ];
+    }
+
+    /**
+     * TextVerified returns camelCase state strings
+     * ("verificationCompleted"). Normalize to the SNAKE_UPPER constants
+     * used throughout the provider; already-SNAKE values pass through.
+     */
+    protected function normalizeState(?string $state): string
+    {
+        $s = (string) $state;
+        if (!str_contains($s, '_')) {
+            $s = preg_replace('/([a-z0-9])([A-Z])/', '$1_$2', $s);
+        }
+        return strtoupper($s);
     }
 
     protected function normalizePhone(string $number): string
@@ -527,7 +541,7 @@ class TextVerifiedProvider implements ProviderInterface
         }
 
         $v = $this->call('GET', "/api/pub/v2/verifications/{$activationId}");
-        $state = strtoupper((string) ($v['state'] ?? 'UNKNOWN'));
+        $state = $this->normalizeState($v['state'] ?? 'UNKNOWN');
 
         $status = match ($state) {
             'VERIFICATION_COMPLETED' => 'STATUS_OK',
@@ -548,7 +562,7 @@ class TextVerifiedProvider implements ProviderInterface
         }
 
         $v = $this->call('GET', "/api/pub/v2/verifications/{$activationId}");
-        $state = strtoupper((string) ($v['state'] ?? ''));
+        $state = $this->normalizeState($v['state'] ?? '');
         // The `to` filter must be the number EXACTLY as TextVerified
         // stores it (their own client sends data.number verbatim) —
         // normalizing to E.164 would silently match nothing when the
@@ -607,7 +621,7 @@ class TextVerifiedProvider implements ProviderInterface
         }
 
         $this->track('cancel');
-        $state = strtoupper((string) ($this->getActivationStatus($activationId)['provider_state'] ?? 'UNKNOWN'));
+        $state = $this->normalizeState($this->getActivationStatus($activationId)['provider_state'] ?? 'UNKNOWN');
 
         switch ($state) {
             case 'VERIFICATION_COMPLETED':
@@ -628,7 +642,7 @@ class TextVerifiedProvider implements ProviderInterface
         // the verification status". Confirm the terminal state before
         // reporting released; if it hasn't landed yet, the cancel is
         // treated as unconfirmed (retryable), not a confirmed release.
-        $after = strtoupper((string) ($this->getActivationStatus($activationId)['provider_state'] ?? 'UNKNOWN'));
+        $after = $this->normalizeState($this->getActivationStatus($activationId)['provider_state'] ?? 'UNKNOWN');
         if (!in_array($after, ['VERIFICATION_CANCELED', 'VERIFICATION_REFUNDED', 'VERIFICATION_TIMED_OUT'], true)) {
             throw new TextVerifiedException(
                 'CANCEL_UNCONFIRMED',
@@ -705,7 +719,7 @@ class TextVerifiedProvider implements ProviderInterface
     protected function mockGetActivationStatus(string $activationId): array
     {
         $v = Cache::get("tvmock:ver:{$activationId}");
-        $state = strtoupper((string) ($v['state'] ?? 'VERIFICATION_PENDING'));
+        $state = $this->normalizeState($v['state'] ?? 'VERIFICATION_PENDING');
         return [
             'status' => match ($state) {
                 'VERIFICATION_COMPLETED' => 'STATUS_OK',
@@ -719,7 +733,7 @@ class TextVerifiedProvider implements ProviderInterface
     protected function mockGetSms(string $activationId): array
     {
         $v = Cache::get("tvmock:ver:{$activationId}");
-        if (!$v || ($v['state'] ?? '') !== 'VERIFICATION_COMPLETED') {
+        if (!$v || $this->normalizeState($v['state'] ?? '') !== 'VERIFICATION_COMPLETED') {
             return [];
         }
         $code = Cache::get("tvmock:deliver:{$activationId}", '483920');
@@ -734,7 +748,7 @@ class TextVerifiedProvider implements ProviderInterface
     protected function mockCancelActivation(string $activationId): array
     {
         $v = Cache::get("tvmock:ver:{$activationId}");
-        $state = strtoupper((string) ($v['state'] ?? 'VERIFICATION_PENDING'));
+        $state = $this->normalizeState($v['state'] ?? 'VERIFICATION_PENDING');
 
         switch ($state) {
             case 'VERIFICATION_COMPLETED':

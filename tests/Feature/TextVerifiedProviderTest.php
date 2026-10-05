@@ -236,7 +236,7 @@ class TextVerifiedProviderTest extends TestCase
         Http::fake(array_merge($this->fakeAuth(), [
             '*/api/pub/v2/verifications' => Http::response([
                 'id' => 'ver_123', 'number' => '+12025550123',
-                'totalCost' => 0.75, 'state' => 'VERIFICATION_PENDING',
+                'totalCost' => 0.75, 'state' => 'verificationPending',
             ]),
         ]));
 
@@ -254,7 +254,7 @@ class TextVerifiedProviderTest extends TestCase
         Http::fake(array_merge($this->fakeAuth(), [
             '*/api/pub/v2/verifications' => Http::response([
                 'id' => 'ver_10digit', 'number' => '2025550123', // national format
-                'totalCost' => 0.75, 'state' => 'VERIFICATION_PENDING',
+                'totalCost' => 0.75, 'state' => 'verificationPending',
             ]),
         ]));
 
@@ -320,7 +320,7 @@ class TextVerifiedProviderTest extends TestCase
         $id = $order->provider_activation_id;
 
         $v = Cache::get("tvmock:ver:{$id}");
-        $v['state'] = 'VERIFICATION_COMPLETED';
+        $v['state'] = 'verificationCompleted';
         Cache::put("tvmock:ver:{$id}", $v, 3600);
         Cache::put("tvmock:deliver:{$id}", '483920', 3600);
 
@@ -414,7 +414,7 @@ class TextVerifiedProviderTest extends TestCase
             }
             return Http::response([
                 'id' => 'ver_1', 'number' => '2025550123', // national format
-                'state' => 'VERIFICATION_COMPLETED',
+                'state' => 'verificationCompleted', // API returns camelCase
             ]);
         });
 
@@ -441,14 +441,14 @@ class TextVerifiedProviderTest extends TestCase
                 // Reconcile list: an orphan pending verification exists.
                 return Http::response([[
                     'id' => 'ver_orphaned', 'serviceName' => 'facebook',
-                    'state' => 'VERIFICATION_PENDING',
+                    'state' => 'verificationPending',
                     'createdAt' => now()->toIso8601String(),
                 ]]);
             }
             // GET /verifications/ver_orphaned — full payload
             return Http::response([
                 'id' => 'ver_orphaned', 'number' => '+13125550111',
-                'serviceName' => 'facebook', 'state' => 'VERIFICATION_PENDING',
+                'serviceName' => 'facebook', 'state' => 'verificationPending',
                 'totalCost' => 0.5, 'createdAt' => now()->toIso8601String(),
             ]);
         });
@@ -532,7 +532,7 @@ class TextVerifiedProviderTest extends TestCase
         Http::fake(array_merge($this->fakeAuth('super-secret-bearer'), [
             '*/api/pub/v2/verifications' => Http::response([
                 'id' => 'v1', 'number' => '+12025550100',
-                'totalCost' => 0.5, 'state' => 'VERIFICATION_PENDING',
+                'totalCost' => 0.5, 'state' => 'verificationPending',
             ]),
         ]));
 
@@ -583,7 +583,7 @@ class TextVerifiedProviderTest extends TestCase
             }
             // Verification still PENDING — cancel did not release the charge.
             return Http::response([
-                'id' => 'ver_1', 'number' => '2025550123', 'state' => 'VERIFICATION_PENDING',
+                'id' => 'ver_1', 'number' => '2025550123', 'state' => 'verificationPending',
             ]);
         });
 
@@ -614,7 +614,7 @@ class TextVerifiedProviderTest extends TestCase
             if ($req->method() === 'POST' && str_contains($req->url(), '/cancel')) {
                 return Http::response([], 200);
             }
-            return Http::response(['id' => 'x', 'number' => '2025550123', 'state' => 'VERIFICATION_PENDING']);
+            return Http::response(['id' => 'x', 'number' => '2025550123', 'state' => 'verificationPending']);
         });
 
         // Sync queue ignores delay() — fake it so the deferred job is
@@ -631,7 +631,7 @@ class TextVerifiedProviderTest extends TestCase
 
         // Job retries; provider now reports CANCELED → refund lands once.
         // dispatchSync bypasses the faked queue and runs handle() directly.
-        Cache::put("tvmock:ver:{$id}", ['state' => 'VERIFICATION_CANCELED'], 3600);
+        Cache::put("tvmock:ver:{$id}", ['state' => 'verificationCanceled'], 3600);
         config(['services.textverified.mode' => 'mock']);
         (new CancelOrderJob($order->id))->handle(
             app(ProviderRouter::class), app(\App\Services\OrderService::class));
