@@ -192,6 +192,15 @@ Route::middleware(['admin', 'throttle:120,1'])->prefix('admin')->name('admin.')-
     Route::get('/service-countries', [AdminServiceCountryController::class, 'index'])->name('service-countries.index');
     Route::put('/service-countries/{service}/{country}', [AdminServiceCountryController::class, 'update'])->name('service-countries.update');
 
+    // Promotions — temporary pricing layer over the normal price engine
+    Route::prefix('promotions')->name('promotions.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PromotionController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\PromotionController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\PromotionController::class, 'store'])->name('store');
+        Route::put('/{promotion}/toggle', [\App\Http\Controllers\Admin\PromotionController::class, 'toggle'])->name('toggle');
+        Route::get('/{promotion}/coverage', [\App\Http\Controllers\Admin\PromotionController::class, 'coverage'])->name('coverage');
+    });
+
     Route::prefix('pricing')->name('pricing.')->group(function () {
         Route::get('/', [AdminPricingController::class, 'index'])->name('index');
         Route::put('/defaults', [AdminPricingController::class, 'updateDefaults'])->name('defaults');

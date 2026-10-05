@@ -18,6 +18,9 @@ class Order extends Model
         'phone_number',
         'purchase_price',
         'selling_price',
+        'normal_price',
+        'discount_amount',
+        'promotion_id',
         'profit',
         'status',
         'expires_at',
@@ -33,6 +36,8 @@ class Order extends Model
     protected $casts = [
         'purchase_price' => 'decimal:2',
         'selling_price' => 'decimal:2',
+        'normal_price' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'profit' => 'decimal:2',
         'refund_amount' => 'decimal:2',
         'expires_at' => 'datetime',
@@ -60,6 +65,11 @@ class Order extends Model
     public function provider(): BelongsTo
     {
         return $this->belongsTo(Provider::class);
+    }
+
+    public function promotion(): BelongsTo
+    {
+        return $this->belongsTo(Promotion::class);
     }
 
     public function smsMessages(): HasMany

@@ -167,7 +167,17 @@
                     <dl class="mt-4 space-y-2.5 text-sm">
                         <div class="flex justify-between gap-3"><dt class="text-ink-500 shrink-0">Service</dt><dd class="font-medium text-ink-900 text-right min-w-0 truncate">{{ $order->service->name }}</dd></div>
                         <div class="flex justify-between gap-3"><dt class="text-ink-500 shrink-0">Country</dt><dd class="font-medium text-ink-900 text-right min-w-0 truncate">{{ $order->country->name }}</dd></div>
-                        <div class="flex justify-between gap-3"><dt class="text-ink-500 shrink-0">Price</dt><dd class="font-bold text-ink-900 text-right">{{ xaf($order->selling_price) }}</dd></div>
+                        <div class="flex justify-between gap-3">
+                            <dt class="text-ink-500 shrink-0">Price</dt>
+                            <dd class="font-bold text-ink-900 text-right">
+                                @if($order->promotion_id && $order->normal_price)
+                                    <span class="text-xs font-medium text-ink-400 line-through mr-1.5">{{ xaf($order->normal_price) }}</span>{{ xaf($order->selling_price) }}
+                                    <span class="kv-badge bg-brand-50 text-brand-700 !text-[10px] ml-1">PROMO</span>
+                                @else
+                                    {{ xaf($order->selling_price) }}
+                                @endif
+                            </dd>
+                        </div>
                         <div class="flex justify-between gap-3"><dt class="text-ink-500 shrink-0">SMS received</dt><dd class="font-medium text-ink-900 text-right" x-text="knownCount + newMessages.length">{{ $smsMessages->count() }}</dd></div>
                         @if($order->expires_at)
                             <div class="flex justify-between"><dt class="text-ink-500">Expires</dt><dd class="font-medium text-ink-900">{{ $order->expires_at->format('H:i') }}</dd></div>

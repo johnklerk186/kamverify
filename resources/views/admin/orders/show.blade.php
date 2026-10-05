@@ -84,6 +84,12 @@
                     <h3 class="font-bold text-ink-900 text-sm">Financials</h3>
                     <dl class="mt-3 space-y-2.5 text-sm">
                         <div class="flex justify-between"><dt class="text-ink-500">Customer paid</dt><dd class="font-bold text-ink-900">{{ xaf($order->selling_price) }}</dd></div>
+                        @if($order->promotion_id)
+                            <div class="flex justify-between">
+                                <dt class="text-ink-500">Promotion</dt>
+                                <dd class="text-brand-700 font-medium">{{ $order->promotion->name ?? '#' . $order->promotion_id }} · −{{ xaf($order->discount_amount) }} off {{ xaf($order->normal_price) }}</dd>
+                            </div>
+                        @endif
                         <div class="flex justify-between"><dt class="text-ink-500">Provider cost</dt><dd class="text-ink-900">{{ number_format($order->purchase_price, 2) }} USD</dd></div>
                         <div class="flex justify-between"><dt class="text-ink-500">Profit</dt><dd class="font-semibold text-emerald-600">{{ xaf($order->profit) }}</dd></div>
                         @if($order->refund_amount)

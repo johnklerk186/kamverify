@@ -22,6 +22,7 @@ class OrderController extends Controller
     protected WalletService $walletService;
     protected ProviderService $providerService;
     protected PricingService $pricingService;
+    protected \App\Services\PromotionService $promotionService;
     protected SmsService $smsService;
 
     public function __construct(
@@ -29,12 +30,14 @@ class OrderController extends Controller
         WalletService $walletService,
         ProviderService $providerService,
         PricingService $pricingService,
+        \App\Services\PromotionService $promotionService,
         SmsService $smsService
     ) {
         $this->orderService = $orderService;
         $this->walletService = $walletService;
         $this->providerService = $providerService;
         $this->pricingService = $pricingService;
+        $this->promotionService = $promotionService;
         $this->smsService = $smsService;
     }
 
@@ -107,13 +110,22 @@ class OrderController extends Controller
             $numbers = $provider->getAvailableNumbers($country->code, $service->slug);
             $available = !empty($numbers);
             $providerCost = $available ? (float) $numbers[0]['cost'] : null;
-            $price = $available ? $this->pricingService->calculateSellingPrice($providerCost, $country, $service) : null;
+            // Promotion-aware quote — the same code path createOrder uses,
+            // so the displayed price is exactly what the wallet is charged.
+            $quote = $available
+                ? $this->promotionService->quote($service, $country, $providerCost)
+                : null;
+            $price = $quote['price'] ?? null;
             $balance = $this->walletService->getBalance(Auth::user());
 
             return response()->json([
                 'available' => $available,
                 'price' => $price,
                 'price_formatted' => $price !== null ? xaf($price) : null,
+                'is_promo' => $quote !== null && $quote['promotion_id'] !== null,
+                'normal_price' => $quote['normal_price'] ?? null,
+                'normal_price_formatted' => ($quote['normal_price'] ?? null) !== null ? xaf($quote['normal_price']) : null,
+                'discount_formatted' => ($quote['discount_amount'] ?? null) !== null ? xaf($quote['discount_amount']) : null,
                 'balance' => (int) round($balance),
                 'balance_formatted' => xaf($balance),
                 'sufficient' => $available ? $balance >= $price : false,

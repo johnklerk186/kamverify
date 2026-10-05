@@ -18,18 +18,24 @@ class OrderService
     protected WalletService $walletService;
     protected PricingService $pricingService;
     protected ReferralService $referralService;
+    protected PromotionService $promotionService;
 
-    public function __construct(WalletService $walletService, PricingService $pricingService, ReferralService $referralService)
+    public function __construct(WalletService $walletService, PricingService $pricingService, ReferralService $referralService, PromotionService $promotionService)
     {
         $this->walletService = $walletService;
         $this->pricingService = $pricingService;
         $this->referralService = $referralService;
+        $this->promotionService = $promotionService;
     }
 
     public function createOrder(User $user, Country $country, Service $service, Provider $provider, float $providerCost): Order
     {
         $order = DB::transaction(function () use ($user, $country, $service, $provider, $providerCost) {
-            $sellingPrice = $this->pricingService->calculateSellingPrice($providerCost, $country, $service);
+            // Promotion is a pricing layer: the quote decides the charged
+            // price server-side and carries the promo provenance. Browser
+            // input never participates in pricing.
+            $quote = $this->promotionService->quote($service, $country, $providerCost);
+            $sellingPrice = $quote['price'];
             $profit = $this->pricingService->calculateProfit($sellingPrice, $providerCost);
 
             // Check wallet balance
@@ -53,6 +59,9 @@ class OrderService
                 'provider_id' => $provider->id,
                 'purchase_price' => $providerCost,
                 'selling_price' => $sellingPrice,
+                'normal_price' => $quote['normal_price'],
+                'discount_amount' => $quote['discount_amount'],
+                'promotion_id' => $quote['promotion_id'],
                 'profit' => $profit,
                 'status' => 'pending',
                 'expires_at' => Carbon::now()->addMinutes(15), // Default 15 minutes

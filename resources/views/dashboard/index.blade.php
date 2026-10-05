@@ -28,6 +28,9 @@
             </div>
         </div>
 
+        {{-- Weekly promotion --}}
+        <x-promo-card />
+
         {{-- Stats --}}
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <x-stat-card label="Active orders" :value="$orderStats['active_orders']" icon="fa-bolt" accent="amber" :href="route('orders.index', ['status' => 'active'])" />

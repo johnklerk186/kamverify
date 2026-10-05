@@ -26,6 +26,7 @@
             ['route' => 'admin.service-countries.index', 'pattern' => 'admin.service-countries.*', 'icon' => 'fa-star',      'label' => 'Service Countries'],
             ['route' => 'admin.providers.index',      'pattern' => 'admin.providers.*',    'icon' => 'fa-server',            'label' => 'Providers'],
             ['route' => 'admin.pricing.index',        'pattern' => 'admin.pricing.*',      'icon' => 'fa-tag',               'label' => 'Pricing'],
+            ['route' => 'admin.promotions.index',     'pattern' => 'admin.promotions.*',   'icon' => 'fa-bullhorn',          'label' => 'Promotions'],
         ],
         'Finance' => [
             ['route' => 'admin.payments.index',       'pattern' => 'admin.payments.*',     'icon' => 'fa-credit-card',       'label' => 'Payments'],

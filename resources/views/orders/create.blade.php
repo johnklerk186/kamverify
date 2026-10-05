@@ -219,7 +219,18 @@
                                     <i class="fas fa-circle-check text-emerald-600"></i>
                                     <span class="text-sm font-semibold text-emerald-800">Numbers available</span>
                                 </div>
-                                <span class="text-2xl font-extrabold text-ink-900" x-text="quote?.price_formatted"></span>
+                                <div class="text-right">
+                                    <span x-show="quote?.is_promo" class="block text-xs font-semibold text-ink-400 line-through" x-text="quote?.normal_price_formatted"></span>
+                                    <span class="text-2xl font-extrabold text-ink-900" x-text="quote?.price_formatted"></span>
+                                </div>
+                            </div>
+                            <div x-show="quote?.is_promo" x-cloak class="mt-2.5 flex items-center justify-between rounded-xl bg-brand-50 border border-brand-200/70 px-4 py-2.5">
+                                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-700">
+                                    <i class="fas fa-bolt"></i> WEEKLY PROMO
+                                </span>
+                                <span class="text-xs font-semibold text-brand-700">
+                                    You save <strong x-text="quote?.discount_formatted"></strong>
+                                </span>
                             </div>
                             <ul class="mt-4 space-y-2 text-sm text-ink-600">
                                 <li class="flex justify-between"><span>Service</span><strong class="text-ink-900" x-text="serviceName"></strong></li>
@@ -268,7 +279,11 @@
                     </div>
                     <div class="flex items-center justify-between gap-3 pt-3 border-t border-ink-100">
                         <dt class="text-ink-500">Price</dt>
-                        <dd class="font-extrabold text-ink-900 text-lg" x-text="quote?.available ? quote.price_formatted : '—'"></dd>
+                        <dd class="text-right">
+                            <span x-show="quote?.is_promo" class="block text-xs font-medium text-ink-400 line-through" x-text="quote?.normal_price_formatted"></span>
+                            <span class="font-extrabold text-ink-900 text-lg" x-text="quote?.available ? quote.price_formatted : '—'"></span>
+                            <span x-show="quote?.is_promo" class="kv-badge bg-brand-50 text-brand-700 !text-[10px]">PROMO</span>
+                        </dd>
                     </div>
                     <div class="flex items-center justify-between gap-3">
                         <dt class="text-ink-500">Balance</dt>
