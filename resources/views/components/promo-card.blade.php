@@ -14,21 +14,7 @@
                 </span>
             </div>
             <p class="mt-2 text-sm font-bold">Special prices for 7 days</p>
-
-            <div class="mt-3 grid grid-cols-3 gap-2 text-center">
-                <div class="rounded-lg bg-white/10 border border-white/10 px-2 py-2">
-                    <p class="text-[10px] font-semibold text-ink-300">Facebook</p>
-                    <p class="text-sm font-extrabold">{{ xaf($promo['facebook_price'] ?? 0) }}</p>
-                </div>
-                <div class="rounded-lg bg-white/10 border border-white/10 px-2 py-2">
-                    <p class="text-[10px] font-semibold text-ink-300">WhatsApp</p>
-                    <p class="text-sm font-extrabold">From {{ xaf($promo['whatsapp_us_price'] ?? 0) }}</p>
-                </div>
-                <div class="rounded-lg bg-white/10 border border-white/10 px-2 py-2">
-                    <p class="text-[10px] font-semibold text-ink-300">Telegram</p>
-                    <p class="text-sm font-extrabold">{{ xaf($promo['telegram_price'] ?? 0) }}</p>
-                </div>
-            </div>
+            <p class="mt-1 text-xs text-ink-300">Exclusive prices on your favorite verification services — limited time only.</p>
 
             <a href="{{ route('orders.create') }}" class="mt-3.5 kv-btn w-full !py-2 bg-white text-ink-900 hover:bg-ink-100 text-xs font-bold justify-center">
                 <i class="fas fa-cart-shopping"></i> Shop now

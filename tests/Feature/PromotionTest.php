@@ -465,9 +465,7 @@ class PromotionTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
         $this->assertStringContainsString('WEEKLY PROMO', strtoupper($html));
-        $this->assertStringContainsString('750', $html);
-        $this->assertStringContainsString('1,500', $html); // WhatsApp "From"
-        $this->assertStringContainsString('800', $html);
+        $this->assertStringContainsString('exclusive prices', $html);
         $this->assertStringContainsString($promo->ends_at->toIso8601String(), $html); // real countdown target
         $this->assertStringContainsString('kvPromo', $html);
         // Responsive: mobile column layout → desktop row

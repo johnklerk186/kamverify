@@ -17,25 +17,7 @@
                         <i class="fas fa-bolt"></i> Weekly Promo
                     </span>
                     <h3 class="mt-2.5 text-xl sm:text-2xl font-extrabold tracking-tight">Get verified for less</h3>
-                    <p class="mt-1 text-sm text-ink-300">Limited-time prices. Back to normal after the promotion.</p>
-
-                    <ul class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                        <li class="flex items-center gap-2">
-                            <i class="fab fa-facebook text-brand-300"></i>
-                            <span class="text-ink-300">Facebook</span>
-                            <strong class="text-white">{{ xaf($promo['facebook_price'] ?? 0) }}</strong>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <i class="fab fa-whatsapp text-emerald-300"></i>
-                            <span class="text-ink-300">WhatsApp</span>
-                            <strong class="text-white">From {{ xaf($promo['whatsapp_us_price'] ?? 0) }}</strong>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <i class="fab fa-telegram text-sky-300"></i>
-                            <span class="text-ink-300">Telegram</span>
-                            <strong class="text-white">{{ xaf($promo['telegram_price'] ?? 0) }}</strong>
-                        </li>
-                    </ul>
+                    <p class="mt-1 text-sm text-ink-300">We're on promo — enjoy exclusive prices on your favorite verification services. Back to normal after the promotion.</p>
                 </div>
 
                 <div class="shrink-0 flex flex-col items-start md:items-end gap-3">
