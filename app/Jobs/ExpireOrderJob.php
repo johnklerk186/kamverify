@@ -18,6 +18,16 @@ class ExpireOrderJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Provider error codes that prove the activation no longer holds
+     * funds — terminal states only. Transient/unknown codes must NOT
+     * land here or a refund is issued while the provider still charges.
+     */
+    protected const RESOLVED_CODES = [
+        'FINISHED', 'CANCELED', 'REFUNDED',
+        'NO_ACTIVATION', 'WRONG_ACTIVATION_ID', 'ACTIVATION_NOT_ACTIVE',
+    ];
+
     protected Order $order;
 
     public function __construct(Order $order)
@@ -45,12 +55,19 @@ class ExpireOrderJob implements ShouldQueue
                     $this->ingestLateSms($provider, $smsService);
                     return;
                 }
-                // FINISHED/CANCELED/NO_ACTIVATION etc. — provider-side
-                // already resolved; proceed with local expiry+refund.
-                $providerOutcome = 'provider_resolved';
+                // Only codes that PROVE the provider released/reported the
+                // activation count as resolved. Anything transient
+                // (TIMEOUT, SERVER_ERROR, HTTP_5xx, AUTH_FAILED...) means
+                // the cancel may never have reached the provider — record
+                // it as unreachable so the cost stays visible on the
+                // reconciliation report instead of looking recovered.
+                $providerOutcome = in_array($e->errorCode, self::RESOLVED_CODES, true)
+                    ? 'provider_resolved'
+                    : 'provider_unreachable';
                 Log::info('Provider cancel on expiry declined', [
                     'order_id' => $this->order->order_id,
                     'code' => $e->errorCode,
+                    'outcome' => $providerOutcome,
                 ]);
             } catch (\Throwable $e) {
                 // Provider unreachable — still expire locally; HeroSMS

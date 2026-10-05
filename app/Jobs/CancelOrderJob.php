@@ -66,7 +66,8 @@ class CancelOrderJob implements ShouldQueue
         try {
             $provider->cancelActivation($order->provider_activation_id);
         } catch (HeroSmsException $e) {
-            if ($e->errorCode === 'EARLY_CANCEL_DENIED' && $this->attempt < self::MAX_ATTEMPTS) {
+            if (in_array($e->errorCode, ['EARLY_CANCEL_DENIED', 'CANCEL_UNCONFIRMED'], true)
+                && $this->attempt < self::MAX_ATTEMPTS) {
                 static::dispatch($this->orderId, $this->attempt + 1)
                     ->delay(now()->addSeconds(self::RETRY_DELAY));
                 return;

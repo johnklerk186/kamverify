@@ -547,6 +547,99 @@ class TextVerifiedProviderTest extends TestCase
         $this->assertGreaterThan(0, ProviderLog::count());
     }
 
+    public function test_transient_cancel_error_marks_cost_unreachable_not_resolved(): void
+    {
+        [$fb, $us, $tv, $hero, $wa, $customer] = $this->enableTextVerified();
+        $this->actingAs($customer)
+            ->post(route('orders.store'), ['service_id' => $fb->id, 'country_id' => $us->id]);
+        $order = Order::latest()->first();
+        $order->update(['expires_at' => now()->subMinute()]);
+
+        // The cancel call never reaches TextVerified — everything 504s.
+        // The customer is still refunded, but the provider cost must be
+        // flagged unreachable, NOT recorded as provider_resolved.
+        config(['services.textverified' => ['enabled' => true, 'mode' => 'production',
+            'base_url' => 'https://www.textverified.com',
+            'api_key' => 'k', 'username' => 'u', 'timeout' => 5]]);
+        Http::fake(['*' => Http::response('gateway timeout', 504)]);
+
+        ExpireOrderJob::dispatchSync($order);
+        $order->refresh();
+
+        $this->assertEquals('expired', $order->status);
+        $this->assertEquals('provider_unreachable', $order->provider_refund_status);
+    }
+
+    public function test_successful_cancel_without_refund_state_is_unconfirmed(): void
+    {
+        $this->enableTextVerified();
+        $posts = 0;
+        Http::fake(function ($req) use (&$posts) {
+            if (str_contains($req->url(), '/auth')) {
+                return Http::response(['token' => 't', 'expiresAt' => now()->addHour()->toIso8601String()]);
+            }
+            if ($req->method() === 'POST' && str_contains($req->url(), '/cancel')) {
+                return Http::response([], 200); // cancel accepted
+            }
+            // Verification still PENDING — cancel did not release the charge.
+            return Http::response([
+                'id' => 'ver_1', 'number' => '2025550123', 'state' => 'VERIFICATION_PENDING',
+            ]);
+        });
+
+        try {
+            $this->liveTv()->cancelActivation('ver_1');
+            $this->fail('expected CANCEL_UNCONFIRMED');
+        } catch (TextVerifiedException $e) {
+            $this->assertEquals('CANCEL_UNCONFIRMED', $e->errorCode);
+        }
+    }
+
+    public function test_customer_cancel_defers_until_provider_confirms_release(): void
+    {
+        [$fb, $us, $tv, $hero, $wa, $customer] = $this->enableTextVerified();
+        $this->actingAs($customer)
+            ->post(route('orders.store'), ['service_id' => $fb->id, 'country_id' => $us->id]);
+        $order = Order::latest()->first();
+        $id = $order->provider_activation_id;
+
+        // Live-mode provider: cancel succeeds but state lags at PENDING.
+        config(['services.textverified' => ['enabled' => true, 'mode' => 'production',
+            'base_url' => 'https://www.textverified.com',
+            'api_key' => 'k', 'username' => 'u', 'timeout' => 5]]);
+        Http::fake(function ($req) {
+            if (str_contains($req->url(), '/auth')) {
+                return Http::response(['token' => 't', 'expiresAt' => now()->addHour()->toIso8601String()]);
+            }
+            if ($req->method() === 'POST' && str_contains($req->url(), '/cancel')) {
+                return Http::response([], 200);
+            }
+            return Http::response(['id' => 'x', 'number' => '2025550123', 'state' => 'VERIFICATION_PENDING']);
+        });
+
+        // Sync queue ignores delay() — fake it so the deferred job is
+        // captured instead of exhausting its retries instantly.
+        \Illuminate\Support\Facades\Queue::fake();
+        $this->actingAs($customer)->delete(route('orders.cancel', $order))->assertRedirect();
+        $order->refresh();
+
+        // Deferred — NOT refunded yet; CancelOrderJob will retry.
+        $this->assertNotNull($order->cancel_requested_at);
+        $this->assertEquals(0, (float) $order->refund_amount); // refund_amount defaults to 0.00
+        $this->assertEquals('waiting_for_sms', $order->status);
+        \Illuminate\Support\Facades\Queue::assertPushed(CancelOrderJob::class);
+
+        // Job retries; provider now reports CANCELED → refund lands once.
+        // dispatchSync bypasses the faked queue and runs handle() directly.
+        Cache::put("tvmock:ver:{$id}", ['state' => 'VERIFICATION_CANCELED'], 3600);
+        config(['services.textverified.mode' => 'mock']);
+        (new CancelOrderJob($order->id))->handle(
+            app(ProviderRouter::class), app(\App\Services\OrderService::class));
+        $order->refresh();
+        $this->assertEquals('provider_resolved', $order->provider_refund_status);
+        $this->assertEquals(1450, $order->refund_amount);
+    }
+
     public function test_database_seeder_registers_textverified_routing(): void
     {
         $this->seedMarketplace();

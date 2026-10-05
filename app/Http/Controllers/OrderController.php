@@ -394,7 +394,7 @@ class OrderController extends Controller
             $provider = $this->providerService->getProviderForModel($order->provider);
             $provider->cancelActivation($order->provider_activation_id);
         } catch (\App\Exceptions\HeroSmsException $e) {
-            if ($e->errorCode === 'EARLY_CANCEL_DENIED') {
+            if (in_array($e->errorCode, ['EARLY_CANCEL_DENIED', 'CANCEL_UNCONFIRMED'], true)) {
                 // Provider enforces a ~2 min no-cancel window after purchase.
                 // Accept the customer's cancellation now and let the queued
                 // job execute it the moment the provider allows it — unless

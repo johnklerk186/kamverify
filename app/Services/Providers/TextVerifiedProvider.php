@@ -622,12 +622,26 @@ class TextVerifiedProvider implements ProviderInterface
         }
 
         $this->call('POST', "/api/pub/v2/verifications/{$activationId}/cancel", retry: false);
+
+        // A successful POST does NOT prove the charge was released —
+        // TextVerified docs: cancel "may result in a refund depending on
+        // the verification status". Confirm the terminal state before
+        // reporting released; if it hasn't landed yet, the cancel is
+        // treated as unconfirmed (retryable), not a confirmed release.
+        $after = strtoupper((string) ($this->getActivationStatus($activationId)['provider_state'] ?? 'UNKNOWN'));
+        if (!in_array($after, ['VERIFICATION_CANCELED', 'VERIFICATION_REFUNDED', 'VERIFICATION_TIMED_OUT'], true)) {
+            throw new TextVerifiedException(
+                'CANCEL_UNCONFIRMED',
+                "Cancel accepted but provider state is {$after} — refund not confirmed"
+            );
+        }
+
         $this->track('cancel', 'success');
 
         return [
             'activation_id' => $activationId,
             'status' => 'cancelled',
-            'provider_response' => 'CANCELED',
+            'provider_response' => $after,
         ];
     }
 
