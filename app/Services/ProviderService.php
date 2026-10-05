@@ -80,6 +80,7 @@ class ProviderService
         }
 
         return $query->orderBy('id')->first()
+            ?? Provider::where('is_active', true)->whereIn('slug', ['herosms', 'hero_sms'])->first()
             ?? Provider::where('is_active', true)->orderBy('id')->first();
     }
 

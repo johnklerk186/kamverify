@@ -49,24 +49,26 @@ class TextVerifiedProviderTest extends TestCase
             'pricing_config' => ['mode' => 'fixed', 'markup' => 1000],
             'provider_mapping' => ['provider' => 'textverified', 'countries' => ['US']],
         ]);
-        $tv = Provider::create([
-            'name' => 'TextVerified', 'slug' => 'textverified',
-            'base_url' => 'https://www.textverified.com', 'is_active' => true,
-        ]);
-        ProviderService::create([
-            'provider_id' => $tv->id, 'service_id' => $fb->id,
-            'provider_service_code' => 'facebook', 'is_active' => true,
-        ]);
-        ProviderCountry::create([
-            'provider_id' => $tv->id, 'country_id' => $us->id,
-            'provider_country_code' => 'US', 'is_active' => true,
-        ]);
+        // The registration migration may already have created the row.
+        $tv = Provider::firstOrCreate(
+            ['slug' => 'textverified'],
+            ['name' => 'TextVerified', 'base_url' => 'https://www.textverified.com',
+                'is_active' => true]
+        );
+        ProviderService::firstOrCreate(
+            ['provider_id' => $tv->id, 'service_id' => $fb->id],
+            ['provider_service_code' => 'facebook', 'is_active' => true]
+        );
+        ProviderCountry::firstOrCreate(
+            ['provider_id' => $tv->id, 'country_id' => $us->id],
+            ['provider_country_code' => 'US', 'is_active' => true]
+        );
 
         // HeroSMS keeps facebook outside the US.
-        ProviderService::create([
-            'provider_id' => $hero->id, 'service_id' => $fb->id,
-            'provider_service_code' => 'fb', 'is_active' => true,
-        ]);
+        ProviderService::firstOrCreate(
+            ['provider_id' => $hero->id, 'service_id' => $fb->id],
+            ['provider_service_code' => 'fb', 'is_active' => true]
+        );
         $others = [];
         foreach ([['Nigeria', 'NG', '19'], ['Cameroon', 'CM', '41'], ['United Kingdom', 'GB', '16']] as [$name, $code, $heroId]) {
             $c = \App\Models\Country::create([
