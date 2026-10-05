@@ -26,7 +26,7 @@
                             <div class="flex-1 min-w-0">
                                 <p class="font-semibold text-ink-900 text-sm">{{ $service->name }}
                                     @if($service->provider_mapping['provider'] ?? null)
-                                        <span class="text-xs font-normal text-ink-400">→ {{ $service->provider_mapping['provider'] }}</span>
+                                        <span class="text-xs font-normal text-ink-400">→ {{ $service->provider_mapping['provider'] }}@if($service->provider_mapping['countries'] ?? null) ({{ implode(',', $service->provider_mapping['countries']) }})@endif</span>
                                     @endif
                                 </p>
                                 <p class="text-xs text-ink-400 font-mono">{{ $service->slug }}</p>

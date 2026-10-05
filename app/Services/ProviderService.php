@@ -44,10 +44,13 @@ class ProviderService
      * Which provider model fulfils a service (+country)?
      *
      * Resolution order:
-     *  1. Explicit routing override — services.provider_mapping.provider
-     *     (e.g. facebook → "textverified"). Returned even when the
-     *     provider row is inactive so callers can fail closed with a
-     *     clear message rather than silently falling back.
+     *  1. Explicit routing override — services.provider_mapping.provider,
+     *     optionally restricted to provider_mapping.countries (country
+     *     codes). Facebook uses {provider: textverified, countries: [US]}:
+     *     US → TextVerified, every other country falls through to the
+     *     HeroSMS mappings. Returned even when the provider row is
+     *     inactive so callers fail closed instead of silently routing a
+     *     TextVerified country to HeroSMS.
      *  2. Active provider_services (+ provider_countries) mappings.
      *  3. First active provider — the historical default: before routing
      *     existed, every purchase went to the single active provider.
@@ -55,9 +58,14 @@ class ProviderService
      */
     public function providerFor(Service $service, ?Country $country = null): ?Provider
     {
-        $slug = $service->provider_mapping['provider'] ?? null;
+        $mapping = $service->provider_mapping ?? [];
+        $slug = $mapping['provider'] ?? null;
         if ($slug) {
-            return Provider::where('slug', $slug)->first();
+            $onlyCountries = array_map('strtoupper', (array) ($mapping['countries'] ?? []));
+            if (!$onlyCountries
+                || ($country && in_array(strtoupper((string) $country->code), $onlyCountries, true))) {
+                return Provider::where('slug', $slug)->first();
+            }
         }
 
         $query = Provider::where('is_active', true)

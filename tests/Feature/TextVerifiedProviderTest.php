@@ -32,11 +32,11 @@ class TextVerifiedProviderTest extends TestCase
     use RefreshDatabase, SeedsMarketplace;
 
     /**
-     * Seed HeroSMS (whatsapp/US) + a TextVerified provider wired to a
-     * facebook Service via provider_services/countries + the explicit
-     * services.provider_mapping.provider routing override.
+     * Seed HeroSMS (whatsapp/US + facebook mappings on NG/CM/GB) and a
+     * TextVerified provider wired to facebook for US only via the
+     * country-scoped routing override.
      *
-     * @return array{Service, \App\Models\Country, Provider, Provider, Service, \App\Models\User}
+     * @return array{Service, \App\Models\Country, Provider, Provider, Service, \App\Models\User, array}
      */
     private function enableTextVerified(): array
     {
@@ -47,7 +47,7 @@ class TextVerifiedProviderTest extends TestCase
             'name' => 'Facebook / Meta', 'slug' => 'facebook',
             'is_active' => true, 'customer_enabled' => true,
             'pricing_config' => ['mode' => 'fixed', 'markup' => 1000],
-            'provider_mapping' => ['provider' => 'textverified'],
+            'provider_mapping' => ['provider' => 'textverified', 'countries' => ['US']],
         ]);
         $tv = Provider::create([
             'name' => 'TextVerified', 'slug' => 'textverified',
@@ -62,7 +62,24 @@ class TextVerifiedProviderTest extends TestCase
             'provider_country_code' => 'US', 'is_active' => true,
         ]);
 
-        return [$fb, $us, $tv, $hero, $wa, $customer];
+        // HeroSMS keeps facebook outside the US.
+        ProviderService::create([
+            'provider_id' => $hero->id, 'service_id' => $fb->id,
+            'provider_service_code' => 'fb', 'is_active' => true,
+        ]);
+        $others = [];
+        foreach ([['Nigeria', 'NG', '19'], ['Cameroon', 'CM', '41'], ['United Kingdom', 'GB', '16']] as [$name, $code, $heroId]) {
+            $c = \App\Models\Country::create([
+                'name' => $name, 'code' => $code, 'dial_code' => '+0', 'is_active' => true,
+            ]);
+            ProviderCountry::create([
+                'provider_id' => $hero->id, 'country_id' => $c->id,
+                'provider_country_code' => $heroId, 'is_active' => true,
+            ]);
+            $others[$code] = $c;
+        }
+
+        return [$fb, $us, $tv, $hero, $wa, $customer, $others];
     }
 
     /** A live-mode provider against faked HTTP. */
@@ -86,17 +103,91 @@ class TextVerifiedProviderTest extends TestCase
         ])];
     }
 
-    public function test_facebook_routes_to_textverified_others_stay_on_herosms(): void
+    public function test_facebook_us_routes_to_textverified_other_countries_to_herosms(): void
     {
-        [$fb, $us, $tv, $hero, $wa] = $this->enableTextVerified();
+        [$fb, $us, $tv, $hero, $wa, $customer, $others] = $this->enableTextVerified();
 
         $svc = app(ProviderRouter::class);
         $this->assertSame('textverified', $svc->providerFor($fb, $us)->slug);
+
+        // Every non-US Facebook country stays on HeroSMS.
+        foreach ($others as $code => $country) {
+            $this->assertSame('herosms', $svc->providerFor($fb, $country)->slug, "facebook+{$code}");
+        }
+
+        // Other services are never routed to TextVerified — US included.
         $this->assertSame('herosms', $svc->providerFor($wa, $us)->slug);
         $this->assertSame('herosms', $svc->providerFor($wa)->slug);
 
+        foreach (['telegram', 'tiktok'] as $slug) {
+            $svc2 = Service::create(['name' => ucfirst($slug), 'slug' => $slug,
+                'is_active' => true, 'customer_enabled' => true]);
+            $this->assertSame('herosms', $svc->providerFor($svc2, $us)->slug);
+        }
+
         $this->assertInstanceOf(TextVerifiedProvider::class, $svc->getProviderForModel($tv));
         $this->assertInstanceOf(HeroSmsProvider::class, $svc->getProviderForModel($hero));
+    }
+
+    public function test_facebook_non_us_purchase_uses_herosms(): void
+    {
+        [$fb, $us, $tv, $hero, $wa, $customer, $others] = $this->enableTextVerified();
+        $ng = $others['NG'];
+
+        // Quote: HeroSMS mock cost $0.50 → 300 XAF + 1000 XAF markup = 1300.
+        $quote = $this->actingAs($customer)
+            ->getJson(route('orders.quote', ['service_id' => $fb->id, 'country_id' => $ng->id]))
+            ->assertOk();
+        $this->assertEquals(1300, $quote->json('price'));
+
+        $balBefore = $customer->wallet->balance;
+        $this->actingAs($customer)
+            ->post(route('orders.store'), ['service_id' => $fb->id, 'country_id' => $ng->id])
+            ->assertRedirect();
+
+        $order = Order::where('service_id', $fb->id)->latest()->first();
+        $this->assertEquals('herosms', $order->provider->slug);
+        $this->assertStringStartsWith('ACT-', $order->provider_activation_id);
+        $this->assertEquals(1300, $order->selling_price);
+        $this->assertEquals($balBefore - 1300, $customer->wallet->fresh()->balance);
+    }
+
+    public function test_facebook_country_list_covers_us_and_herosms_countries(): void
+    {
+        [$fb, $us, $tv, $hero, $wa, $customer, $others] = $this->enableTextVerified();
+
+        $countries = collect($this->actingAs($customer)
+            ->getJson(route('orders.countries', ['service_id' => $fb->id]))
+            ->assertOk()
+            ->json('countries'));
+
+        $codes = $countries->pluck('code')->all();
+        $this->assertContains('US', $codes);
+        $this->assertContains('NG', $codes);
+        $this->assertContains('CM', $codes);
+        $this->assertContains('GB', $codes);
+        // Provider internals are never exposed to the customer.
+        $this->assertStringNotContainsString('textverified', strtolower(json_encode($countries)));
+    }
+
+    public function test_facebook_us_fails_closed_when_textverified_unconfigured(): void
+    {
+        [$fb, $us, $tv, $hero, $wa, $customer, $others] = $this->enableTextVerified();
+
+        // Production mode, no credentials — HeroSMS must NOT pick it up.
+        config(['services.textverified' => ['enabled' => true, 'mode' => 'production',
+            'api_key' => '', 'username' => '', 'base_url' => 'https://www.textverified.com']]);
+        Http::fake(['*' => Http::response('unauthorized', 401)]);
+
+        $this->actingAs($customer)
+            ->post(route('orders.store'), ['service_id' => $fb->id, 'country_id' => $us->id]);
+
+        $this->assertEquals(0, Order::where('service_id', $fb->id)
+            ->whereNotNull('provider_activation_id')->count());
+        // The only order created (if any) was wound back refunded.
+        $this->assertEquals(0, Order::where('service_id', $fb->id)
+            ->where('status', 'waiting_for_sms')->count());
+        $this->assertEquals($customer->wallet->balance, $customer->wallet->fresh()->balance);
     }
 
     public function test_bearer_token_is_generated_cached_and_refreshed(): void
@@ -420,6 +511,7 @@ class TextVerifiedProviderTest extends TestCase
 
         $fb = Service::where('slug', 'facebook')->first();
         $this->assertEquals('textverified', $fb->provider_mapping['provider']);
+        $this->assertEquals(['US'], $fb->provider_mapping['countries']);
         $this->assertTrue(ProviderService::where('provider_id', $tv->id)
             ->where('service_id', $fb->id)->exists());
     }

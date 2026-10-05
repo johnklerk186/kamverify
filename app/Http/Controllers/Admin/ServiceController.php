@@ -61,11 +61,22 @@ class ServiceController extends Controller
             'is_active' => 'boolean',
             'customer_enabled' => 'boolean',
             'fulfilment_provider' => 'nullable|string|exists:providers,slug',
+            'fulfilment_countries' => 'nullable|string|max:500',
         ]);
 
         $mapping = $service->provider_mapping ?? [];
         $mapping['provider'] = $request->filled('fulfilment_provider')
             ? $request->input('fulfilment_provider') : null;
+
+        // Optional country restriction — e.g. textverified only for US;
+        // blank means the override applies to every country.
+        $codes = collect(explode(',', (string) $request->input('fulfilment_countries')))
+            ->map(fn ($c) => strtoupper(trim($c)))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+        $mapping['countries'] = $codes ?: null;
         $mapping = array_filter($mapping);
 
         $service->update(array_merge($request->only([

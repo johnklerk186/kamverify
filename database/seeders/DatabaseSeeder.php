@@ -479,9 +479,12 @@ class DatabaseSeeder extends Seeder
                     ['provider_country_code' => 'US', 'is_active' => true]
                 );
             }
-            if (empty($facebook->provider_mapping['provider'])) {
-                $facebook->update(['provider_mapping' => ['provider' => 'textverified']]);
-            }
+            // Country-scoped routing: facebook+US → TextVerified; every
+            // other Facebook country keeps the HeroSMS mappings above.
+            $facebook->update(['provider_mapping' => [
+                'provider' => 'textverified',
+                'countries' => ['US'],
+            ]]);
         }
 
         $this->seedBlogPosts();

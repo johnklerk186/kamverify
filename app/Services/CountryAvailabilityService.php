@@ -67,71 +67,90 @@ class CountryAvailabilityService
             return ['count' => 0, 'popular' => [], 'countries' => []];
         }
 
-        // Route per-service — facebook resolves to TextVerified when
-        // its provider_mapping override is set; others stay on HeroSMS.
-        $provider = $this->providerService->providerFor($service);
-        if (!$provider || !$provider->is_active) {
-            return ['count' => 0, 'popular' => [], 'countries' => []];
-        }
-
-        $serviceMap = $provider->providerServices()
-            ->where('service_id', $service->id)
+        // Every provider that serves this service — routing can differ
+        // per country (facebook: US → TextVerified, elsewhere → HeroSMS),
+        // so providers are iterated and each country is kept only on the
+        // provider the router actually resolves for it.
+        $serviceMaps = \App\Models\ProviderService::where('service_id', $service->id)
             ->where('is_active', true)
-            ->first();
-        if (!$serviceMap) {
-            return ['count' => 0, 'popular' => [], 'countries' => []];
-        }
-
-        // Live allocatable stock keyed by provider country ID — or null
-        // when the provider couldn't answer (fall back to mappings).
-        $counts = null;
-        try {
-            $counts = $this->providerService
-                ->getProviderForModel($provider)
-                ->availableCountryCounts($service->slug);
-        } catch (\Throwable $e) {
-            $counts = null;
-        }
-
-        // Active country mappings for this provider → Country models
-        $mappings = ProviderCountry::where('provider_id', $provider->id)
-            ->where('is_active', true)
-            ->with('country')
+            ->with('provider')
             ->get()
-            ->filter(fn ($m) => $m->country && $m->country->is_active);
+            ->filter(fn ($sm) => $sm->provider && $sm->provider->is_active)
+            ->sortBy('provider_id');
+
+        if ($serviceMaps->isEmpty()) {
+            return ['count' => 0, 'popular' => [], 'countries' => []];
+        }
 
         $overrides = ServiceCountry::where('service_id', $service->id)->get()
             ->keyBy('country_id');
 
+        $countsCache = [];
         $countries = [];
-        foreach ($mappings as $mapping) {
-            $country = $mapping->country;
-            $override = $overrides->get($country->id);
-            $enabled = !($override && $override->is_enabled === false);
+        foreach ($serviceMaps as $serviceMap) {
+            $provider = $serviceMap->provider;
 
-            if (!$includeDisabled && !$enabled) {
-                continue;
+            // Live allocatable stock keyed by provider country ID — or
+            // null when the provider couldn't answer (mappings fallback).
+            if (!array_key_exists($provider->id, $countsCache)) {
+                try {
+                    $countsCache[$provider->id] = $this->providerService
+                        ->getProviderForModel($provider)
+                        ->availableCountryCounts($service->slug);
+                } catch (\Throwable $e) {
+                    $countsCache[$provider->id] = null;
+                }
             }
+            $counts = $countsCache[$provider->id];
 
-            $stock = $counts === null
-                ? null // provider silent → mapping-only availability
-                : ($counts[(int) $mapping->provider_country_code] ?? 0);
+            $mappings = ProviderCountry::where('provider_id', $provider->id)
+                ->where('is_active', true)
+                ->with('country')
+                ->get()
+                ->filter(fn ($m) => $m->country && $m->country->is_active);
 
-            if ($stock !== null && $stock <= 0) {
-                continue; // provider says no allocatable numbers
+            foreach ($mappings as $mapping) {
+                $country = $mapping->country;
+                if (isset($countries[$country->id])) {
+                    continue; // already listed through its routed provider
+                }
+
+                // Keep the country only where the router sends it —
+                // e.g. US stays on TextVerified even though HeroSMS also
+                // maps facebook+US.
+                $routed = $this->providerService->providerFor($service, $country);
+                if (!$routed || $routed->id !== $provider->id) {
+                    continue;
+                }
+
+                $override = $overrides->get($country->id);
+                $enabled = !($override && $override->is_enabled === false);
+
+                if (!$includeDisabled && !$enabled) {
+                    continue;
+                }
+
+                $stock = $counts === null
+                    ? null // provider silent → mapping-only availability
+                    : ($counts[(int) $mapping->provider_country_code] ?? 0);
+
+                if ($stock !== null && $stock <= 0) {
+                    continue; // provider says no allocatable numbers
+                }
+
+                $countries[$country->id] = [
+                    'id'        => $country->id,
+                    'name'      => $country->name,
+                    'code'      => $country->code,
+                    'dial_code' => $country->dial_code,
+                    'flag'      => countryFlag($country->code),
+                    'stock'     => $stock,
+                    'popular'   => (bool) ($override?->is_popular) || (bool) $country->is_popular,
+                    'enabled'   => $enabled,
+                ];
             }
-
-            $countries[] = [
-                'id'        => $country->id,
-                'name'      => $country->name,
-                'code'      => $country->code,
-                'dial_code' => $country->dial_code,
-                'flag'      => countryFlag($country->code),
-                'stock'     => $stock,
-                'popular'   => (bool) ($override?->is_popular) || (bool) $country->is_popular,
-                'enabled'   => $enabled,
-            ];
         }
+        $countries = array_values($countries);
 
         // Popular countries first, then the rest — alphabetical
         // within each group, deterministic.

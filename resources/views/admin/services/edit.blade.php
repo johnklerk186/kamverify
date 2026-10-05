@@ -48,6 +48,13 @@
                     <p class="mt-1 text-xs text-ink-400">Force a specific provider for this service — e.g. Facebook → TextVerified. "Auto" uses the provider_services mappings.</p>
                     @error('fulfilment_provider')<p class="mt-1.5 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
+                <div>
+                    <label class="kv-label">Restrict to countries <span class="text-ink-400 font-normal">(optional)</span></label>
+                    <input type="text" name="fulfilment_countries"
+                           value="{{ old('fulfilment_countries', implode(', ', $service->provider_mapping['countries'] ?? [])) }}"
+                           class="kv-input" placeholder="e.g. US — blank = all countries use this provider">
+                    <p class="mt-1 text-xs text-ink-400">Comma-separated country codes the override applies to. Facebook uses <code>US</code> so Nigeria/Cameroon/UK stay on HeroSMS.</p>
+                </div>
                 <label class="flex items-center gap-3">
                     <input type="hidden" name="is_active" value="0">
                     <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $service->is_active)) class="w-4 h-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500">
