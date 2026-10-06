@@ -161,4 +161,7 @@
             </div>
         </div>
     </div>
+
+    {{-- "Add to Home Screen" floating prompt — dashboard only --}}
+    <x-install-prompt />
 </x-app-layout>

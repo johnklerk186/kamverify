@@ -15,8 +15,8 @@ self.addEventListener('push', function (event) {
     event.waitUntil(
         self.registration.showNotification(title, {
             body: payload.body || '',
-            icon: payload.icon || '/icon.png',
-            badge: '/icon.png',
+            icon: payload.icon || '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
             tag: payload.tag || 'kamverify',
             data: { url: payload.url || '/' },
             renotify: true,

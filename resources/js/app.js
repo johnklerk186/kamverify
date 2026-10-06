@@ -37,6 +37,108 @@ window.kvPromo = function (id, endIso) {
     };
 };
 
+// ---- PWA install prompt ----
+// Capture beforeinstallprompt early (it can fire before the dashboard
+// component initializes) and remember real installs across sessions.
+// The event is suppressed sitewide so the browser's own mini-infobar
+// never competes with our dashboard prompt.
+window.__kvBIP = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.__kvBIP = e;
+});
+window.addEventListener('appinstalled', () => {
+    window.__kvBIP = null;
+    try { localStorage.setItem('kv_pwa_installed', '1'); } catch (e) {}
+});
+
+// "Add KamVerify to your Home Screen" floating prompt — dashboard only.
+// Shows ~2s after load, auto-dismisses at 30s, persists dismissal, and
+// never renders when the app is already installed/standalone.
+window.kvInstallPrompt = function () {
+    return {
+        visible: false,
+        modal: null,          // 'ios' | 'android' | null
+        busy: false,
+        deferred: null,
+        timers: [],
+        _onBip: null,
+        _onInstalled: null,
+
+        isIOS() {
+            const ua = navigator.userAgent || '';
+            return /iphone|ipad|ipod/i.test(ua)
+                || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        },
+        isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches
+                || window.matchMedia('(display-mode: fullscreen)').matches
+                || navigator.standalone === true
+                || document.referrer.startsWith('android-app://');
+        },
+        init() {
+            if (this.isStandalone()) return;
+            try {
+                if (localStorage.getItem('kv_pwa_installed') === '1'
+                    || localStorage.getItem('kv_a2hs_dismissed') === '1'
+                    || sessionStorage.getItem('kv_a2hs_shown') === '1') return;
+                sessionStorage.setItem('kv_a2hs_shown', '1');
+            } catch (e) {}
+
+            if (window.__kvBIP) this.deferred = window.__kvBIP;
+            this._onBip = (e) => { this.deferred = e; };
+            this._onInstalled = () => {
+                this.visible = false;
+                this.modal = null;
+                this._clearTimers();
+                try { localStorage.setItem('kv_pwa_installed', '1'); } catch (e) {}
+            };
+            window.addEventListener('beforeinstallprompt', this._onBip);
+            window.addEventListener('appinstalled', this._onInstalled);
+
+            this.timers.push(setTimeout(() => this._show(), 2000));
+        },
+        _show() {
+            if (this.isStandalone()) return this._destroy();
+            this.visible = true;
+            this.timers.push(setTimeout(() => this.dismiss(), 30000));
+        },
+        async install() {
+            if (this.isIOS()) { this.modal = 'ios'; return; }
+            const p = this.deferred || window.__kvBIP;
+            if (p && typeof p.prompt === 'function') {
+                this.busy = true;
+                try {
+                    await p.prompt();
+                    const { outcome } = await p.userChoice;
+                    if (outcome === 'accepted') return this._destroy();
+                } catch (e) { /* prompt rejected — fall through to manual steps */ }
+                finally { this.busy = false; }
+                this.deferred = null;
+                window.__kvBIP = null;
+            }
+            this.modal = 'android';
+        },
+        dismiss() {
+            this.visible = false;
+            this.modal = null;
+            try { localStorage.setItem('kv_a2hs_dismissed', '1'); } catch (e) {}
+            this._destroy();
+        },
+        closeModal() { this.modal = null; },
+        _clearTimers() {
+            this.timers.forEach(clearTimeout);
+            this.timers = [];
+        },
+        _destroy() {
+            this._clearTimers();
+            if (this._onBip) window.removeEventListener('beforeinstallprompt', this._onBip);
+            if (this._onInstalled) window.removeEventListener('appinstalled', this._onInstalled);
+        },
+        destroy() { this._destroy(); },
+    };
+};
+
 Alpine.start();
 
 // Scroll-reveal: elements opt in via [data-reveal] (+ optional

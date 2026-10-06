@@ -143,3 +143,13 @@
     .kv-marquee-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; gap: .75rem; }
     .kv-marquee-item { margin-right: 0; }
 }
+
+/* A2HS install prompt — subtle slide-up/fade-in on entry.
+   No animation at all under reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+    .kv-a2hs { animation: kv-a2hs-in 0.35s ease-out both; }
+}
+@keyframes kv-a2hs-in {
+    from { opacity: 0; transform: translateY(0.75rem); }
+    to { opacity: 1; transform: translateY(0); }
+}
