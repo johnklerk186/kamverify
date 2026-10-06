@@ -66,5 +66,6 @@
 </div>
 
 <x-flash-messages />
+<x-smartsupp />
 </body>
 </html>

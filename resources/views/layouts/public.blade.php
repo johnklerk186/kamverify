@@ -19,5 +19,6 @@
     </main>
     <x-public-footer />
     <x-flash-messages />
+    <x-smartsupp />
 </body>
 </html>

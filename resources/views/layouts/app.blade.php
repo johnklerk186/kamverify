@@ -376,5 +376,7 @@
         subscribePush();
     }
 </script>
+
+<x-smartsupp />
 </body>
 </html>

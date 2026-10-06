@@ -417,5 +417,6 @@
 </script>
 
 <x-service-outage-modal />
+<x-smartsupp />
 </body>
 </html>
