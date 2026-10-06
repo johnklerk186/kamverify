@@ -94,8 +94,9 @@ class InstallPromptTest extends TestCase
         // timing + dismissal contract
         $this->assertStringContainsString('2000', $js);   // ~2s delay
         $this->assertStringContainsString('30000', $js);  // 30s max
-        $this->assertStringContainsString('kv_a2hs_dismissed', $js);
-        $this->assertStringContainsString('kv_a2hs_shown', $js); // once per session
+        $this->assertStringContainsString('kv_a2hs_dismissed', $js); // × — permanent
+        $this->assertStringContainsString('kv_a2hs_snooze', $js);    // 30s timeout — 24h only
+        $this->assertStringContainsString('kv_a2hs_shown', $js);     // once per session
         // cleanup
         $this->assertStringContainsString('clearTimeout', $js);
         $this->assertStringContainsString('removeEventListener', $js);

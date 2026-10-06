@@ -80,8 +80,10 @@ window.kvInstallPrompt = function () {
             if (this.isStandalone()) return;
             try {
                 if (localStorage.getItem('kv_pwa_installed') === '1'
-                    || localStorage.getItem('kv_a2hs_dismissed') === '1'
-                    || sessionStorage.getItem('kv_a2hs_shown') === '1') return;
+                    || localStorage.getItem('kv_a2hs_dismissed') === '1') return;
+                // 24h snooze after an auto-dismiss — not permanent like the ×
+                if (parseInt(localStorage.getItem('kv_a2hs_snooze') || '0', 10) > Date.now()) return;
+                if (sessionStorage.getItem('kv_a2hs_shown') === '1') return;
                 sessionStorage.setItem('kv_a2hs_shown', '1');
             } catch (e) {}
 
@@ -101,7 +103,7 @@ window.kvInstallPrompt = function () {
         _show() {
             if (this.isStandalone()) return this._destroy();
             this.visible = true;
-            this.timers.push(setTimeout(() => this.dismiss(), 30000));
+            this.timers.push(setTimeout(() => this.snooze(), 30000));
         },
         async install() {
             if (this.isIOS()) { this.modal = 'ios'; return; }
@@ -120,9 +122,17 @@ window.kvInstallPrompt = function () {
             this.modal = 'android';
         },
         dismiss() {
+            // × button — user said no, don't ask again
             this.visible = false;
             this.modal = null;
             try { localStorage.setItem('kv_a2hs_dismissed', '1'); } catch (e) {}
+            this._destroy();
+        },
+        snooze() {
+            // 30s auto-dismiss — only snoozes, prompt can return next session/day
+            this.visible = false;
+            this.modal = null;
+            try { localStorage.setItem('kv_a2hs_snooze', String(Date.now() + 86400000)); } catch (e) {}
             this._destroy();
         },
         closeModal() { this.modal = null; },
