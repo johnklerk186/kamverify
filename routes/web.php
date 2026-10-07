@@ -212,6 +212,7 @@ Route::middleware(['admin', 'throttle:120,1'])->prefix('admin')->name('admin.')-
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
         Route::get('/{payment}', [AdminPaymentController::class, 'show'])->name('show');
+        Route::post('/{payment}/recheck', [AdminPaymentController::class, 'recheck'])->name('recheck');
     });
 
     // Refunds

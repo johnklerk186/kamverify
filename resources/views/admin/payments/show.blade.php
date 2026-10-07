@@ -13,7 +13,17 @@
                     <p class="text-xs text-ink-500">{{ $payment->created_at->format('M d, Y H:i:s') }}</p>
                 </div>
             </div>
-            <x-status-badge :status="$payment->status" />
+            <div class="flex items-center gap-2">
+                @if($payment->status === 'pending')
+                    <form method="POST" action="{{ route('admin.payments.recheck', $payment) }}">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 transition">
+                            <i class="fas fa-rotate"></i> Re-check provider status
+                        </button>
+                    </form>
+                @endif
+                <x-status-badge :status="$payment->status" />
+            </div>
         </div>
 
         <div class="grid sm:grid-cols-3 gap-4">
