@@ -64,6 +64,18 @@ class SmsService
             ->get();
     }
 
+    /**
+     * Recent SMS across many orders in ONE query — replaces the
+     * per-order loop that produced an N+1 on the customer dashboard.
+     */
+    public function getRecentSmsForOrders(iterable $orderIds, int $limit = 10)
+    {
+        return SmsMessage::whereIn('order_id', collect($orderIds)->all())
+            ->orderBy('received_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
     public function extractOtpCode(string $message): ?string
     {
         // Common OTP patterns

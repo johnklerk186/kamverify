@@ -419,31 +419,38 @@ class OrderService
             });
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+        return $query->with(['service', 'country'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)->withQueryString();
     }
 
     public function getActiveOrders(User $user)
     {
         return Order::where('user_id', $user->id)
             ->active()
+            ->with(['service', 'country'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
 
     public function getOrderStats(User $user): array
     {
+        // One conditional-aggregate query instead of five round-trips.
+        $active = "'" . implode("','", Order::ACTIVE_STATUSES) . "'";
+        $row = Order::where('user_id', $user->id)->selectRaw(
+            "count(*) as total_orders,
+             sum(case when status in ({$active}) then 1 else 0 end) as active_orders,
+             sum(case when status = 'completed' then 1 else 0 end) as completed_orders,
+             sum(case when status = 'cancelled' then 1 else 0 end) as cancelled_orders,
+             sum(case when status = 'completed' then selling_price else 0 end) as total_spent"
+        )->first();
+
         return [
-            'total_orders' => Order::where('user_id', $user->id)->count(),
-            'active_orders' => Order::where('user_id', $user->id)
-                ->active()
-                ->count(),
-            'completed_orders' => Order::where('user_id', $user->id)
-                ->where('status', 'completed')
-                ->count(),
-            'cancelled_orders' => Order::where('user_id', $user->id)
-                ->where('status', 'cancelled')
-                ->count(),
-            'total_spent' => $this->totalSpent($user),
+            'total_orders' => (int) $row->total_orders,
+            'active_orders' => (int) $row->active_orders,
+            'completed_orders' => (int) $row->completed_orders,
+            'cancelled_orders' => (int) $row->cancelled_orders,
+            'total_spent' => round((float) $row->total_spent, 2),
         ];
     }
 

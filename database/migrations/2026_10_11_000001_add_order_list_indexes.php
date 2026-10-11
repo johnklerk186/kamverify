@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Composite indexes for the hot customer/admin order queries — every
+ * order list filters on user_id (or status) and sorts by created_at.
+ */
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->index(['user_id', 'created_at'], 'orders_user_created_idx');
+        });
+        Schema::table('wallet_transactions', function (Blueprint $table) {
+            $table->index(['user_id', 'created_at'], 'wt_user_created_idx');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('orders', function (Blueprint $table) {
+            $table->dropIndex('orders_user_created_idx');
+        });
+        Schema::table('wallet_transactions', function (Blueprint $table) {
+            $table->dropIndex('wt_user_created_idx');
+        });
+    }
+};

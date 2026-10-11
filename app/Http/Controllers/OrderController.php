@@ -43,7 +43,7 @@ class OrderController extends Controller
 
     public function create()
     {
-        $countries = Country::active()->orderBy('name')->get();
+        $countries = app(\App\Services\CountryAvailabilityService::class)->activeCountries();
         // customerVisible keeps temporarily-unavailable services listed —
         // they render with an outage badge and cannot be purchased.
         $services = Service::customerVisible()->orderBy('name')->get();
@@ -325,14 +325,23 @@ class OrderController extends Controller
         ];
 
         $orders = $this->orderService->getUserOrders($user, $filters);
-        $countries = Country::active()->orderBy('name')->get();
+        $countries = app(\App\Services\CountryAvailabilityService::class)->activeCountries();
         $services = Service::customerEnabled()->orderBy('name')->get();
+        // One conditional-aggregate query instead of five round-trips.
+        $active = "'" . implode("','", Order::ACTIVE_STATUSES) . "'";
+        $row = Order::where('user_id', $user->id)->selectRaw(
+            "count(*) as all_count,
+             sum(case when status in ({$active}) then 1 else 0 end) as active_count,
+             sum(case when status = 'completed' then 1 else 0 end) as completed_count,
+             sum(case when status in ('cancelled','refunded') then 1 else 0 end) as cancelled_count,
+             sum(case when status = 'expired' then 1 else 0 end) as expired_count"
+        )->first();
         $counts = [
-            'all' => Order::where('user_id', $user->id)->count(),
-            'active' => Order::where('user_id', $user->id)->active()->count(),
-            'completed' => Order::where('user_id', $user->id)->where('status', 'completed')->count(),
-            'cancelled' => Order::where('user_id', $user->id)->whereIn('status', ['cancelled', 'refunded'])->count(),
-            'expired' => Order::where('user_id', $user->id)->where('status', 'expired')->count(),
+            'all' => (int) $row->all_count,
+            'active' => (int) $row->active_count,
+            'completed' => (int) $row->completed_count,
+            'cancelled' => (int) $row->cancelled_count,
+            'expired' => (int) $row->expired_count,
         ];
 
         return view('orders.index', compact('orders', 'countries', 'services', 'filters', 'counts'));

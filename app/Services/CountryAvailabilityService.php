@@ -49,6 +49,18 @@ class CountryAvailabilityService
     public function forgetAll(): void
     {
         Service::where('customer_enabled', true)->each(fn ($s) => $this->forget($s));
+        Cache::forget('catalog:active_countries');
+    }
+
+    /**
+     * Alphabetically-sorted active countries for filter dropdowns and
+     * the buy flow — cached 1h, busted by forgetAll() whenever an
+     * admin changes a country. Names/flags are stable catalog data.
+     */
+    public function activeCountries()
+    {
+        return Cache::remember('catalog:active_countries', 3600,
+            fn () => Country::active()->orderBy('name')->get());
     }
 
     /**

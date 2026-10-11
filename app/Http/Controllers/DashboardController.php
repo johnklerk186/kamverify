@@ -31,14 +31,9 @@ class DashboardController extends Controller
         $orderStats = $this->orderService->getOrderStats($user);
         $activeOrders = $this->orderService->getActiveOrders($user);
         $recentTransactions = $this->walletService->getTransactions($user, 10);
-        $recentSms = collect();
-
-        foreach ($activeOrders as $order) {
-            $smsMessages = $this->smsService->getOrderSmsMessages($order);
-            $recentSms = $recentSms->merge($smsMessages);
-        }
-
-        $recentSms = $recentSms->sortByDesc('received_at')->take(10);
+        // One batched query across all active orders (was N+1).
+        $recentSms = $this->smsService->getRecentSmsForOrders(
+            $activeOrders->pluck('id'), 10);
 
         return view('dashboard.index', compact(
             'wallet',
