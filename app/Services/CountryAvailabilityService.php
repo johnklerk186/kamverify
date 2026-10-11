@@ -26,13 +26,14 @@ use Illuminate\Support\Facades\Cache;
  */
 class CountryAvailabilityService
 {
-    public const CACHE_TTL = 300; // 5 min — underlying provider data is itself cached 90s
+    public const CACHE_FRESH = 300;  // 5 min fresh
+    public const CACHE_STALE = 1800; // up to 30 min stale-while-revalidate
 
     public function __construct(protected ProviderService $providerService) {}
 
     public function cacheKey(Service $service): string
     {
-        return "service_countries:{$service->id}";
+        return "service_countries_v2:{$service->id}";
     }
 
     public function forget(Service $service): void
@@ -41,13 +42,28 @@ class CountryAvailabilityService
     }
 
     /**
-     * Customer-facing list. Cached briefly; the purchase-time quote
-     * re-verifies availability live so a stale entry can only ever
-     * produce a "not available" quote, never a failed charge.
+     * Bust every cached storefront list — call after any change that
+     * can alter which countries appear (country edits/deactivation,
+     * provider or mapping toggles).
+     */
+    public function forgetAll(): void
+    {
+        Service::where('customer_enabled', true)->each(fn ($s) => $this->forget($s));
+    }
+
+    /**
+     * Customer-facing list. Stale-while-revalidate: a response inside
+     * the stale window is served instantly while the expensive rebuild
+     * (a live provider call, up to ~30s worst case) refreshes in a
+     * deferred callback after the response — customers never wait on
+     * the provider. The purchase-time quote still re-verifies
+     * availability live, so a stale entry can only ever produce a
+     * "not available" quote, never a failed charge.
      */
     public function forService(Service $service): array
     {
-        return Cache::remember($this->cacheKey($service), self::CACHE_TTL,
+        return Cache::flexible($this->cacheKey($service),
+            [self::CACHE_FRESH, self::CACHE_STALE],
             fn () => $this->build($service));
     }
 

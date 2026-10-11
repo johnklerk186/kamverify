@@ -40,6 +40,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->trustProxies(at: '*');
 
+        // Canonical https://kamverify.com — www/http variants redirect
+        // before sessions, cookies or CSRF see a different origin.
+        // Appended so TrustProxies has already resolved X-Forwarded-Proto
+        // — checking secure() any earlier would loop behind the proxy.
+        $middleware->append(\App\Http\Middleware\CanonicalHost::class);
+
         // Payment provider webhooks are server-to-server POSTs — they cannot
         // carry a CSRF token. Exempt only the webhook namespace; every other
         // POST (customer, admin, auth) remains CSRF-protected.

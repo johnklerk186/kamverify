@@ -57,6 +57,7 @@ class CountryController extends Controller
         ]);
 
         $country->update($request->all());
+        $this->bustCatalog();
 
         return redirect()->route('admin.countries.index')
             ->with('success', 'Country updated successfully.');
@@ -65,6 +66,7 @@ class CountryController extends Controller
     public function destroy(Country $country)
     {
         $country->delete();
+        $this->bustCatalog();
 
         return redirect()->route('admin.countries.index')
             ->with('success', 'Country deleted successfully.');
@@ -73,6 +75,7 @@ class CountryController extends Controller
     public function toggleStatus(Country $country)
     {
         $country->update(['is_active' => !$country->is_active]);
+        $this->bustCatalog();
 
         return back()->with('success', 'Country status updated successfully.');
     }
@@ -84,13 +87,18 @@ class CountryController extends Controller
     public function togglePopular(Country $country)
     {
         $country->update(['is_popular' => !$country->is_popular]);
-
-        // Bust cached storefront lists for every customer-facing service
-        $availability = app(\App\Services\CountryAvailabilityService::class);
-        \App\Models\Service::where('customer_enabled', true)->each(
-            fn ($s) => $availability->forget($s));
+        $this->bustCatalog();
 
         return back()->with('success',
             "{$country->name} " . ($country->is_popular ? 'marked popular.' : 'removed from popular.'));
+    }
+
+    /**
+     * Country edits/deactivation can alter which countries appear for
+     * any service — drop every cached storefront list immediately.
+     */
+    protected function bustCatalog(): void
+    {
+        app(\App\Services\CountryAvailabilityService::class)->forgetAll();
     }
 }

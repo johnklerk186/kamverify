@@ -203,12 +203,32 @@ class HeroSmsProvider implements ProviderInterface
      * Returns null when the ranking can't answer — callers then fall back
      * to the getPrices count rather than blocking a sale on a failed call.
      */
+    /**
+     * Shared cached fetch of getTopCountriesByService for a service.
+     * A short cache lock prevents a cache-miss stampede — every
+     * concurrent request would otherwise fire the provider call at
+     * once (rate-limit territory). Lock losers return null rather
+     * than queueing a second live call; callers fall back as usual.
+     */
+    protected function topCountries(string $heroService): ?array
+    {
+        $key = "herosms:top:{$heroService}";
+        try {
+            $lock = Cache::lock("{$key}:lock", 35);
+            return $lock->block(8, function () use ($key, $heroService) {
+                return Cache::remember($key, 90, function () use ($heroService) {
+                    return $this->call('getTopCountriesByService', ['service' => $heroService], false);
+                });
+            });
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     protected function allocatableCount(string $heroService, int $heroCountry): ?int
     {
         try {
-            $list = Cache::remember("herosms:top:{$heroService}", 90, function () use ($heroService) {
-                return $this->call('getTopCountriesByService', ['service' => $heroService], false);
-            });
+            $list = $this->topCountries($heroService);
 
             foreach ((array) $list as $entry) {
                 if ((int) ($entry['country'] ?? -1) === $heroCountry) {
@@ -244,9 +264,7 @@ class HeroSmsProvider implements ProviderInterface
         $heroService = $serviceMap->provider_service_code;
 
         try {
-            $list = Cache::remember("herosms:top:{$heroService}", 90, function () use ($heroService) {
-                return $this->call('getTopCountriesByService', ['service' => $heroService], false);
-            });
+            $list = $this->topCountries($heroService);
 
             $out = [];
             foreach ((array) $list as $entry) {

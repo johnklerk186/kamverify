@@ -377,6 +377,8 @@
                 countryQuery: '',
                 quote: null,
                 quoteLoading: false,
+                _countriesReq: 0,
+                _quoteReq: 0,
                 purchasing: false,
                 // Service instruction notices — shown on service pick,
                 // before country selection. Add WhatsApp/TikTok entries
@@ -448,19 +450,22 @@
                     this.popularIds = [];
                     this.countryCount = 0;
                     this.countryQuery = '';
+                    const req = ++this._countriesReq; // supersede any in-flight fetch
                     try {
                         const res = await fetch(config.countriesUrl + '?service_id=' + this.serviceId, {
                             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                         });
                         const data = await res.json();
+                        if (req !== this._countriesReq) return; // stale response — ignore
                         this.serviceCountries = data.countries || [];
                         this.popularIds = data.popular || [];
                         this.countryCount = data.count || 0;
                     } catch (e) {
+                        if (req !== this._countriesReq) return;
                         this.serviceCountries = [];
                         this.countryCount = 0;
                     }
-                    this.countriesLoading = false;
+                    if (req === this._countriesReq) this.countriesLoading = false;
                 },
                 serviceSlug() {
                     return (config.slugs && config.slugs[this.serviceId]) || '';
@@ -510,15 +515,19 @@
                     this.step = 3;
                     this.quoteLoading = true;
                     this.quote = null;
+                    const req = ++this._quoteReq; // supersede any in-flight quote
                     try {
                         const res = await fetch(config.quoteUrl + '?country_id=' + this.countryId + '&service_id=' + this.serviceId, {
                             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                         });
-                        this.quote = await res.json();
+                        const data = await res.json();
+                        if (req !== this._quoteReq) return; // stale response — ignore
+                        this.quote = data;
                     } catch (e) {
+                        if (req !== this._quoteReq) return;
                         this.quote = { available: false, message: 'Unable to check availability. Please try again.' };
                     }
-                    this.quoteLoading = false;
+                    if (req === this._quoteReq) this.quoteLoading = false;
                 }
             }
         }

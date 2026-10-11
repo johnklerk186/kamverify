@@ -98,6 +98,7 @@ class ProviderController extends Controller
         $provider->update($validated);
 
         $this->auditService->log('provider.update', $provider, $old, $provider->only(['name', 'base_url', 'is_active']));
+        $this->bustCatalog();
 
         return redirect()->route('admin.providers.index')->with('success', 'Provider updated.');
     }
@@ -107,6 +108,7 @@ class ProviderController extends Controller
         $old = ['is_active' => $provider->is_active];
         $provider->update(['is_active' => !$provider->is_active]);
         $this->auditService->log('provider.toggle', $provider, $old, ['is_active' => $provider->is_active]);
+        $this->bustCatalog();
 
         return back()->with('success', 'Provider ' . ($provider->is_active ? 'activated' : 'deactivated') . '.');
     }
@@ -129,6 +131,7 @@ class ProviderController extends Controller
         );
 
         $this->auditService->log('provider.service_map', $provider, null, $validated);
+        $this->bustCatalog();
 
         return back()->with('success', 'Service mapping saved.');
     }
@@ -141,6 +144,7 @@ class ProviderController extends Controller
             'service_id' => $mapping->service_id,
             'is_active' => $mapping->is_active,
         ]);
+        $this->bustCatalog();
 
         return back()->with('success', 'Service mapping updated.');
     }
@@ -150,6 +154,7 @@ class ProviderController extends Controller
         abort_unless($mapping->provider_id === $provider->id, 404);
         $mapping->delete();
         $this->auditService->log('provider.service_unmap', $provider, null, ['service_id' => $mapping->service_id]);
+        $this->bustCatalog();
 
         return back()->with('success', 'Service mapping removed.');
     }
@@ -170,6 +175,7 @@ class ProviderController extends Controller
         );
 
         $this->auditService->log('provider.country_map', $provider, null, $validated);
+        $this->bustCatalog();
 
         return back()->with('success', 'Country mapping saved.');
     }
@@ -182,6 +188,7 @@ class ProviderController extends Controller
             'country_id' => $mapping->country_id,
             'is_active' => $mapping->is_active,
         ]);
+        $this->bustCatalog();
 
         return back()->with('success', 'Country mapping updated.');
     }
@@ -191,7 +198,18 @@ class ProviderController extends Controller
         abort_unless($mapping->provider_id === $provider->id, 404);
         $mapping->delete();
         $this->auditService->log('provider.country_unmap', $provider, null, ['country_id' => $mapping->country_id]);
+        $this->bustCatalog();
 
         return back()->with('success', 'Country mapping removed.');
+    }
+
+    /**
+     * Any provider/mapping change can alter which countries appear for
+     * a service — drop every cached storefront list so the next build
+     * reflects the change instead of waiting out the TTL.
+     */
+    protected function bustCatalog(): void
+    {
+        app(\App\Services\CountryAvailabilityService::class)->forgetAll();
     }
 }
