@@ -33,7 +33,7 @@ class CountryAvailabilityService
 
     public function cacheKey(Service $service): string
     {
-        return "service_countries_v2:{$service->id}";
+        return "service_countries_v3:{$service->id}";
     }
 
     public function forget(Service $service): void
@@ -160,7 +160,9 @@ class CountryAvailabilityService
 
                 $stock = $counts === null
                     ? null // provider silent → mapping-only availability
-                    : ($counts[(int) $mapping->provider_country_code] ?? 0);
+                    : ($counts[$mapping->provider_country_code]
+                        ?? $counts[(int) $mapping->provider_country_code]
+                        ?? 0);
 
                 if ($stock !== null && $stock <= 0) {
                     continue; // provider says no allocatable numbers

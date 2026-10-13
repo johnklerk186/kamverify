@@ -453,10 +453,12 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // TextVerified — fulfils Facebook/Meta only (US verifications).
+        // TextVerified — fulfils US verifications for every service.
         // The provider row + mappings are seeded idempotently; routing
         // activates via services.provider_mapping.provider. HeroSMS
-        // keeps every other service unchanged.
+        // keeps every non-US country unchanged. provider_service_code
+        // defaults to our slug — correct any TextVerified service-name
+        // mismatches from the provider edit page once connected.
         $tv = Provider::firstOrCreate(
             ['slug' => 'textverified'],
             [
@@ -466,25 +468,24 @@ class DatabaseSeeder extends Seeder
                 'config' => ['timeout' => 30],
             ]
         );
-        $facebook = Service::where('slug', 'facebook')->first();
-        if ($tv && $facebook) {
-            \App\Models\ProviderService::firstOrCreate(
-                ['provider_id' => $tv->id, 'service_id' => $facebook->id],
-                ['provider_service_code' => 'facebook', 'cost' => 0, 'is_active' => true]
+        $us = Country::where('code', 'US')->first();
+        if ($tv && $us) {
+            \App\Models\ProviderCountry::firstOrCreate(
+                ['provider_id' => $tv->id, 'country_id' => $us->id],
+                ['provider_country_code' => 'US', 'is_active' => true]
             );
-            $us = Country::where('code', 'US')->first();
-            if ($us) {
-                \App\Models\ProviderCountry::firstOrCreate(
-                    ['provider_id' => $tv->id, 'country_id' => $us->id],
-                    ['provider_country_code' => 'US', 'is_active' => true]
+            foreach (Service::all() as $service) {
+                \App\Models\ProviderService::firstOrCreate(
+                    ['provider_id' => $tv->id, 'service_id' => $service->id],
+                    ['provider_service_code' => $service->slug, 'cost' => 0, 'is_active' => true]
                 );
+                // Country-scoped routing: service+US → TextVerified;
+                // every other country keeps the HeroSMS mappings above.
+                $service->update(['provider_mapping' => [
+                    'provider' => 'textverified',
+                    'countries' => ['US'],
+                ]]);
             }
-            // Country-scoped routing: facebook+US → TextVerified; every
-            // other Facebook country keeps the HeroSMS mappings above.
-            $facebook->update(['provider_mapping' => [
-                'provider' => 'textverified',
-                'countries' => ['US'],
-            ]]);
         }
 
         $this->seedBlogPosts();

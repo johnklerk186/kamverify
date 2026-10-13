@@ -290,6 +290,63 @@ class TextVerifiedProviderTest extends TestCase
             WalletTransaction::where('reference', $order->order_id)->first()->type);
     }
 
+    /**
+     * Wire a service to TextVerified the same way the rollout migration
+     * does: provider_mapping override + an active provider_services row.
+     */
+    private function routeServiceToTextVerified(Service $service, Provider $tv): void
+    {
+        $service->update(['provider_mapping' => ['provider' => 'textverified', 'countries' => ['US']]]);
+        ProviderService::firstOrCreate(
+            ['provider_id' => $tv->id, 'service_id' => $service->id],
+            ['provider_service_code' => $service->slug, 'is_active' => true]
+        );
+    }
+
+    public function test_usa_routes_to_textverified_for_any_mapped_service(): void
+    {
+        [$fb, $us, $tv, $hero, $wa, $customer, $others] = $this->enableTextVerified();
+        $this->routeServiceToTextVerified($wa, $tv);
+
+        $svc = app(ProviderRouter::class);
+        $this->assertSame('textverified', $svc->providerFor($wa, $us)->slug);
+
+        // Non-US whatsapp stays on HeroSMS.
+        $this->assertSame('herosms', $svc->providerFor($wa, $others['NG'])->slug);
+    }
+
+    public function test_non_facebook_service_purchases_via_textverified_end_to_end(): void
+    {
+        [$fb, $us, $tv, $hero, $wa, $customer] = $this->enableTextVerified();
+        $this->routeServiceToTextVerified($wa, $tv);
+
+        $this->actingAs($customer)
+            ->post(route('orders.store'), ['service_id' => $wa->id, 'country_id' => $us->id])
+            ->assertRedirect();
+
+        $order = Order::where('service_id', $wa->id)->latest()->first();
+        $this->assertEquals('waiting_for_sms', $order->status);
+        $this->assertEquals('textverified', $order->provider->slug);
+        $this->assertStringStartsWith('TV-', $order->provider_activation_id);
+        $this->assertStringStartsWith('+1212', $order->phone_number);
+        $this->assertEquals(0.75, (float) $order->purchase_price);
+    }
+
+    public function test_catalog_lists_us_via_textverified_for_routed_service(): void
+    {
+        [$fb, $us, $tv, $hero, $wa, $customer] = $this->enableTextVerified();
+        $catalog = app(\App\Services\CountryAvailabilityService::class);
+
+        // Facebook (TV PS row + US route): US listed through TextVerified.
+        $this->assertContains('US',
+            collect($catalog->forServiceAdmin($fb)['countries'])->pluck('code')->all());
+
+        // Once whatsapp is routed, US is listed through TextVerified too.
+        $this->routeServiceToTextVerified($wa, $tv);
+        $this->assertContains('US',
+            collect($catalog->forServiceAdmin($wa)['countries'])->pluck('code')->all());
+    }
+
     public function test_customer_cancel_releases_cost_and_refunds_as_refund(): void
     {
         [$fb, $us, $tv, $hero, $wa, $customer] = $this->enableTextVerified();
@@ -653,6 +710,14 @@ class TextVerifiedProviderTest extends TestCase
         $this->assertEquals(['US'], $fb->provider_mapping['countries']);
         $this->assertTrue(ProviderService::where('provider_id', $tv->id)
             ->where('service_id', $fb->id)->exists());
+
+        // Every seeded service routes US → TextVerified with a mapping row.
+        Service::all()->each(function ($service) use ($tv) {
+            $this->assertEquals('textverified', $service->provider_mapping['provider'] ?? null);
+            $this->assertEquals(['US'], $service->provider_mapping['countries'] ?? null);
+            $this->assertTrue(ProviderService::where('provider_id', $tv->id)
+                ->where('service_id', $service->id)->exists());
+        });
     }
 
     public function test_temporarily_unavailable_flag_still_blocks_facebook(): void

@@ -12,8 +12,9 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * TextVerified provider — official API v2 (REST/JSON, bearer auth).
- * Used ONLY for Facebook/Meta verifications; all other services stay
- * on HeroSMS via the provider routing in ProviderService::providerFor.
+ * US-only by protocol: fulfils any service routed via
+ * services.provider_mapping ({provider: 'textverified', countries:
+ * ['US']}); HeroSMS keeps every non-US country.
  *
  * Protocol (docs: textverified.com/docs/api/v2):
  *   POST /api/pub/v2/auth                        → {token, expiresAt}
@@ -365,12 +366,16 @@ class TextVerifiedProvider implements ProviderInterface
     }
 
     /**
-     * US-only provider — per-country stock ranking doesn't apply.
-     * Null → callers fall back to the (single) US mapping.
+     * US-only provider — the catalog build looks up stock by the
+     * provider_country_code ('US'). A mapped service advertises stock;
+     * an unmapped one reports zero so the US is dropped instead of
+     * listing a service TextVerified cannot fulfil.
      */
     public function availableCountryCounts(string $serviceSlug): ?array
     {
-        return null;
+        return $this->serviceName($serviceSlug) !== null
+            ? ['US' => 1]
+            : ['US' => 0];
     }
 
     // =========================================================================
