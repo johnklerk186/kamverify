@@ -80,8 +80,8 @@
                                     <span x-show="!editing">{{ $service->provider_cost !== null ? number_format($service->provider_cost, 2) . ' USD' : '—' }}</span>
                                 </td>
                                 <td class="kv-td">
-                                    <span x-show="!editing" class="font-medium {{ $service->markup !== null ? 'text-brand-700' : 'text-ink-400' }}">
-                                        {{ $service->markup !== null ? ($service->resolved_mode === 'percentage' ? $service->markup.'%' : xaf($service->markup)) : 'default' }}
+                                    <span x-show="!editing" class="font-medium {{ $service->price !== null ? 'text-brand-700' : ($service->markup !== null ? 'text-brand-700' : 'text-ink-400') }}">
+                                        {{ $service->price !== null ? 'flat '.xaf($service->price) : ($service->markup !== null ? ($service->resolved_mode === 'percentage' ? $service->markup.'%' : xaf($service->markup)) : 'default') }}
                                     </span>
                                     <form x-show="editing" x-cloak method="POST" action="{{ route('admin.pricing.services.update', $service) }}"
                                           onsubmit="return confirm('Save new pricing for {{ $service->name }}? Customer prices update immediately.');"
@@ -89,6 +89,7 @@
                                         @csrf @method('PUT')
                                         <input type="number" name="provider_cost" value="{{ $service->provider_cost }}" step="0.01" min="0" placeholder="Cost (USD)" class="kv-input !py-1.5 !w-24 !text-xs" title="Provider cost">
                                         <input type="number" name="markup" value="{{ $service->markup }}" step="0.01" min="0" placeholder="Markup" class="kv-input !py-1.5 !w-24 !text-xs" title="Markup (blank = default)">
+                                        <input type="number" name="price" value="{{ $service->price }}" step="1" min="0" placeholder="Flat price" class="kv-input !py-1.5 !w-24 !text-xs" title="Flat customer price in XAF — overrides markup, floored at provider cost (blank = markup applies)">
                                         <select name="mode" class="kv-input !py-1.5 !w-28 !text-xs" title="Pricing mode">
                                             <option value="" @selected($service->mode === null)>Default</option>
                                             <option value="fixed" @selected($service->mode === 'fixed')>Fixed XAF</option>
@@ -98,9 +99,9 @@
                                     </form>
                                 </td>
                                 <td class="kv-td">
-                                    <span class="kv-badge {{ $service->resolved_mode === 'percentage' ? 'bg-violet-50 text-violet-700' : 'bg-emerald-50 text-emerald-700' }}">
-                                        {{ $service->resolved_mode === 'percentage' ? 'Percentage' : 'Fixed XAF' }}
-                                        {{ $service->mode === null ? '· default' : '' }}
+                                    <span class="kv-badge {{ $service->price !== null ? 'bg-amber-50 text-amber-700' : ($service->resolved_mode === 'percentage' ? 'bg-violet-50 text-violet-700' : 'bg-emerald-50 text-emerald-700') }}">
+                                        {{ $service->price !== null ? 'Flat price' : ($service->resolved_mode === 'percentage' ? 'Percentage' : 'Fixed XAF') }}
+                                        {{ $service->price === null && $service->mode === null ? '· default' : '' }}
                                     </span>
                                 </td>
                                 <td class="kv-td font-bold text-ink-900">{{ $service->customer_price !== null ? xaf($service->customer_price) : '—' }}</td>
@@ -131,7 +132,7 @@
                         </div>
                         <div x-show="!editing" class="mt-2 flex justify-between text-xs text-ink-500">
                             <span>Cost: {{ $service->provider_cost !== null ? number_format($service->provider_cost, 2) . ' USD' : '—' }}</span>
-                            <span>Markup: {{ $service->markup !== null ? ($service->resolved_mode === 'percentage' ? $service->markup.'%' : xaf($service->markup)) : 'default' }}</span>
+                            <span>{{ $service->price !== null ? 'Flat price: '.xaf($service->price) : 'Markup: '.($service->markup !== null ? ($service->resolved_mode === 'percentage' ? $service->markup.'%' : xaf($service->markup)) : 'default') }}</span>
                             <span class="font-bold text-ink-900">Price: {{ $service->customer_price !== null ? xaf($service->customer_price) : '—' }}</span>
                         </div>
                         <form x-show="editing" x-cloak method="POST" action="{{ route('admin.pricing.services.update', $service) }}"
@@ -140,6 +141,7 @@
                             @csrf @method('PUT')
                             <input type="number" name="provider_cost" value="{{ $service->provider_cost }}" step="0.01" min="0" placeholder="Cost (USD)" class="kv-input !py-2 !text-xs">
                             <input type="number" name="markup" value="{{ $service->markup }}" step="0.01" min="0" placeholder="Markup" class="kv-input !py-2 !text-xs">
+                            <input type="number" name="price" value="{{ $service->price }}" step="1" min="0" placeholder="Flat price" class="kv-input !py-2 !text-xs" title="Flat customer price in XAF — overrides markup, floored at provider cost">
                             <select name="mode" class="kv-input !py-2 !text-xs">
                                 <option value="" @selected($service->mode === null)>Default</option>
                                 <option value="fixed" @selected($service->mode === 'fixed')>Fixed XAF</option>

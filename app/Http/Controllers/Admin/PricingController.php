@@ -25,6 +25,7 @@ class PricingController extends Controller
                 $service->provider_cost = ProviderService::where('service_id', $service->id)
                     ->where('is_active', true)->min('cost');
                 $service->markup = $service->pricing_config['markup'] ?? null;
+                $service->price = $service->pricing_config['price'] ?? null;
                 $service->mode = $service->pricing_config['mode'] ?? null;
                 $service->resolved_mode = $this->pricingService->resolveMode($service);
                 $service->customer_price = $service->provider_cost !== null
@@ -65,6 +66,7 @@ class PricingController extends Controller
     {
         $validated = $request->validate([
             'markup' => 'nullable|numeric|min:0|max:10000000',
+            'price' => 'nullable|numeric|min:0|max:10000000',
             'mode' => 'nullable|in:fixed,percentage',
             'provider_cost' => 'nullable|numeric|min:0',
         ]);
@@ -76,6 +78,12 @@ class PricingController extends Controller
             $config['markup'] = (float) $validated['markup'];
         } else {
             unset($config['markup']);
+        }
+
+        if ($request->filled('price')) {
+            $config['price'] = (float) $validated['price'];
+        } else {
+            unset($config['price']);
         }
 
         if ($request->filled('mode')) {

@@ -78,6 +78,47 @@ class PricingLayerTest extends TestCase
         $this->assertSame(900, $pricing->calculateSellingPrice(1.00, null, $pct)); // 600 * 1.5
     }
 
+    // ---------- Flat pinned price ----------
+
+    public function test_flat_price_overrides_markup_and_is_floored_at_cost(): void
+    {
+        $pricing = app(PricingService::class);
+        $fb = Service::create(['name' => 'Facebook', 'slug' => 'facebook', 'is_active' => true, 'pricing_config' => ['mode' => 'fixed', 'markup' => 1500, 'price' => 1000]]);
+
+        // Flat price wins over markup at any cost below it
+        $this->assertSame(1000, $pricing->calculateSellingPrice(0.50, null, $fb)); // 300 base -> 1000
+        $this->assertSame(1000, $pricing->calculateSellingPrice(0.10, null, $fb)); // 60 base -> 1000
+
+        // Cost floor: a country costing more than the pin never sells at a loss
+        $this->assertSame(1800, $pricing->calculateSellingPrice(3.00, null, $fb)); // 1800 base > 1000
+    }
+
+    public function test_admin_can_set_and_clear_flat_service_price(): void
+    {
+        [$provider, $country, $service] = $this->seedMarketplace();
+        $admin = $this->admin();
+        $pricing = app(PricingService::class);
+
+        $this->actingAs($admin, 'admin')
+            ->put(route('admin.pricing.services.update', $service), [
+                'markup' => 500, 'mode' => 'fixed', 'price' => 1000,
+            ])->assertSessionHas('success');
+
+        $service->refresh();
+        $this->assertEquals(1000, $service->pricing_config['price']);
+        $this->assertSame(1000, $pricing->calculateSellingPrice(0.50, $country, $service));
+
+        // Clearing the price restores markup pricing (300 + 500)
+        $this->actingAs($admin, 'admin')
+            ->put(route('admin.pricing.services.update', $service), [
+                'markup' => 500, 'mode' => 'fixed',
+            ])->assertSessionHas('success');
+
+        $service->refresh();
+        $this->assertArrayNotHasKey('price', $service->pricing_config);
+        $this->assertSame(800, $pricing->calculateSellingPrice(0.50, $country, $service));
+    }
+
     // ---------- Order locks price fields ----------
 
     public function test_order_locks_customer_price_provider_cost_and_profit(): void

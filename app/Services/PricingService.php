@@ -12,10 +12,21 @@ class PricingService
      * Provider costs arrive in USD; customers pay in whole XAF. The
      * configured exchange rate converts the cost, then the markup is
      * applied and the result is rounded up to the nearest XAF.
+     *
+     * A service may instead pin an absolute customer price via
+     * pricing_config['price'] (whole XAF). It wins over markup and is
+     * floored at the converted provider cost so a pinned price can
+     * never produce a loss on an expensive country.
      */
     public function calculateSellingPrice(float $providerCost, ?Country $country = null, ?Service $service = null): int
     {
         $baseXaf = usdToXaf($providerCost);
+
+        $flat = $service?->pricing_config['price'] ?? null;
+        if ($flat !== null) {
+            return max((int) round((float) $flat), $baseXaf);
+        }
+
         $mode = $this->resolveMode($service);
         $markup = $this->getMarkup($country, $service, $mode);
 
