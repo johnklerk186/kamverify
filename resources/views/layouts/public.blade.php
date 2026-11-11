@@ -24,6 +24,6 @@
     </main>
     <x-public-footer />
     <x-flash-messages />
-    <x-smartsupp />
+    <x-whatsapp-chat />
 </body>
 </html>

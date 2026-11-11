@@ -4,8 +4,8 @@
      native beforeinstallprompt on Android, manual steps elsewhere. --}}
 <div x-data="kvInstallPrompt()" x-cloak>
 
-    {{-- Floating prompt — above the mobile bottom nav (h-16), clear of
-         the Smartsupp bubble (bottom-right) on desktop. --}}
+    {{-- Floating prompt — above the mobile bottom nav (h-16), bottom-left
+         on desktop so it stays clear of the WhatsApp button (bottom-right). --}}
     <div x-show="visible"
          class="kv-a2hs fixed z-40 bottom-20 inset-x-4 sm:inset-x-auto sm:left-6 sm:bottom-6 sm:w-[24rem]">
         <div class="relative flex items-start gap-3 rounded-2xl border border-ink-200/80 bg-white p-4 shadow-pop">

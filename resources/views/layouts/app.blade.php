@@ -383,6 +383,6 @@
     }
 </script>
 
-<x-smartsupp />
+<x-whatsapp-chat />
 </body>
 </html>

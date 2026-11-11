@@ -422,6 +422,6 @@
 </script>
 
 <x-service-outage-modal />
-<x-smartsupp />
+<x-whatsapp-chat />
 </body>
 </html>

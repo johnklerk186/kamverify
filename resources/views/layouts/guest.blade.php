@@ -71,6 +71,6 @@
 </div>
 
 <x-flash-messages />
-<x-smartsupp />
+<x-whatsapp-chat />
 </body>
 </html>

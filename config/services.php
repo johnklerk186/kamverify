@@ -34,6 +34,11 @@ return [
         'timeout' => env('FAPSHI_TIMEOUT', 30),
     ],
 
+    'whatsapp' => [
+        // Floating "chat with us" button target — the community group invite.
+        'group_url' => env('WHATSAPP_GROUP_URL', 'https://chat.whatsapp.com/C8nH3ePfWV0AORciaxTuMD'),
+    ],
+
     'webpush' => [
         // VAPID keys for browser push notifications.
         // Generate: php artisan tinker --execute="var_export(\Minishlink\WebPush\VAPID::createVapidKeys())"
